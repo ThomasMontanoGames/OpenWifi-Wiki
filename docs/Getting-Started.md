@@ -43,15 +43,10 @@ The `board_name` string matters: it selects which FPGA image and boot files you 
 
    Afterwards the card should show two partitions: `BOOT` and `rootfs`.
 
-<ol start="3">
-<li>Configure the card for your board (do this on your PC before first boot):
-   <ul>
-     <li>Copy everything from <code>BOOT/openwifi/&lt;board_name&gt;/</code> into the root of the <code>BOOT</code> partition.</li>
-     <li>Delete <code>rootfs/root/kernel_modules</code> if it exists.</li>
-     <li>Delete <code>rootfs/etc/network/interfaces.new</code> if it exists (a common cause of "can't ssh to the board").</li>
-   </ul>
-</li>
-</ol>
+3. Configure the card for your board (do this on your PC before first boot):
+    - Copy everything from `BOOT/openwifi/<board_name>/` into the root of the `BOOT` partition.
+    - Delete `rootfs/root/kernel_modules` if it exists.
+    - Delete `rootfs/etc/network/interfaces.new` if it exists (a common cause of "can't ssh to the board").
 
 ## 3. First boot and login
 
@@ -111,4 +106,4 @@ The board is a small Linux computer. `wgd.sh` loaded the openwifi FPGA design an
 
 ## Alternative: OpenWrt
 
-Prefer a router-style experience with the LuCI web UI? Prebuilt OpenWrt images with openwifi baked in exists for most boards. Flash the image, boot, and an `openwrt-openwifi` SSID appears on 2.4 GHz channel 1 within about a minute. See the [OpenWrt build instructions](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/openwrt/README.md) for the support matrix, usage examples, and how to build your own image.
+Prefer a router-style experience with the LuCI web UI? Prebuilt OpenWrt images with openwifi baked in exist for most boards. Flash the image, boot, and an `openwrt-openwifi` SSID appears on 2.4 GHz channel 1 within about a minute. See the [OpenWrt build instructions](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/openwrt/README.md) for the support matrix, usage examples, and how to build your own image.
