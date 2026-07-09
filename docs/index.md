@@ -18,10 +18,12 @@ Note: MIMO and 40 MHz bandwidth are *not* supported in the open-source release; 
 
 ## The repositories
 
+The project is split across four repositories — the driver and the FPGA design use completely different toolchains, so they live apart. The [Repositories guide](Repositories.md) explains why, and — most usefully — **where to look for whatever you need to change**.
+
 | Repository | Contents |
 |---|---|
 | [openwifi](https://github.com/open-sdr/openwifi) | Linux kernel driver, user-space tools (`sdrctl`, capture scripts, demo scripts), SD-card boot files, documentation |
-| [openwifi-hw](https://github.com/open-sdr/openwifi-hw) | FPGA design: the openwifi IP cores plus board-level Vivado projects |
+| [openwifi-hw](https://github.com/open-sdr/openwifi-hw) | FPGA design: the openwifi [IP cores](FPGA-IP-Cores.md) plus board-level Vivado projects |
 | [openwifi-hw-img](https://github.com/open-sdr/openwifi-hw-img) | Pre-built FPGA bitstreams per board, so you can skip hours of synthesis |
 | [openofdm](https://github.com/jhshi/openofdm) (fork: `dot11zynq` branch) | The 802.11 OFDM receiver that openwifi's `openofdm_rx` IP is based on |
 
@@ -29,27 +31,30 @@ Note: MIMO and 40 MHz bandwidth are *not* supported in the open-source release; 
 
 **New to the project?** Read these in order:
 
-1. [Getting Started](Getting-Started.md) — hardware you need, flashing the SD card, bringing up your first openwifi AP.
-2. [Architecture Overview](Architecture.md) — how the FPGA, driver, and Linux stack fit together. Required reading before touching code.
-3. [Operating Modes](Operating-Modes.md) — AP, client, ad-hoc, monitor, and packet injection walkthroughs.
+1. [The Repositories](Repositories.md) — the four repos, why the project is split, and where to look for anything. The best first stop for onboarding.
+2. [Getting Started](Getting-Started.md) — hardware you need, flashing the SD card, bringing up your first openwifi AP.
+3. [Architecture Overview](Architecture.md) — how the FPGA, driver, and Linux stack fit together. Required reading before touching code.
+4. [Supported Boards](Supported-Boards.md) — the board matrix, per-board hardware notes, and the GPIO/LED debug map.
+5. [Operating Modes](Operating-Modes.md) — AP, client, ad-hoc, monitor, and packet injection walkthroughs.
 
 **Using and controlling the system:**
 
-4. [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md) — the register interface and the everyday knobs: TX power, rates, gain, CCA, ACK behavior, antenna selection, arbitrary frequencies.
+6. [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md) — the register interface and the everyday knobs: TX power, rates, gain, CCA, ACK behavior, antenna selection, arbitrary frequencies.
 
 **Developing:**
 
-5. [Software Development Workflow](Software-Development-Workflow.md) — rebuilding the driver, reloading driver + FPGA without rebooting, building full SD images.
-6. [FPGA Development](FPGA-Development.md) — building the bitstream from source, modifying and simulating IP cores, HLS, porting to new boards.
+7. [Software Development Workflow](Software-Development-Workflow.md) — rebuilding the driver, reloading driver + FPGA without rebooting, building full SD images.
+8. [FPGA Development](FPGA-Development.md) — building the bitstream from source, modifying and simulating IP cores, HLS, porting to new boards.
+9. [FPGA IP Cores](FPGA-IP-Cores.md) — a reference for the six custom cores: the real-time MAC, the OFDM TX/RX chains, and the capture side channel.
 
 **Research features:**
 
-7. [CSI, IQ Capture and Research Features](Research-Features.md) — CSI extraction, CSI radar, CSI fuzzer, IQ capture, loopback testing, counters and statistics.
+10. [CSI, IQ Capture and Research Features](Research-Features.md) — CSI extraction, CSI radar, CSI fuzzer, IQ capture, loopback testing, counters and statistics.
 
 **When things go wrong:**
 
-8. [Troubleshooting and Known Issues](Troubleshooting.md)
-9. [FAQ and Resources](FAQ-and-Resources.md) — 802.11b compatibility, ASIC questions, publications, citing openwifi, licensing, community channels.
+11. [Troubleshooting and Known Issues](Troubleshooting.md)
+12. [FAQ and Resources](FAQ-and-Resources.md) — 802.11b compatibility, ASIC questions, publications, citing openwifi, licensing, community channels.
 
 ## License and attribution
 

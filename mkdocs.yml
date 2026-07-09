@@ -36,6 +36,8 @@ theme:
 
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.inlinehilite
@@ -50,14 +52,17 @@ plugins:
 nav:
   - Getting oriented:
       - Home: index.md
+      - The Repositories: Repositories.md
       - Getting Started: Getting-Started.md
       - Architecture Overview: Architecture.md
+      - Supported Boards: Supported-Boards.md
   - Using openwifi:
       - Operating Modes: Operating-Modes.md
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
   - Developing:
       - Software Development Workflow: Software-Development-Workflow.md
       - FPGA Development: FPGA-Development.md
+      - FPGA IP Cores: FPGA-IP-Cores.md
   - Research:
       - CSI, IQ & Research Features: Research-Features.md
   - Reference:

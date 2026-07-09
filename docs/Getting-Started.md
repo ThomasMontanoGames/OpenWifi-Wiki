@@ -12,7 +12,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 - An Ethernet cable between the board and your PC.
 - Optionally a USB-UART cable for a serial console — invaluable when networking doesn't come up.
 
-**Supported boards**
+**Supported boards** — the most common ones are below; the full matrix, per-board hardware notes, and the GPIO/LED debug map are on the [Supported Boards](Supported-Boards.md) page.
 
 | `board_name` | Hardware | Vivado license needed to rebuild FPGA? |
 |---|---|---|
@@ -26,7 +26,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 | `sdrpi` | HexSDR Raspberry-Pi-sized SDR | No |
 | `neptunesdr`, `LibreSDR` | Low-cost Zynq-7020 + AD9361 boards (community-supported, unofficial) | No |
 
-The `board_name` string matters: it selects which FPGA image and boot files you use throughout the project. The "Vivado license" column only matters if you rebuild the FPGA yourself — the prebuilt image works regardless. If you have no hardware at all, the imec **w-iLab.t** testbed offers remote access to openwifi-ready boards.
+The `board_name` string matters: it selects which FPGA image and boot files you use throughout the project (the same string names the board in all the [repos](Repositories.md)). The "Vivado license" column only matters if you rebuild the FPGA yourself — the prebuilt image works regardless. If you have no hardware at all, the imec **w-iLab.t** testbed offers remote access to openwifi-ready boards.
 
 **A note on the ZedBoard-class FPGAs.** Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi) have less FPGA memory. A few features (notably IQ capture buffer length) have reduced limits on them; the relevant pages call this out.
 

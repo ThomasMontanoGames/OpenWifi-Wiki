@@ -4,7 +4,11 @@ This is where openwifi earns its reputation. Because the PHY is open and the pla
 
 ## The side channel: one mechanism, two data types
 
-CSI and IQ capture both ride the same **side channel** infrastructure: the FPGA `side_ch` module collects data, DMAs it to the processor, and a small kernel module (`side_ch.ko`) plus a user tool (`side_ch_ctl`) move it to your PC for display/analysis in Python or MATLAB.
+CSI and IQ capture both ride the same **side channel** infrastructure: the FPGA `side_ch` module collects data, DMAs it to the processor, and a small kernel module (`side_ch.ko`) plus a user tool (`side_ch_ctl`) move it to your PC for display/analysis in Python or MATLAB. (For what `side_ch` taps inside the FPGA, see [FPGA IP Cores → side_ch](FPGA-IP-Cores.md#side_ch-the-csi-iq-capture-side-channel).)
+
+![CSI side-channel architecture](assets/img/csi-architecture.jpg)
+
+*The side-channel data path: the FPGA `side_ch` core captures data and DMAs it to the board's processor; `side_ch_ctl` forwards it over UDP (port 4000) to a display/analysis script on your PC.*
 
 Two ways to build the side-channel pieces:
 
@@ -50,9 +54,13 @@ python3 side_info_display.py     # needs python3-numpy, python3-matplotlib, pyth
 
 You'll get live plots of frequency offset, channel response, and the equalizer constellation, with the timestamp printed. Everything is also logged to `side_info.txt` for offline work with the MATLAB script `test_side_info_file_display.m`.
 
+![Live CSI display: frequency offset, channel response, equalizer constellation](assets/img/csi-screen-shot.jpg)
+
 ### Data format
 
 Each element is 64-bit: a 64-bit TSF **timestamp** (identical to the value shown by tcpdump/Wireshark, which is how you map CSI to packets); **freq_offset** (first 16 bits used); and **csi** and **equalizer** (first two 16-bit words used for I/Q of the channel response and equalizer output; the rest reserved for future multi-antenna use). The Python and MATLAB scripts are the precise reference for parsing.
+
+![CSI information format](assets/img/csi-information-format.jpg)
 
 ### Capturing only specific packets
 
@@ -82,6 +90,8 @@ python3 side_info_display.py 3      # and set num_eq=3 in the MATLAB script
 
 openwifi's baseband can receive its *own* transmit signal — so with a TX and an RX antenna (ideally two directional antennas facing the scene), the CSI of the self-TX signal reflects changes in the environment. That's joint radar-and-communication on a Wi-Fi platform.
 
+![WiFi CSI radar concept: directional TX/RX antennas sensing a target](assets/img/openwifi-radar.jpg)
+
 The recipe: bring up the latest driver+FPGA package, monitor a channel, restrict CSI to your own injector's source MAC, **unmute self-reception**, then inject a stream of packets to sound the channel:
 
 ```bash
@@ -101,11 +111,24 @@ cd /root/openwifi/inject_80211 && make
 
 Then on the PC, `python3 side_info_display.py 8 waterfall` shows CSI, a CSI waterfall, equalizer output, and frequency offset — the waterfall visibly changes as objects/people move between the antennas. Data logs to `side_info.txt` for offline analysis. The key control is `xpu` register 1 (`xpu 1 1` unmutes self-RX); read the [normal CSI section](#csi-channel-state-information) first to understand the plumbing.
 
+![CSI radar waterfall (MATLAB offline analysis)](assets/img/csi-screen-shot-radar-matlab.jpg)
+
+*Offline CSI-radar analysis: the waterfall plot shows the channel response changing over time as a person moves between the two directional antennas.*
+
 ---
 
 ## CSI fuzzer (privacy protection)
 
 Wi-Fi CSI can be used to sense people and activity **passively and without consent** (keystrokes, presence, motion). The CSI fuzzer fights back by injecting a controlled *artificial* channel response into the transmitter, so an eavesdropper's CSI-based sensing is corrupted while normal communication continues. It's backed by peer-reviewed work ([ACM WiSec 2021](https://dl.acm.org/doi/pdf/10.1145/3448300.3468255); [privacy-protection paper](https://ieeexplore.ieee.org/abstract/document/10818006)).
+
+<figure markdown>
+![CSI fuzzer: unauthorized sensing before vs. with the fuzzer](assets/img/csi-fuzzer-system-before-vs-now.png)
+<figcaption>The problem and the fix: without the fuzzer an eavesdropper can passively sense you from your Wi-Fi signal; the fuzzer injects an artificial channel response so their CSI-based sensing is corrupted while your link keeps working.</figcaption>
+</figure>
+
+The fuzzer's principle — the artificial CSI is applied at the transmitter and mixes with the real channel:
+
+![CSI fuzzer principle](assets/img/csi-fuzzer-principle.png)
 
 Thanks to full duplex, you can watch the artificial CSI you're creating via the same self-monitoring setup. First set up CSI self-monitoring as in [CSI radar](#csi-radar-full-duplex-self-sensing), then in another ssh session:
 
@@ -114,7 +137,14 @@ cd openwifi
 ./csi_fuzzer_scan.sh 1     # sweep artificial-CSI values (calls csi_fuzzer.sh)
 ```
 
-The self-monitored CSI will visibly change. `csi_fuzzer.sh 1 45 0 13` applies one specific artificial response; `csi_fuzzer_scan.sh` sweeps the `c1`/`c2` parameters in various modes. The fuzzer is configured through `tx_intf` register 5 — read both scripts to see the exact commands.
+The self-monitored CSI will visibly change. `csi_fuzzer.sh 1 45 0 13` applies one specific artificial response (its four arguments are a two-tap filter: `c1_rot90_en c1_raw c2_rot90_en c2_raw`, each raw value −64…63, packed into `tx_intf` register 5); `csi_fuzzer_scan.sh {1|2|3|4}` sweeps tap1, tap2, or their combinations across the full range by calling `csi_fuzzer.sh` repeatedly.
+
+<div class="grid" markdown>
+![CSI before fuzzing](assets/img/csi-fuzzer-beacon-ant-back-0.jpg)
+![CSI after `csi_fuzzer.sh 1 45 0 13`](assets/img/csi-fuzzer-beacon-ant-back-1-45-0-13.jpg)
+</div>
+
+*Self-monitored beacon CSI before (left) and after (right) applying `./csi_fuzzer.sh 1 45 0 13` — the injected artificial response visibly reshapes the channel an eavesdropper would measure.*
 
 ---
 
@@ -143,9 +173,17 @@ python3 iq_capture.py                    # small FPGA: pass the iq_len, e.g. 409
 
 You'll see live IQ, AGC gain + lock status, and uncalibrated RSSI, with the timestamp printed; data logs to `iq.txt` for `test_iq_file_display.m` (set `iq_len` to match in the MATLAB script).
 
+![Live IQ capture: IQ samples, AGC gain/lock, RSSI](assets/img/iq-screen-shot.jpg)
+
 ### Format
 
 Each 64-bit element: a 64-bit TSF **timestamp** (moment the trigger fired); then per sample, two 16-bit words of **I/Q** from the active antenna, one 16-bit word of **AD9361 AGC gain** (bit7 = lock/unlock, bits6-0 = gain), and one 16-bit word of **uncalibrated RSSI** (half-dB).
+
+![IQ information format](assets/img/iq-information-format.jpg)
+
+The capture is windowed around a trigger event — `iq_len` total samples, of which `pre_trigger_len` come *before* the trigger:
+
+![IQ capture parameters: iq_len, pre_trigger_len, trigger condition](assets/img/iq-capture-parameter.jpg)
 
 ### iq_len and pre_trigger_len
 
@@ -184,17 +222,46 @@ Thresholds: RSSI via `wh9dY` (0–2047), AGC gain via `wh10dY` (0–127). For fr
 
 ### Dual-antenna IQ (collision capture)
 
-On AD9361 boards (FMCOMMS2/3, ADRV9361-Z7035) you can capture IQ from the *monitoring* antenna (rx1) coherently alongside the main antenna (rx0). Place rx1 near a peer node to catch collisions — moments when both link ends transmit at once. Set rx1's AGC to manual at a low gain in `rf_init.sh` (`echo manual > in_voltage1_gain_control_mode`; `echo 20 > in_voltage1_hardwaregain`), then use a short `pre_trigger_len` and a TX-done trigger. Full recipe in the [dual-antenna IQ note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_2ant.md).
+On AD9361 boards (FMCOMMS2/3, ADRV9361-Z7035) you can capture IQ from the *monitoring* antenna (rx1) coherently alongside the main antenna (rx0). Place rx1 near a peer node to catch collisions — moments when both link ends transmit at once. Set rx1's AGC to manual at a low gain in `rf_init.sh` (`echo manual > in_voltage1_gain_control_mode`; `echo 20 > in_voltage1_hardwaregain`), then use a short `pre_trigger_len` and a TX-done trigger (`wh8d23`), or the dedicated collision trigger (`wh8d29`, rx1 IQ above threshold while this SDR is transmitting). Capture with `iq_capture_2ant.py`. Full recipe in the [dual-antenna IQ note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_2ant.md).
+
+<figure markdown>
+![Dual-antenna collision-capture setup](assets/img/iq_2ant-setup.png){ width="520" }
+<figcaption>Setup: the main antenna (rx0) handles comms and capture; a second monitoring antenna (rx1), placed near the peer, catches collisions.</figcaption>
+</figure>
+
+![Dual-antenna capture: rx0 (main) vs rx1 (monitoring)](assets/img/iq_2ant-screen-shot.jpg)
 
 ### ACK timing measurement
 
-Because you can trigger IQ capture on the ACK-send event, you can directly measure ACK timing. Keep the receiver always on (`xpu 1 1`), configure `wh3h21` for the right IQ composition, `wh5h20` / `wh8d16` for the trigger, and capture with `g0`. See the [ACK-timing note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_ack_timing.md).
+Because you can trigger IQ capture on the ACK-send event, you can directly measure ACK timing — the Rx-ACK-GAP and Tx-ACK-GAP that should sit around a 16 µs SIFS. Keep the receiver always on (`xpu 1 1`), configure `wh3h21` for the right IQ composition, `wh5h20` / `wh8d16` for the trigger, and capture with `g0`. Generate traffic (e.g. a `ping` sweep of payload sizes across all MCS from a second board), then analyze offline with `test_iq_file_ack_timing_display.m`. See the [ACK-timing note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_ack_timing.md).
+
+<figure markdown>
+![Two packets ~16 µs apart — the ACK timing](assets/img/iq-ack-timing-screen-shot.jpg)
+<figcaption>A live capture showing the data packet and its ACK ~16 µs (≈320 samples) apart — the SIFS-based ACK timing.</figcaption>
+</figure>
+
+This technique is precise enough to have caught real bugs: the plot below shows abnormal Tx-ACK-GAPs (a ~12 µs gap and a "−1" no-event) that traced back to AGC-induced DC power before the ACK being mis-detected as the ACK start — since fixed.
+
+![MATLAB Tx-ACK-GAP analysis showing anomalies](assets/img/iq-ack-timing-matlab-tx-ack-gap.jpg)
 
 ---
 
 ## Self-loopback testing
 
-Full duplex also enables self-loopback tests of packets, CSI, and IQ — over the air (TX/RX antennas close together) or entirely inside the FPGA. This is a great sanity check for the transmitter and receiver without a second node. The essential ingredients are: monitor mode, CCA effectively disabled (`xpu 8 <big>`), self-RX unmuted (`xpu 1 1`), a TX-start trigger, and the loopback source select (`side_ch_ctl wh5h0` for over-the-air, `wh5h4` for FPGA-internal). Full walkthrough in the [loopback note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/packet-iq-self-loopback-test.md).
+Full duplex also enables self-loopback tests of packets, CSI, and IQ — over the air (TX/RX antennas close together) or entirely inside the FPGA. This is a great sanity check for the transmitter and receiver without a second node.
+
+![Self-loopback principle](assets/img/openwifi-loopback-principle.jpg)
+
+The essential ingredients are: monitor mode, CCA effectively disabled (`xpu 8 <big>`), self-RX unmuted (`xpu 1 1`), a TX-start trigger, and the loopback source select (`side_ch_ctl wh5h0` for over-the-air, `wh5h4` for FPGA-internal). Inject a packet in a second ssh session (`./inject_80211 -m n -r 5 -n 1 sdr0`) to fire the capture.
+
+<div class="grid" markdown>
+![Over-the-air self-loopback IQ](assets/img/openwifi-iq-loopback.jpg)
+![FPGA-internal loopback CSI (ideal channel)](assets/img/openwifi-csi-fpga-loopback.jpg)
+</div>
+
+*Left: IQ captured from an over-the-air self-loopback packet. Right: CSI/constellation over the ideal FPGA-internal loopback channel — useful as a "golden" reference since it has no real-channel distortion.*
+
+Full walkthrough in the [loopback note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/packet-iq-self-loopback-test.md).
 
 ---
 
@@ -211,3 +278,7 @@ Two additional counter sources live in the FPGA:
 **openofdm_rx watchdog counters** — the `signal_watchdog` inside `openofdm_rx` detects abnormal signals early so the receiver isn't tied up chasing junk. Select an event with `sdrctl dev sdr0 set reg rx 17 <type>` (0 = phase offset too big, 1 = too many small equalizer outputs, 2 = DC / slow sine detected, 3 = packet too short, 4 = packet too long), read the count with `get reg rx 30`, and clear it by writing any value to reg 30.
 
 **Side-channel PHY RX/TX counters** — after `insmod side_ch.ko`, registers 26–31 count paired events (each register has two selectable sources chosen by bits in register 19), e.g. short/long preamble detected, `phy_tx_start`/`phy_tx_done`, header-valid strobes, RSSI-above-threshold, AGC lock/gain-change, and "data packet for me with good FCS." Set the addr2 target in register 7 and the RSSI-event threshold in register 9; read a counter with `rhX`; reset one by writing any value to registers 26–31. The exact event→register mapping is in the [FPGA counter note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/perf_counter.md).
+
+### High-rate register logging (`fast_reg_log`)
+
+For microsecond-resolution traces of radio state, the `user_space/fast_reg_log/` tool memory-maps the XPU register BRAM through `/dev/mem` and tight-loops reading two registers as fast as the CPU allows: **XPU reg 57** (a packed status word — `rssi_half_db`, AGC lock/gain, `demod_is_ongoing`, `tx_is_ongoing`, `ch_idle`) and **XPU reg 58** (the low 32 bits of the TSF). It dumps millions of samples to `fast_reg_log.bin`, which `fast_reg_log_analyzer.m` decodes and plots against the TSF timeline — far faster than polling through `sdrctl`/sysfs, and ideal for studying CSMA/CA timing, AGC behavior, and channel occupancy at fine granularity.

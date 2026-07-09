@@ -1,6 +1,10 @@
 # Architecture Overview
 
-This page explains how openwifi is put together. Read it before you start modifying code — almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA.
+This page explains how openwifi is put together. Read it before you start modifying code — almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA. (For *where* each part lives in the source tree, see [The Repositories](Repositories.md); for the FPGA cores in depth, see [FPGA IP Cores](FPGA-IP-Cores.md).)
+
+![openwifi software and FPGA module composition](assets/img/openwifi-detail.jpg)
+
+*openwifi's full composition: software modules (top) and FPGA modules (bottom). The module names in this diagram match the source file names — `xpu`, `openofdm_tx/rx`, `tx_intf`, `rx_intf`, `side_ch` — which is the key to navigating both the code and this wiki.*
 
 ## The big picture
 
@@ -35,7 +39,14 @@ The Linux `mac80211` subsystem defines a set of callbacks (`ieee80211_ops`) that
 | `ampdu_action` | A-MPDU (aggregation) operations |
 | `testmode_cmd` | Handles `sdrctl` commands (see [sdrctl](sdrctl-and-Runtime-Control.md)) |
 
-When Linux invokes one of these, `sdr.c` does the work by driving the FPGA. It leans on per-block helper "sub-drivers" — `tx_intf_api`, `rx_intf_api`, `openofdm_tx_api`, `openofdm_rx_api`, and `xpu_api` — each of which wraps register access to one FPGA module.
+When Linux invokes one of these, `sdr.c` does the work by driving the FPGA. It leans on per-block helper "sub-drivers" — `tx_intf_api`, `rx_intf_api`, `openofdm_tx_api`, `openofdm_rx_api`, and `xpu_api` — each of which wraps register access to one FPGA module. These are compiled as separate kernel modules (`tx_intf.ko`, `rx_intf.ko`, …) that `sdr.ko` binds to at load time, which is why `wgd.sh` inserts all of them.
+
+A few implementation facts worth knowing:
+
+- openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`. The device tree is what tells Linux the AXI addresses and interrupts of every FPGA block — which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise.
+- At probe time (`openwifi_dev_probe()`) the driver reads the device-tree `model` string to detect the **hardware type** (`ZYNQ_AD9361`, `ZYNQMP_AD9361`, `RFSOC4X2`) and whether it's a **small or large FPGA** — the latter is how features like capture-buffer length adapt per board automatically.
+- The AD9361 RF chip is itself driven by the standard Analog Devices IIO driver; openwifi finds it on the SPI bus and calls into it (e.g. `ad9361_set_tx_atten`, `ad9361_rf_set_channel`). This is also why some patches to the ADI kernel are needed — see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver).
+- TX uses a 64-entry DMA ring of buffer descriptors; RX uses a cyclic DMA buffer. The driver keeps write/read indices so the running `openwifi_tx()`, the FPGA, and the interrupt handler can cross-check each other.
 
 ## The FPGA modules
 
@@ -50,6 +61,10 @@ The FPGA design decomposes into modules whose names match their source files (in
 There's also a **`side_ch`** (side channel) module used for research features — CSI and IQ capture — described on the [Research Features](Research-Features.md) page.
 
 The processor reaches these modules over the ARM **AXI bus**. Each module exposes a bank of registers (`slv_regN` in the Verilog), whose addresses are defined in `driver/hw_def.h`. This AXI coupling is what gives openwifi very low processor↔PHY latency — and also what makes the design fairly platform-specific.
+
+For a core-by-core walkthrough — the submodules inside `xpu` (the CSMA/CA state machine, TSF timer, hardware SPI to the AD9361), the OFDM transmit and receive chains, and how a register write travels from `sdrctl` all the way to a `slv_regN` — see the dedicated [FPGA IP Cores](FPGA-IP-Cores.md) page.
+
+openwifi's FPGA design is built **on top of the [Analog Devices HDL reference design](https://github.com/analogdevicesinc/hdl)** (vendored as the `adi-hdl` submodule of openwifi-hw): ADI provides the AD9361 interfacing IP, DMA engines, and board plumbing, and openwifi inserts its own cores into that design. This is why [porting to a new board](FPGA-Development.md#porting-to-a-new-board) is framed as "diff openwifi against the matching ADI reference design."
 
 ## The receive path, step by step
 
@@ -78,6 +93,44 @@ openwifi drives the AD9361 in **FDD mode with identical TX and RX frequencies**,
 - **Fast TX/RX turnaround** (~0.6 µs), which is what makes the 10 µs SIFS and hardware ACK timing achievable.
 
 The AD9361↔FPGA IQ rate is 40 Msps, decimated/interpolated inside the FPGA to the 20 Msps the WiFi baseband uses. Crucially, the **FPGA baseband clock is derived from the AD9361 clock**, so RF and baseband never drift relative to each other. This design (replacing the older "offset tuning" approach) is what gives openwifi its good EVM, spectral mask conformance, sensitivity, and RSSI accuracy.
+
+![Baseband clock derived from the AD9361 clock](assets/img/bb-clk.jpg)
+
+*The FPGA baseband clock is generated from the AD9361 sample clock, so the two never drift. The exact clock frequency per board is the `NUM_CLK_PER_US` knob discussed in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).*
+
+The configuration points of this RF/digital chain are spread across the AD9361 registers, the driver's `.c` files, and the FPGA `.v` modules:
+
+![RF and digital IF chain configuration points](assets/img/rf-digital-if-chain-config.jpg)
+
+## What openwifi implements of 802.11a/g/n
+
+openwifi implements 802.11a/g (legacy OFDM) and a **single-stream 20 MHz subset of 802.11n (Wi-Fi 4)**. Understanding which 11n improvements it does and doesn't have explains its performance envelope. 802.11n added five PHY improvements on top of 802.11a/g's 54 Mbps ceiling:
+
+| 802.11n improvement | Effect | openwifi? |
+|---|---|---|
+| **More subcarriers** (48 → 52 data) | 54 → 58.5 Mbps | ✅ yes |
+| **Higher FEC rate** (3/4 → 5/6) | 58.5 → 65 Mbps | ✅ yes |
+| **Short guard interval** (800 → 400 ns) | 65 → 72.2 Mbps | ✅ yes |
+| **MIMO** (up to 4 spatial streams) | 72.2 → 288.9 Mbps | ❌ no |
+| **40 MHz bandwidth** (108 data subcarriers) | 288.9 → 600 Mbps | ❌ no |
+
+So the open-source release reaches a **theoretical 72.2 Mbps single-stream**, not the full-11n 600 Mbps (which requires 4×4 MIMO + 40 MHz).
+
+<figure markdown>
+![48 vs 52 OFDM data subcarriers](assets/img/subcarriers.png){ width="440" }
+<figcaption>More data subcarriers (48 → 52): openwifi implements this.</figcaption>
+</figure>
+
+<figure markdown>
+![800 ns vs 400 ns guard interval](assets/img/guard-interval.png){ width="440" }
+<figcaption>Short guard interval (800 → 400 ns): openwifi implements this.</figcaption>
+</figure>
+
+On the **MAC** side, 802.11n added frame aggregation. There are two flavors: **A-MSDU** (efficient, but one bit error invalidates the whole aggregate) and **A-MPDU** (per-subframe headers, so a single error only costs one retransmission — the more widely adopted choice).
+
+![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png)
+
+openwifi supports **A-MPDU aggregation experimentally** (`./wgd.sh 1`, which sets `test_mode` bit 0); A-MSDU is not supported. Background and the full derivation are in the [802.11n app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md).
 
 ## Where the source lives
 
