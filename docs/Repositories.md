@@ -10,26 +10,78 @@ openwifi is a full-stack, Linux `mac80211`-compatible IEEE 802.11 (Wi-Fi) implem
 
 There is not one "openwifi repo" — there are four, each with a distinct job, a distinct toolchain, and a distinct release cadence:
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                     The openwifi project (open-sdr)                   │
-├──────────────────┬───────────────────┬───────────────┬──────────────┤
-│    openwifi      │   openwifi-hw     │ openwifi-hw-img│   openofdm   │
-│                  │                   │               │              │
-│ Linux driver +   │ FPGA design       │ Pre-built     │ 802.11 OFDM  │
-│ user-space tools │ (Verilog/HLS IP + │ bitstreams    │ receiver     │
-│ + boot files +   │ per-board Vivado  │ per board     │ (submodule   │
-│ docs             │ projects)         │ (.xsa/.bit)   │ of -hw)      │
-│                  │                   │               │              │
-│ Tools: C, kernel │ Tools: Verilog,   │ Tools: none — │ Tools:       │
-│ build, bash      │ Vivado 2022.2     │ just download │ Verilog/HLS  │
-└──────────────────┴───────────────────┴───────────────┴──────────────┘
-        │                   │                   │              │
-        └── driver builds ──┘                   │              └── vendored into
-            against the FPGA's register map     │                  openwifi-hw/ip/openofdm_rx
-                                                 │
-        openwifi's build scripts pull bitstreams from here ──┘
-```
+<figure>
+<svg viewBox="0 0 920 434" role="img" aria-label="The four openwifi repositories and how they connect: openwifi (driver and tools), openwifi-hw (FPGA design), openwifi-hw-img (prebuilt bitstreams), and openofdm (OFDM receiver submodule)." style="width:100%;height:auto;max-width:920px;font-family:inherit;font-size:13px">
+  <defs>
+    <marker id="ow-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.55"/>
+    </marker>
+  </defs>
+
+  <!-- project title bar -->
+  <rect x="10" y="8" width="900" height="34" rx="8" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.15"/>
+  <text x="460" y="30" text-anchor="middle" font-size="15" font-weight="700" fill="currentColor">The openwifi project · open-sdr</text>
+
+  <!-- card 1: openwifi (indigo) -->
+  <rect x="10" y="58" width="214" height="240" rx="12" fill="currentColor" fill-opacity="0.03" stroke="#4f5bd5" stroke-opacity="0.45" stroke-width="1.4"/>
+  <path d="M10,70 a12,12 0 0 1 12,-12 h190 a12,12 0 0 1 12,12 v28 h-214 z" fill="#4f5bd5"/>
+  <text x="117" y="83" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">openwifi</text>
+  <text x="26" y="126" fill="currentColor">Linux driver +</text>
+  <text x="26" y="145" fill="currentColor">user-space tools,</text>
+  <text x="26" y="164" fill="currentColor">boot files &amp; docs</text>
+  <line x1="24" y1="262" x2="210" y2="262" stroke="currentColor" stroke-opacity="0.12"/>
+  <text x="26" y="281" font-size="11" font-weight="600" fill="#4f5bd5">C · kernel · bash</text>
+
+  <!-- card 2: openwifi-hw (teal) -->
+  <rect x="238" y="58" width="214" height="240" rx="12" fill="currentColor" fill-opacity="0.03" stroke="#0d9488" stroke-opacity="0.45" stroke-width="1.4"/>
+  <path d="M238,70 a12,12 0 0 1 12,-12 h190 a12,12 0 0 1 12,12 v28 h-214 z" fill="#0d9488"/>
+  <text x="345" y="83" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">openwifi-hw</text>
+  <text x="254" y="126" fill="currentColor">FPGA design:</text>
+  <text x="254" y="145" fill="currentColor">custom IP cores +</text>
+  <text x="254" y="164" fill="currentColor">per-board Vivado</text>
+  <text x="254" y="183" fill="currentColor">projects</text>
+  <line x1="252" y1="262" x2="438" y2="262" stroke="currentColor" stroke-opacity="0.12"/>
+  <text x="254" y="281" font-size="11" font-weight="600" fill="#0d9488">Verilog · Vivado 2022.2</text>
+
+  <!-- card 3: openwifi-hw-img (amber) -->
+  <rect x="466" y="58" width="214" height="240" rx="12" fill="currentColor" fill-opacity="0.03" stroke="#c2740a" stroke-opacity="0.45" stroke-width="1.4"/>
+  <path d="M466,70 a12,12 0 0 1 12,-12 h190 a12,12 0 0 1 12,12 v28 h-214 z" fill="#c2740a"/>
+  <text x="573" y="83" text-anchor="middle" font-size="13.5" font-weight="700" fill="#ffffff">openwifi-hw-img</text>
+  <text x="482" y="126" fill="currentColor">Pre-built</text>
+  <text x="482" y="145" fill="currentColor">bitstreams per</text>
+  <text x="482" y="164" fill="currentColor">board (.xsa / .bit)</text>
+  <line x1="480" y1="262" x2="666" y2="262" stroke="currentColor" stroke-opacity="0.12"/>
+  <text x="482" y="281" font-size="11" font-weight="600" fill="#c2740a">none — just download</text>
+
+  <!-- card 4: openofdm (rose) -->
+  <rect x="694" y="58" width="214" height="240" rx="12" fill="currentColor" fill-opacity="0.03" stroke="#be3d73" stroke-opacity="0.45" stroke-width="1.4"/>
+  <path d="M694,70 a12,12 0 0 1 12,-12 h190 a12,12 0 0 1 12,12 v28 h-214 z" fill="#be3d73"/>
+  <text x="801" y="83" text-anchor="middle" font-size="14.5" font-weight="700" fill="#ffffff">openofdm</text>
+  <text x="710" y="126" fill="currentColor">802.11 OFDM</text>
+  <text x="710" y="145" fill="currentColor">receiver</text>
+  <text x="710" y="164" fill="currentColor">(submodule of</text>
+  <text x="710" y="183" fill="currentColor">openwifi-hw)</text>
+  <line x1="708" y1="262" x2="894" y2="262" stroke="currentColor" stroke-opacity="0.12"/>
+  <text x="710" y="281" font-size="11" font-weight="600" fill="#be3d73">Verilog / HLS</text>
+
+  <!-- connector bus -->
+  <g stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" fill="none">
+    <path d="M117,298 V372"/>
+    <path d="M345,298 V414"/>
+    <path d="M573,298 V372"/>
+    <path d="M801,298 V414"/>
+  </g>
+  <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
+    <line x1="117" y1="330" x2="345" y2="330" marker-start="url(#ow-arrow)" marker-end="url(#ow-arrow)"/>
+    <line x1="117" y1="372" x2="573" y2="372" marker-end="url(#ow-arrow)"/>
+    <line x1="801" y1="414" x2="345" y2="414" marker-end="url(#ow-arrow)"/>
+  </g>
+  <text x="231" y="324" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">shared register map (driver ↔ FPGA)</text>
+  <text x="345" y="366" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">build scripts pull the prebuilt bitstreams</text>
+  <text x="573" y="408" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">vendored as a git submodule → ip/openofdm_rx</text>
+</svg>
+<figcaption><em>The four openwifi repositories and how they connect. The two you clone day-to-day are <strong>openwifi</strong> and <strong>openwifi-hw</strong>; the other two are consumed automatically.</em></figcaption>
+</figure>
 
 | Repository | What it holds | When you touch it |
 |---|---|---|
