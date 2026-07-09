@@ -1,0 +1,65 @@
+site_name: openwifi Wiki
+site_description: A reorganized, plain-language guide to openwifi — a free and open-source, Linux mac80211-compatible, full-stack IEEE 802.11 implementation on SDR hardware.
+site_url: https://thomasmontanogames.github.io/OpenWifi-Wiki/
+repo_url: https://github.com/ThomasMontanoGames/OpenWifi-Wiki
+repo_name: ThomasMontanoGames/OpenWifi-Wiki
+edit_uri: edit/master/docs/
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - pymdownx.highlight
+  - tables
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+
+nav:
+  - Getting oriented:
+      - Home: index.md
+      - Getting Started: Getting-Started.md
+      - Architecture Overview: Architecture.md
+  - Using openwifi:
+      - Operating Modes: Operating-Modes.md
+      - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
+  - Developing:
+      - Software Development Workflow: Software-Development-Workflow.md
+      - FPGA Development: FPGA-Development.md
+  - Research:
+      - CSI, IQ & Research Features: Research-Features.md
+  - Reference:
+      - Troubleshooting: Troubleshooting.md
+      - FAQ & Resources: FAQ-and-Resources.md

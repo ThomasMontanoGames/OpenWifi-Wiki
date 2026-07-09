@@ -18,7 +18,7 @@ openwifi is OFDM-only and not backward-compatible with 802.11b, which trips up 2
 Yes — the AD9361 tunes 70 MHz–6 GHz. Bring the system up on the nearest legal channel, lock it, then override the RF frequency. See [sdrctl → arbitrary tuning](sdrctl-and-Runtime-Control.md#frequency-restrict-and-arbitrary-tuning). You can also run narrower bandwidths (2 MHz for sub-GHz 802.11ah-style, 10 MHz for 802.11p vehicular). **Mind your local spectrum regulations.**
 
 **My receiver stops working after about two hours. Broken?**
-No — that's the Xilinx Viterbi decoder evaluation license halting. Reload the FPGA or power-cycle. See [Troubleshooting](Troubleshooting.md#client--link-problems).
+No — that's the Xilinx Viterbi decoder evaluation license halting. Reload the FPGA or power-cycle. See [Troubleshooting](Troubleshooting.md#client-link-problems).
 
 **Do I need a paid Vivado license?**
 Only for some boards. Boards with the Zynq-7020 FPGA (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi, and the community 7020 boards) build under the free Vivado tier. ZC706, ZCU102, ADRV9361-Z7035, and RFSoC4x2 need a license to rebuild the FPGA. Either way, the prebuilt images need no license to *run*.
