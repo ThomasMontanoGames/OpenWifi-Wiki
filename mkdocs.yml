@@ -77,6 +77,7 @@ nav:
   - Developing:
       - Software Development Workflow: Software-Development-Workflow.md
       - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
+      - Building SD Images: Building-SD-Images.md
       - FPGA Development: FPGA-Development.md
       - FPGA IP Cores: FPGA-IP-Cores.md
   - Research:

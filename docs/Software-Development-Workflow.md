@@ -130,9 +130,4 @@ For larger updates (kernel, modules, device tree, rootfs) there are paired host/
 
 ## Building a full SD image from scratch
 
-Two supported base images:
-
-- **ADI Kuiper (Ubuntu-like):** follow [`doc/img_build_instruction/kuiper.md`](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/kuiper.md). In short: flash the "13 December 2023 (2022_r2)" ADI-Kuiper image, mount `BOOT` and `rootfs`, add the openwifi network/sysctl/systemd tweaks and the udev rule, then run `user_space/update_sdcard.sh` (last argument is the mount point holding `BOOT`/`rootfs`). That script builds and installs the kernel image, device tree, and `BOOT.BIN` for your board.
-- **OpenWrt:** follow [`doc/img_build_instruction/openwrt/README.md`](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/openwrt/README.md) to build an image with openwifi baked in for a supported board.
-
-Kuiper builds want Vivado 2022.2 (with Vitis) and the same `flex bison libssl-dev device-tree-compiler u-boot-tools` packages.
+Two base operating systems are supported, **ADI Kuiper** (Debian/Ubuntu-like) and **OpenWrt** (router-style with LuCI). The full step-by-step for both — flashing the base image, the rootfs edits, `update_sdcard.sh`, and the OpenWrt Docker build — is on the dedicated [Building SD Images](Building-SD-Images.md) page. Kuiper builds want Vivado 2022.2 (with Vitis) and the `flex bison libssl-dev device-tree-compiler u-boot-tools` packages; the OpenWrt build needs only Docker.
