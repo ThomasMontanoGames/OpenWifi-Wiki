@@ -1,30 +1,21 @@
 # openwifi Wiki (rebuilt)
 
-A reorganized, public-facing wiki for the [openwifi](https://github.com/open-sdr/openwifi) and [openwifi-hw](https://github.com/open-sdr/openwifi-hw) projects, written for onboarding new contributors. It consolidates the two repositories' READMEs, the project document, all application notes, the image-build guides, the FPGA IP-core and per-board hardware detail, and the known-issues list into thirteen cross-linked pages, with instructions rewritten for clarity.
+A reorganized, public-facing wiki for the [openwifi](https://github.com/open-sdr/openwifi) and [openwifi-hw](https://github.com/open-sdr/openwifi-hw) projects, written for onboarding new contributors. It consolidates the two repositories' READMEs, the project document, all application notes, the image-build and boot/device-tree details, the FPGA IP-core and per-board hardware detail, a glossary, and the known-issues list into sixteen cross-linked pages, with instructions rewritten for clarity.
 
 Built with [MkDocs](https://www.mkdocs.org/) + [Material](https://squidfunk.github.io/mkdocs-material/) and published to GitHub Pages on every push to `master`.
 
-## Pages
+## Structure
 
-Listed in navigation order (see [`mkdocs.yml`](mkdocs.yml) for the section grouping):
+Pages live in `docs/` and are organized into sections defined in [`mkdocs.yml`](mkdocs.yml), which is the authoritative page list and ordering:
 
-| File | Purpose |
-|---|---|
-| `docs/index.md` | Landing page: what openwifi is, the repos, and a reading path |
-| `docs/Repositories.md` | The four repos, why the project is split, and where to look for anything |
-| `docs/Getting-Started.md` | Hardware, flashing the SD card, first AP bring-up |
-| `docs/Architecture.md` | How Linux, the driver, and the FPGA fit together (read before coding) |
-| `docs/Supported-Boards.md` | Board matrix, per-board hardware notes, and the GPIO/LED debug map |
-| `docs/Operating-Modes.md` | AP, client, ad-hoc, monitor, packet injection, 802.11b notes |
-| `docs/sdrctl-and-Runtime-Control.md` | The `sdrctl` tool, common tricks, and the full register reference |
-| `docs/Software-Development-Workflow.md` | Rebuilding the driver, live reload, SD-image builds |
-| `docs/FPGA-Development.md` | Bitstream builds, IP cores, simulation, HLS, porting |
-| `docs/FPGA-IP-Cores.md` | The six custom FPGA cores: signal chain, registers, testbenches |
-| `docs/Research-Features.md` | CSI, CSI radar, CSI fuzzer, IQ capture, loopback, counters |
-| `docs/Troubleshooting.md` | Known issues by symptom + debugging tools |
-| `docs/FAQ-and-Resources.md` | FAQ, citing, publications, videos, community, license |
+- **Getting oriented** — what openwifi is, the repositories, getting started, architecture, and supported boards
+- **Using openwifi** — operating modes and the `sdrctl` runtime-control reference
+- **Developing** — the software workflow, boot/kernel/device tree, and the FPGA design and IP cores
+- **Research** — CSI, IQ capture, and the other research features
+- **Application notes** — an index of the upstream application notes
+- **Reference** — troubleshooting, a glossary, and the FAQ
 
-Navigation, theme, and the custom look live in [`mkdocs.yml`](mkdocs.yml) and [`docs/assets/stylesheets/extra.css`](docs/assets/stylesheets/extra.css).
+For the exact page list and order, see [`mkdocs.yml`](mkdocs.yml) or the [live site](https://thomasmontanogames.github.io/OpenWifi-Wiki/). The theme and custom styling live in `mkdocs.yml` and [`docs/assets/stylesheets/extra.css`](docs/assets/stylesheets/extra.css).
 
 ## Running it locally
 
