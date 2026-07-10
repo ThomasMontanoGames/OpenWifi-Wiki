@@ -84,12 +84,66 @@ Three ingredients go in:
 
 The script compiles each overlay with `dtc`, preprocesses and compiles the stock `.dts`, then fuses them with `fdtoverlay`:
 
-```
-stock board .dts ──cpp──► default_devicetree.dtb ─┐
-                                                   ├─fdtoverlay─► devicetree.dtb
-openwifi_<arch>_ad9361.dtso ──dtc──► openwifi.dtbo ┤            (+ full_devicetree.dts
-overlays/<board>.dtso ──dtc──► <board>.dtbo ───────┘             decompiled for sanity)
-```
+<figure>
+<svg viewBox="0 0 940 240" role="img" aria-label="How construct_device_tree.sh builds a board device tree: the stock board .dts is compiled with cpp and dtc into default_devicetree.dtb; the shared openwifi overlay and the per-board overlay are each compiled with dtc into .dtbo files; fdtoverlay then fuses all three into the board's devicetree.dtb, plus a decompiled full_devicetree.dts for a sanity check." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
+  <defs>
+    <marker id="dt-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.6"/>
+    </marker>
+  </defs>
+
+  <!-- source boxes (left) -->
+  <g fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3">
+    <rect x="12" y="18" width="200" height="44" rx="10"/>
+    <rect x="12" y="98" width="200" height="44" rx="10"/>
+    <rect x="12" y="178" width="200" height="44" rx="10"/>
+  </g>
+  <text x="112" y="44" text-anchor="middle" font-size="11" fill="currentColor">stock board .dts</text>
+  <text x="112" y="124" text-anchor="middle" font-size="10.5" fill="currentColor">openwifi_&lt;arch&gt;_ad9361.dtso</text>
+  <text x="112" y="204" text-anchor="middle" font-size="10.5" fill="currentColor">overlays/&lt;board&gt;.dtso</text>
+
+  <!-- source -> intermediate arrows, with tool labels -->
+  <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
+    <line x1="212" y1="40" x2="272" y2="40" marker-end="url(#dt-arrow)"/>
+    <line x1="212" y1="120" x2="272" y2="120" marker-end="url(#dt-arrow)"/>
+    <line x1="212" y1="200" x2="272" y2="200" marker-end="url(#dt-arrow)"/>
+  </g>
+  <text x="242" y="33" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">cpp+dtc</text>
+  <text x="242" y="113" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">dtc</text>
+  <text x="242" y="193" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">dtc</text>
+
+  <!-- intermediate boxes (middle) -->
+  <g fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3">
+    <rect x="272" y="18" width="176" height="44" rx="10"/>
+    <rect x="272" y="98" width="176" height="44" rx="10"/>
+    <rect x="272" y="178" width="176" height="44" rx="10"/>
+  </g>
+  <text x="360" y="44" text-anchor="middle" font-size="10.5" fill="currentColor">default_devicetree.dtb</text>
+  <text x="360" y="124" text-anchor="middle" font-size="10.5" fill="currentColor">openwifi.dtbo</text>
+  <text x="360" y="204" text-anchor="middle" font-size="10.5" fill="currentColor">&lt;board&gt;.dtbo</text>
+
+  <!-- converge into fdtoverlay -->
+  <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
+    <line x1="448" y1="40" x2="528" y2="110" marker-end="url(#dt-arrow)"/>
+    <line x1="448" y1="120" x2="528" y2="120" marker-end="url(#dt-arrow)"/>
+    <line x1="448" y1="200" x2="528" y2="130" marker-end="url(#dt-arrow)"/>
+  </g>
+
+  <!-- fdtoverlay (amber) -->
+  <rect x="528" y="92" width="124" height="56" rx="12" fill="#c2740a" fill-opacity="0.08" stroke="#c2740a" stroke-opacity="0.6" stroke-width="1.5"/>
+  <text x="590" y="124" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c2740a">fdtoverlay</text>
+
+  <!-- fdtoverlay -> output -->
+  <line x1="652" y1="120" x2="712" y2="120" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none" marker-end="url(#dt-arrow)"/>
+
+  <!-- output (teal) -->
+  <rect x="712" y="92" width="176" height="56" rx="12" fill="#0d9488" fill-opacity="0.06" stroke="#0d9488" stroke-opacity="0.55" stroke-width="1.5"/>
+  <text x="800" y="116" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">devicetree.dtb</text>
+  <text x="800" y="132" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">the board's final tree</text>
+  <text x="800" y="172" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.65">+ full_devicetree.dts (decompiled sanity check)</text>
+</svg>
+<figcaption><em><code>construct_device_tree.sh</code> compiles the stock board tree (<code>cpp</code> + <code>dtc</code>) and the two openwifi overlays (<code>dtc</code>), then <code>fdtoverlay</code> fuses all three into the board's final <code>devicetree.dtb</code> (and decompiles a <code>full_devicetree.dts</code> for a sanity check).</em></figcaption>
+</figure>
 
 !!! info "Why it's built this way"
     This modular, overlay-based device-tree system came out of the NLnet project [*Extensive openwifi support for OpenWRT*](https://nlnet.nl/project/OpenWifi-OpenWRT/), which set out to **modularize openwifi's hardware description** so it can be ported across the whole board matrix in a maintainable way, and to **break openwifi's dependency on ADI Kuiper Linux** so it can target OpenWrt. Splitting the tree into a shared openwifi overlay plus small per-board overlays (instead of one hand-maintained tree per board) is what makes the porting flow below tractable.
