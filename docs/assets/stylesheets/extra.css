@@ -108,6 +108,12 @@
 .md-typeset table:not([class]) tbody tr:hover {
   background: color-mix(in srgb, var(--md-accent-fg-color) 7%, transparent);
 }
+/* Keep code tokens (board names, register names) on one line so a column
+   is never squeezed narrower than its content and clips a character. The
+   table scrolls horizontally instead if it runs out of room. */
+.md-typeset table:not([class]) code {
+  white-space: nowrap;
+}
 
 /* ---- Code ---- */
 .md-typeset pre > code { border-radius: 10px; }
