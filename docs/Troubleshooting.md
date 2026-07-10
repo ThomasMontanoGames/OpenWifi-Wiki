@@ -1,14 +1,14 @@
 # Troubleshooting and Known Issues
 
-Grouped by symptom. When networking won't come up at all, a **USB-UART serial console** is your best friend — it shows you the boot messages that ssh can't. The authoritative, continuously updated list is the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md); this page reorganizes it and adds the debugging tools.
+Grouped by symptom. When networking won't come up at all, reach for a **USB-UART serial console**; it shows you the boot messages that ssh can't. The authoritative, continuously updated list is the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md); this page reorganizes it and adds the debugging tools.
 
 ## Boot and networking
 
 **Can't ssh to the board on first boot.** Delete `/etc/network/interfaces.new` from the SD card's `rootfs` partition (on your PC). If it still fails, use the UART console (`/dev/ttyUSBx`, `/dev/ttyCH341USBx`, …) to watch the boot.
 
-**No UART console device appears** (antsdr e200 and similar CH341 adapters). Try `sudo apt remove brltty` — brltty grabs the CH341 device. (Reference: the [CH341SER notes](https://github.com/juliagoda/CH341SER).)
+**No UART console device appears** (antsdr e200 and similar CH341 adapters). Try `sudo apt remove brltty`, since brltty grabs the CH341 device. (Reference: the [CH341SER notes](https://github.com/juliagoda/CH341SER).)
 
-**`EXT4-fs error (device mmcblk0p2)` on first boot** (seen on neptunesdr). The flashing tool is suspect — re-flash with a different one (gnome-disks, Startup Disk Creator, or win32diskimager).
+**`EXT4-fs error (device mmcblk0p2)` on first boot** (seen on neptunesdr). The flashing tool is suspect, so re-flash with a different one (gnome-disks, Startup Disk Creator, or win32diskimager).
 
 **ZCU102 kernel panic: "Unable to mount root fs on unknown-block(179,2)."** The same SD card boots on some ZCU102 units but not others; the SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed:
 
@@ -42,7 +42,7 @@ Zynq> saveenv
 service isc-dhcp-server restart
 ```
 
-**Big packet loss at slow ping, but fine at fast ping.** The *other* device's Wi-Fi power save is the usual culprit — it sleeps between your infrequent packets. Turn it off on that device:
+**Big packet loss at slow ping, but fine at fast ping.** The *other* device's Wi-Fi power save is the usual culprit; it sleeps between your infrequent packets. Turn it off on that device:
 
 ```bash
 iw dev wlan0 get power_save
@@ -51,7 +51,7 @@ sudo iw dev wlan0 set power_save off
 
 **Ping-by-hostname fails (DNS).** Set `nameserver 8.8.8.8` in `/etc/resolv.conf` on the board.
 
-**Reception dies after ~2 hours; `sdrctl dev sdr0 get reg rx 20` is frozen.** This is the **Xilinx Viterbi decoder evaluation license** halting — expected behavior, not a bug. Reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle. A proper license removes the limit.
+**Reception dies after ~2 hours; `sdrctl dev sdr0 get reg rx 20` is frozen.** This is the **Xilinx Viterbi decoder evaluation license** halting, which is expected behavior, not a bug. Reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle. A proper license removes the limit.
 
 ## Hardware quirks
 
@@ -63,7 +63,7 @@ fru-dump -i ./masterfiles/AD-FMCOMMS4-EBZ-FRU.bin -o /sys/.../0-0050/eeprom
 
 Reboot and re-read to confirm.
 
-**`Unsupported PRODUCT_ID 0xFF`** at AD9361 probe — same root cause as above (EEPROM/FRU). See the fru_tools references.
+**`Unsupported PRODUCT_ID 0xFF`** at AD9361 probe: same root cause as above (EEPROM/FRU). See the fru_tools references.
 
 **ZCU102 kernel panic due to RTC / panic due to hardware capacitor & current load.** Tracked upstream: [#366](https://github.com/open-sdr/openwifi/issues/366) and [#457](https://github.com/open-sdr/openwifi/issues/457).
 
@@ -102,7 +102,7 @@ sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12.6.3 /usr/lib/x86_64-linux-gnu/
 
 **Vitis HLS: `'2xxxxxxxxx' is an invalid argument`** during `create_ip_repo.sh`. Apply [Xilinx article 76960](https://support.xilinx.com/s/article/76960).
 
-**Ubuntu 24: FPGA tools need `libtinfo5`** (default is `libtinfo6`). Install it manually — see [FPGA Development prerequisites](FPGA-Development.md#prerequisites).
+**Ubuntu 24: FPGA tools need `libtinfo5`** (default is `libtinfo6`). Install it manually (see [FPGA Development prerequisites](FPGA-Development.md#prerequisites)).
 
 ## OpenWrt-specific
 
@@ -147,7 +147,7 @@ openwifi_rx: 270B ht0aggr0/0 sgi0 240M FC0080 DI0000 ADDR.../00c88b113f5f/00c88b
 
 ### Native Linux tools
 
-`tcpdump`, `tshark`, and Wireshark all work over `sdr0` exactly as with a commercial card — often the quickest way to see what's on the air.
+`tcpdump`, `tshark`, and Wireshark all work over `sdr0` exactly as with a commercial card, and are often the quickest way to see what's on the air.
 
 ### FPGA ILA
 

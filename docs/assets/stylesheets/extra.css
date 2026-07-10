@@ -1,0 +1,233 @@
+/* ============================================================
+   openwifi Wiki — "Refined technical" theme layer
+   Builds on Material for MkDocs. Uses Material CSS variables so
+   everything adapts to light (default) and dark (slate) schemes.
+   ============================================================ */
+
+/* ---- Palette: a deeper, calmer teal than Material's stock ---- */
+:root {
+  --md-primary-fg-color:        #0f766e;
+  --md-primary-fg-color--light: #14b8a6;
+  --md-primary-fg-color--dark:  #0b5c55;
+  --md-accent-fg-color:         #0d9488;
+  --ow-rule: var(--md-default-fg-color--lightest);
+}
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color:  #14b8a6;
+  --md-accent-fg-color:   #2dd4bf;
+  --md-typeset-a-color:   #2dd4bf;
+  /* a touch warmer/deeper page background than stock slate */
+  --md-default-bg-color:  hsl(200, 18%, 12%);
+}
+
+/* ---- Typography ---- */
+.md-typeset {
+  font-feature-settings: "kern", "liga", "calt";
+}
+.md-typeset h1 {
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  color: var(--md-default-fg-color);
+}
+.md-typeset h2 {
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin-top: 2.6rem;
+  padding-top: 1.1rem;
+  border-top: 1px solid var(--ow-rule);
+}
+.md-typeset h3 {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+/* Header title a little tighter */
+.md-header__title { font-weight: 700; letter-spacing: -0.01em; }
+
+/* ---- Wider layout ----
+   Give the content column more room (Material's default is fairly narrow),
+   then use a "breakout" measure: cap running prose at a readable line
+   length while letting code blocks, tables, figures and diagrams use the
+   full width. */
+@media screen and (min-width: 76.25em) {
+  .md-grid { max-width: 70rem; }
+}
+@media screen and (min-width: 88em) {
+  .md-grid { max-width: 80rem; }
+}
+.md-content { max-width: none; }
+
+/* Keep body text at a comfortable measure; wide blocks are exempt below. */
+.md-typeset > p,
+.md-typeset > ul,
+.md-typeset > ol {
+  max-width: 48rem;
+}
+/* Let these span the full (now wider) column. */
+.md-typeset > pre,
+.md-typeset > .highlight,
+.md-typeset > .highlighttable,
+.md-typeset > .md-typeset__scrollwrap,
+.md-typeset > .tabbed-set,
+.md-typeset > figure,
+.md-typeset > .admonition,
+.md-typeset > details,
+.md-typeset > .grid,
+.md-typeset > h1,
+.md-typeset > h2,
+.md-typeset > h3 {
+  max-width: none;
+}
+
+/* ---- Links ---- */
+.md-typeset a { text-underline-offset: 0.15em; }
+
+/* ---- Tables: card style with header fill + row hover ---- */
+.md-typeset table:not([class]) {
+  border: 1px solid var(--ow-rule);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  font-size: 0.76rem;
+}
+.md-typeset table:not([class]) th {
+  background: var(--md-default-fg-color--lightest);
+  color: var(--md-default-fg-color);
+  font-weight: 700;
+  letter-spacing: -0.005em;
+}
+.md-typeset table:not([class]) td,
+.md-typeset table:not([class]) th {
+  border: none;
+  border-bottom: 1px solid var(--ow-rule);
+  padding: 0.6em 0.9em;
+}
+.md-typeset table:not([class]) tr:last-child td { border-bottom: none; }
+.md-typeset table:not([class]) tbody tr {
+  transition: background-color 120ms ease;
+}
+.md-typeset table:not([class]) tbody tr:hover {
+  background: color-mix(in srgb, var(--md-accent-fg-color) 7%, transparent);
+}
+
+/* ---- Code ---- */
+.md-typeset pre > code { border-radius: 10px; }
+.md-typeset code {
+  border-radius: 5px;
+  font-size: 0.82em;
+}
+.md-typeset :not(pre) > code {
+  background: color-mix(in srgb, var(--md-primary-fg-color) 10%, transparent);
+  color: var(--md-typeset-color);
+}
+
+/* ---- Admonitions & details: softer, flatter ---- */
+.md-typeset .admonition,
+.md-typeset details {
+  border: 1px solid var(--ow-rule);
+  border-left-width: 3px;
+  border-radius: 10px;
+  box-shadow: none;
+  font-size: 0.76rem;
+}
+
+/* ---- Figures & captions (diagrams, screenshots) ---- */
+.md-typeset figure {
+  margin: 1.6rem auto;
+  max-width: 100%;
+}
+.md-typeset figure img,
+.md-typeset figure svg {
+  border-radius: 10px;
+}
+/* frame raster screenshots subtly; leave inline SVG diagrams borderless */
+.md-typeset figure img {
+  border: 1px solid var(--ow-rule);
+  background: var(--md-default-bg-color);
+}
+.md-typeset figcaption {
+  color: var(--md-default-fg-color--light);
+  font-size: 0.72rem;
+  line-height: 1.5;
+  max-width: 44rem;
+  margin: 0.7rem auto 0;
+}
+
+/* Standalone images (not in <figure>) get the same gentle frame */
+.md-typeset p > img { border-radius: 10px; }
+
+/* ---- Nav: section labels a touch stronger ---- */
+.md-nav__item--section > .md-nav__link {
+  font-weight: 700;
+  color: var(--md-default-fg-color);
+}
+
+/* ---- Home hero ---- */
+.ow-hero {
+  margin: 0 0 2.2rem;
+  padding: 2rem 2rem 1.8rem;
+  border: 1px solid var(--ow-rule);
+  border-radius: 16px;
+  background:
+    radial-gradient(120% 140% at 100% 0%,
+      color-mix(in srgb, var(--md-primary-fg-color) 14%, transparent) 0%,
+      transparent 55%),
+    var(--md-default-bg-color);
+}
+.ow-hero h1 {
+  margin: 0 0 0.4rem;
+  font-size: 2.1rem;
+  line-height: 1.1;
+}
+.ow-hero p { margin: 0.2rem 0 0; font-size: 0.86rem; color: var(--md-default-fg-color--light); max-width: 40rem; }
+.ow-hero .ow-hero__tag {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+  padding: 0.15rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--md-primary-fg-color);
+  background: color-mix(in srgb, var(--md-primary-fg-color) 12%, transparent);
+}
+.ow-hero .ow-hero__cta {
+  margin-top: 1.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+.ow-hero .ow-hero__cta a {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid var(--ow-rule);
+  transition: transform 120ms ease, background-color 120ms ease;
+}
+.ow-hero .ow-hero__cta a:hover { transform: translateY(-1px); }
+.ow-hero .ow-hero__cta a.ow-primary {
+  background: var(--md-primary-fg-color);
+  color: #fff;
+  border-color: transparent;
+}
+.ow-hero .ow-hero__cta a.ow-ghost {
+  background: transparent;
+  color: var(--md-default-fg-color);
+}
+.ow-hero .ow-hero__cta a.ow-ghost:hover {
+  background: color-mix(in srgb, var(--md-primary-fg-color) 8%, transparent);
+}
+
+/* ---- Grid cards (Material built-in) spacing polish ---- */
+.md-typeset .grid.cards > ul > li,
+.md-typeset .grid > .card {
+  border-radius: 12px;
+  border-color: var(--ow-rule);
+}
+.md-typeset .grid.cards > ul > li:hover {
+  border-color: var(--md-accent-fg-color);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+}

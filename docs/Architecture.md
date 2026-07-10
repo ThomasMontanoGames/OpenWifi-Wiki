@@ -1,10 +1,10 @@
 # Architecture Overview
 
-This page explains how openwifi is put together. Read it before you start modifying code — almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA. (For *where* each part lives in the source tree, see [The Repositories](Repositories.md); for the FPGA cores in depth, see [FPGA IP Cores](FPGA-IP-Cores.md).)
+This page explains how openwifi is put together. Read it before you start modifying code. Almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA. (For *where* each part lives in the source tree, see [The Repositories](Repositories.md); for the FPGA cores in depth, see [FPGA IP Cores](FPGA-IP-Cores.md).)
 
 ![openwifi software and FPGA module composition](assets/img/openwifi-detail.jpg)
 
-*openwifi's full composition: software modules (top) and FPGA modules (bottom). The module names in this diagram match the source file names — `xpu`, `openofdm_tx/rx`, `tx_intf`, `rx_intf`, `side_ch` — which is the key to navigating both the code and this wiki.*
+*openwifi's full composition: software modules (top) and FPGA modules (bottom). The module names in this diagram match the source file names (`xpu`, `openofdm_tx/rx`, `tx_intf`, `rx_intf`, `side_ch`), which is the key to navigating both the code and this wiki.*
 
 ## The big picture
 
@@ -18,7 +18,7 @@ Layered from top to bottom:
 - **FPGA design (the openwifi-hw repo)** — OFDM transmitter and receiver, the CSMA/CA low MAC, and DMA interfaces to the processor.
 - **AD9361 RF front end** — the analog radio (70 MHz–6 GHz), connected to the FPGA over the Analog Devices RF interface and controlled in real time over an FPGA-driven SPI link.
 
-Because it registers a normal Linux network interface (`sdr0`), every tool that works with a commercial card works here too. That's the whole point.
+Because it registers a normal Linux network interface (`sdr0`), every tool that works with a commercial card works here too, which is the core idea behind openwifi.
 
 ## How the driver talks to Linux: the mac80211 API
 
@@ -39,13 +39,13 @@ The Linux `mac80211` subsystem defines a set of callbacks (`ieee80211_ops`) that
 | `ampdu_action` | A-MPDU (aggregation) operations |
 | `testmode_cmd` | Handles `sdrctl` commands (see [sdrctl](sdrctl-and-Runtime-Control.md)) |
 
-When Linux invokes one of these, `sdr.c` does the work by driving the FPGA. It leans on per-block helper "sub-drivers" — `tx_intf_api`, `rx_intf_api`, `openofdm_tx_api`, `openofdm_rx_api`, and `xpu_api` — each of which wraps register access to one FPGA module. These are compiled as separate kernel modules (`tx_intf.ko`, `rx_intf.ko`, …) that `sdr.ko` binds to at load time, which is why `wgd.sh` inserts all of them.
+When Linux invokes one of these, `sdr.c` does the work by driving the FPGA. It leans on per-block helper "sub-drivers" (`tx_intf_api`, `rx_intf_api`, `openofdm_tx_api`, `openofdm_rx_api`, and `xpu_api`), each of which wraps register access to one FPGA module. These are compiled as separate kernel modules (`tx_intf.ko`, `rx_intf.ko`, …) that `sdr.ko` binds to at load time, which is why `wgd.sh` inserts all of them.
 
 A few implementation facts worth knowing:
 
-- openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`. The device tree is what tells Linux the AXI addresses and interrupts of every FPGA block — which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise.
-- At probe time (`openwifi_dev_probe()`) the driver reads the device-tree `model` string to detect the **hardware type** (`ZYNQ_AD9361`, `ZYNQMP_AD9361`, `RFSOC4X2`) and whether it's a **small or large FPGA** — the latter is how features like capture-buffer length adapt per board automatically.
-- The AD9361 RF chip is itself driven by the standard Analog Devices IIO driver; openwifi finds it on the SPI bus and calls into it (e.g. `ad9361_set_tx_atten`, `ad9361_rf_set_channel`). This is also why some patches to the ADI kernel are needed — see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver).
+- openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`. The device tree is what tells Linux the AXI addresses and interrupts of every FPGA block, which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise.
+- At probe time (`openwifi_dev_probe()`) the driver reads the device-tree `model` string to detect the **hardware type** (`ZYNQ_AD9361`, `ZYNQMP_AD9361`, `RFSOC4X2`) and whether it's a **small or large FPGA**. That last distinction is how features like capture-buffer length adapt per board automatically.
+- The AD9361 RF chip is itself driven by the standard Analog Devices IIO driver; openwifi finds it on the SPI bus and calls into it (e.g. `ad9361_set_tx_atten`, `ad9361_rf_set_channel`). This is also why some patches to the ADI kernel are needed (see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver)).
 - TX uses a 64-entry DMA ring of buffer descriptors; RX uses a cyclic DMA buffer. The driver keeps write/read indices so the running `openwifi_tx()`, the FPGA, and the interrupt handler can cross-check each other.
 
 ## The FPGA modules
@@ -58,18 +58,18 @@ The FPGA design decomposes into modules whose names match their source files (in
 - **`rx_intf`** — the receive interface: takes decoded packets and side-channel data, attaches metadata (TSF timestamp, RSSI, length, MCS, FCS status), and DMAs them up to the processor.
 - **`xpu`** — the "eXtensible Processing Unit," which holds the **real-time low MAC**: the CSMA/CA state machine, NAV, DIFS/SIFS/EIFS timing, the TSF timer, hardware ACK generation and reception, retransmission, RTS/CTS, packet filtering, and the time-slicing gates for the TX queues. If a behavior has to happen in microseconds, it's in `xpu`.
 
-There's also a **`side_ch`** (side channel) module used for research features — CSI and IQ capture — described on the [Research Features](Research-Features.md) page.
+There's also a **`side_ch`** (side channel) module used for research features (CSI and IQ capture), described on the [Research Features](Research-Features.md) page.
 
-The processor reaches these modules over the ARM **AXI bus**. Each module exposes a bank of registers (`slv_regN` in the Verilog), whose addresses are defined in `driver/hw_def.h`. This AXI coupling is what gives openwifi very low processor↔PHY latency — and also what makes the design fairly platform-specific.
+The processor reaches these modules over the ARM **AXI bus**. Each module exposes a bank of registers (`slv_regN` in the Verilog), whose addresses are defined in `driver/hw_def.h`. This AXI coupling is what gives openwifi very low processor↔PHY latency, and also what makes the design fairly platform-specific.
 
-For a core-by-core walkthrough — the submodules inside `xpu` (the CSMA/CA state machine, TSF timer, hardware SPI to the AD9361), the OFDM transmit and receive chains, and how a register write travels from `sdrctl` all the way to a `slv_regN` — see the dedicated [FPGA IP Cores](FPGA-IP-Cores.md) page.
+For a core-by-core walkthrough, see the dedicated [FPGA IP Cores](FPGA-IP-Cores.md) page: the submodules inside `xpu` (the CSMA/CA state machine, TSF timer, hardware SPI to the AD9361), the OFDM transmit and receive chains, and how a register write travels from `sdrctl` all the way to a `slv_regN`.
 
 openwifi's FPGA design is built **on top of the [Analog Devices HDL reference design](https://github.com/analogdevicesinc/hdl)** (vendored as the `adi-hdl` submodule of openwifi-hw): ADI provides the AD9361 interfacing IP, DMA engines, and board plumbing, and openwifi inserts its own cores into that design. This is why [porting to a new board](FPGA-Development.md#porting-to-a-new-board) is framed as "diff openwifi against the matching ADI reference design."
 
 ## The receive path, step by step
 
 1. A signal arrives at the AD9361 and is delivered to the FPGA as IQ samples.
-2. `openofdm_rx` detects, synchronizes, and decodes it. Whether the FCS/CRC passes or fails, the packet is offered up if the current frame-filtering rules allow it (in monitor mode, everything is allowed — even bad-CRC frames and control frames like ACKs).
+2. `openofdm_rx` detects, synchronizes, and decodes it. Whether the FCS/CRC passes or fails, the packet is offered up if the current frame-filtering rules allow it (in monitor mode, everything is allowed, even bad-CRC frames and control frames like ACKs).
 3. `rx_intf` writes the packet plus metadata into a DMA buffer and raises an interrupt.
 4. The driver's `openwifi_rx_interrupt()` runs: it pulls the raw buffer, parses out the inserted metadata (TSF timestamp, raw RSSI which is then corrected to dBm per band/channel, length, MCS, FCS-valid flag), and hands the packet and its metadata to Linux via `ieee80211_rx_irqsafe()`.
 
@@ -78,21 +78,21 @@ openwifi's FPGA design is built **on top of the [Analog Devices HDL reference de
 1. Linux `mac80211` calls `openwifi_tx()` with a frame to send.
 2. The driver reads what it needs from the 802.11 header and mac80211 metadata: length and MCS; unicast vs broadcast; whether an ACK is required and the maximum number of retransmissions the FPGA may attempt; which TX queue / time slice to use; whether RTS/CTS or CTS-to-self protection applies; whether the driver should insert a sequence number.
 3. It maintains an internal write index (`ring->bd_wr_idx`) so that the active `openwifi_tx()`, the FPGA, and the later interrupt handler can cross-check each other.
-4. It writes the per-packet FPGA configuration (so the FPGA generates the right PHY header, etc.) and fires a DMA transfer into one of the four FPGA TX queues. The packet may not go out immediately — the FPGA sends it when the channel and the CSMA state machine allow.
-5. When the FPGA finishes sending, it raises an interrupt. `openwifi_tx_interrupt()` reads back the result (success/failure — i.e. was an ACK received — and how many retransmissions happened) and reports it to Linux via `ieee80211_tx_status_irqsafe()`.
+4. It writes the per-packet FPGA configuration (so the FPGA generates the right PHY header, etc.) and fires a DMA transfer into one of the four FPGA TX queues. The packet may not go out immediately; the FPGA sends it when the channel and the CSMA state machine allow.
+5. When the FPGA finishes sending, it raises an interrupt. `openwifi_tx_interrupt()` reads back the result (success or failure, meaning whether an ACK was received, and how many retransmissions happened) and reports it to Linux via `ieee80211_tx_status_irqsafe()`.
 
 ## The TSF timestamp
 
-The 64-bit TSF (Timing Synchronization Function) timer is defined by the 802.11 standard and implemented in the FPGA. When a packet's PHY header is received, the FPGA samples the TSF value and attaches it to the packet's DMA buffer; the driver forwards it to Linux, which is why you see a consistent TSF timestamp in Wireshark/tcpdump. That same TSF value is the key that lets you line up side-channel data (CSI, IQ) with specific packets — they share one time base. (See [this discussion](https://github.com/open-sdr/openwifi/discussions/344) for the matching recipe.)
+The 64-bit TSF (Timing Synchronization Function) timer is defined by the 802.11 standard and implemented in the FPGA. When a packet's PHY header is received, the FPGA samples the TSF value and attaches it to the packet's DMA buffer; the driver forwards it to Linux, which is why you see a consistent TSF timestamp in Wireshark/tcpdump. That same TSF value is the key that lets you line up side-channel data (CSI, IQ) with specific packets, since they share one time base. (See [this discussion](https://github.com/open-sdr/openwifi/discussions/344) for the matching recipe.)
 
 ## RF and baseband: the frequency/clock design
 
 openwifi drives the AD9361 in **FDD mode with identical TX and RX frequencies**, and controls the AD9361 TX chain in real time over an FPGA SPI link (`openwifi-hw/ip/xpu/src/spi.v`). The TX local oscillator (or an RF switch) is turned **on just before** a transmit packet and **off just after** it. Two consequences follow:
 
-- **No LO leakage during receive**, so the receiver isn't self-interfered — this is what enables full-duplex self-reception (the basis of the CSI radar and loopback features).
+- **No LO leakage during receive**, so the receiver isn't self-interfered, which enables full-duplex self-reception (the basis of the CSI radar and loopback features).
 - **Fast TX/RX turnaround** (~0.6 µs), which is what makes the 10 µs SIFS and hardware ACK timing achievable.
 
-The AD9361↔FPGA IQ rate is 40 Msps, decimated/interpolated inside the FPGA to the 20 Msps the WiFi baseband uses. Crucially, the **FPGA baseband clock is derived from the AD9361 clock**, so RF and baseband never drift relative to each other. This design (replacing the older "offset tuning" approach) is what gives openwifi its good EVM, spectral mask conformance, sensitivity, and RSSI accuracy.
+The AD9361↔FPGA IQ rate is 40 Msps, decimated/interpolated inside the FPGA to the 20 Msps the Wi-Fi baseband uses. Crucially, the **FPGA baseband clock is derived from the AD9361 clock**, so RF and baseband never drift relative to each other. This design (replacing the older "offset tuning" approach) is what gives openwifi its good EVM, spectral mask conformance, sensitivity, and RSSI accuracy.
 
 ![Baseband clock derived from the AD9361 clock](assets/img/bb-clk.jpg)
 
@@ -126,7 +126,7 @@ So the open-source release reaches a **theoretical 72.2 Mbps single-stream**, no
 <figcaption>Short guard interval (800 → 400 ns): openwifi implements this.</figcaption>
 </figure>
 
-On the **MAC** side, 802.11n added frame aggregation. There are two flavors: **A-MSDU** (efficient, but one bit error invalidates the whole aggregate) and **A-MPDU** (per-subframe headers, so a single error only costs one retransmission — the more widely adopted choice).
+On the **MAC** side, 802.11n added frame aggregation. There are two flavors: **A-MSDU** (efficient, but one bit error invalidates the whole aggregate) and **A-MPDU** (per-subframe headers, so a single error only costs one retransmission, which is the more widely adopted choice).
 
 ![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png)
 

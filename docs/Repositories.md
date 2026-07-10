@@ -1,6 +1,6 @@
 # The openwifi Project and Its Repositories
 
-New to openwifi? Start here. This page explains **what the project is made of**, **why it is split across several repositories**, and — most usefully — **where to look when you need to find something**. Once the repository map makes sense, everything else on this wiki has an obvious home.
+New to openwifi? Start here. This page explains **what the project is made of**, **why it is split across several repositories**, and, most usefully, **where to look when you need to find something**. Once the repository map makes sense, everything else on this wiki has an obvious home.
 
 ## The one-sentence version
 
@@ -8,10 +8,10 @@ openwifi is a full-stack, Linux `mac80211`-compatible IEEE 802.11 (Wi-Fi) implem
 
 ## Why more than one repository?
 
-There is not one "openwifi repo" — there are four, each with a distinct job, a distinct toolchain, and a distinct release cadence:
+There is not one "openwifi repo"; there are four, each with a distinct job, a distinct toolchain, and a distinct release cadence:
 
 <figure>
-<svg viewBox="0 0 920 434" role="img" aria-label="The four openwifi repositories and how they connect: openwifi (driver and tools), openwifi-hw (FPGA design), openwifi-hw-img (prebuilt bitstreams), and openofdm (OFDM receiver submodule)." style="width:100%;height:auto;max-width:920px;font-family:inherit;font-size:13px">
+<svg viewBox="0 0 920 450" role="img" aria-label="The four openwifi repositories and how they connect: openwifi (driver and tools), openwifi-hw (FPGA design), openwifi-hw-img (prebuilt bitstreams), and openofdm (OFDM receiver submodule)." style="width:100%;height:auto;max-width:1080px;font-family:inherit;font-size:13px">
   <defs>
     <marker id="ow-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.55"/>
@@ -64,21 +64,18 @@ There is not one "openwifi repo" — there are four, each with a distinct job, a
   <line x1="708" y1="262" x2="894" y2="262" stroke="currentColor" stroke-opacity="0.12"/>
   <text x="710" y="281" font-size="11" font-weight="600" fill="#be3d73">Verilog / HLS</text>
 
-  <!-- connector bus -->
-  <g stroke="currentColor" stroke-opacity="0.4" stroke-width="1.5" fill="none">
-    <path d="M117,298 V372"/>
-    <path d="M345,298 V414"/>
-    <path d="M573,298 V372"/>
-    <path d="M801,298 V414"/>
-  </g>
+  <!-- connectors: each elbow starts and ends on a card's bottom edge, arrowheads landing on the boxes -->
   <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
-    <line x1="117" y1="330" x2="345" y2="330" marker-start="url(#ow-arrow)" marker-end="url(#ow-arrow)"/>
-    <line x1="117" y1="372" x2="573" y2="372" marker-end="url(#ow-arrow)"/>
-    <line x1="801" y1="414" x2="345" y2="414" marker-end="url(#ow-arrow)"/>
+    <!-- openwifi <-> openwifi-hw : shared register map (bidirectional) -->
+    <path d="M200,298 V338 H270 V298" marker-start="url(#ow-arrow)" marker-end="url(#ow-arrow)"/>
+    <!-- openwifi -> openwifi-hw-img : build scripts pull bitstreams -->
+    <path d="M120,298 V388 H573 V298" marker-end="url(#ow-arrow)"/>
+    <!-- openofdm -> openwifi-hw : vendored as submodule -->
+    <path d="M801,298 V434 H380 V298" marker-end="url(#ow-arrow)"/>
   </g>
-  <text x="231" y="324" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">shared register map (driver ↔ FPGA)</text>
-  <text x="345" y="366" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">build scripts pull the prebuilt bitstreams</text>
-  <text x="573" y="408" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">vendored as a git submodule → ip/openofdm_rx</text>
+  <text x="235" y="354" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">shared register map (driver ↔ FPGA)</text>
+  <text x="346" y="381" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">build scripts pull the prebuilt bitstreams</text>
+  <text x="590" y="427" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">vendored as a git submodule → ip/openofdm_rx</text>
 </svg>
 <figcaption><em>The four openwifi repositories and how they connect. The two you clone day-to-day are <strong>openwifi</strong> and <strong>openwifi-hw</strong>; the other two are consumed automatically.</em></figcaption>
 </figure>
@@ -90,7 +87,7 @@ There is not one "openwifi repo" — there are four, each with a distinct job, a
 | **[openwifi-hw-img](https://github.com/open-sdr/openwifi-hw-img)** | **Pre-built FPGA bitstreams** for each board (`.xsa`, bitstream, ILA `.ltx`, init files under `boards/<board_name>/sdk/`), plus the CLA/doc PDFs | You want a working bitstream *without* installing Vivado or waiting hours for synthesis |
 | **[openofdm](https://github.com/open-sdr/openofdm)** | The 802.11 **OFDM receiver** that `openofdm_rx` is based on. openwifi's improvements live on the `dot11zynq` branch (and `dot11zynq_hls` for the HLS variant). Originally by [jhshi](https://github.com/jhshi/openofdm) | Deep receiver work (synchronization, channel estimation, Viterbi decode); usually you just let the build script fetch it |
 
-The two you will clone and work in day-to-day are **openwifi** and **openwifi-hw**. The other two are consumed automatically: `openwifi-hw-img` by the software build scripts, and `openofdm` as a git submodule of `openwifi-hw`.
+The two you will clone and work with day to day are **openwifi** and **openwifi-hw**. The other two are consumed automatically: `openwifi-hw-img` by the software build scripts, and `openofdm` as a git submodule of `openwifi-hw`.
 
 !!! tip "The `board_name` thread ties it all together"
     The same `board_name` string (e.g. `zed_fmcs2`, `zcu102_fmcs2`) names a board in **all** the repos: `openwifi-hw/boards/$BOARD_NAME/` (FPGA project), `openwifi-hw-img/boards/$BOARD_NAME/sdk/` (prebuilt bitstream), and `openwifi/kernel_boot/boards/$BOARD_NAME/` (boot files + device tree). Set `export BOARD_NAME=...` once and every build script uses it. See [Supported Boards](Supported-Boards.md).
@@ -98,8 +95,8 @@ The two you will clone and work in day-to-day are **openwifi** and **openwifi-hw
 ## How the pieces fit at build and run time
 
 - **At run time**, only the `openwifi` repo's artifacts run on the board: the FPGA bitstream (`system_top.bit.bin`), the kernel driver (`sdr.ko` and friends), and the user-space tools. The bitstream originally came from `openwifi-hw` (or was downloaded from `openwifi-hw-img`).
-- **At build time**, the driver must agree with the FPGA on the **register map**. That contract is expressed in two mirror-image places: `openwifi/driver/hw_def.h` (the addresses the driver writes) and each core's `*_s_axi.v` in `openwifi-hw/ip/` (the registers the FPGA implements). A driver file and its FPGA counterpart usually even share a name — `xpu.c` ↔ `xpu.v`. This is why the two repos are versioned together in spirit even though they are separate in git.
-- **The submodule chain**: `openwifi-hw` pulls in two submodules — [`analogdevicesinc/hdl`](https://github.com/analogdevicesinc/hdl) (the Analog Devices FPGA reference design openwifi is built on top of, pinned to tag `2022_R2`) as `adi-hdl/`, and `openofdm` (branch `dot11zynq`) as `ip/openofdm_rx/`. A fresh `openwifi-hw` clone has these as **empty directories** until you run `./prepare_adi_lib.sh` and `./get_ip_openofdm_rx.sh` (or `git submodule update --init`).
+- **At build time**, the driver must agree with the FPGA on the **register map**. That contract is expressed in two mirror-image places: `openwifi/driver/hw_def.h` (the addresses the driver writes) and each core's `*_s_axi.v` in `openwifi-hw/ip/` (the registers the FPGA implements). A driver file and its FPGA counterpart usually even share a name (`xpu.c` ↔ `xpu.v`). This is why the two repos are versioned together in spirit even though they are separate in git.
+- **The submodule chain**: `openwifi-hw` pulls in two submodules. [`analogdevicesinc/hdl`](https://github.com/analogdevicesinc/hdl) (the Analog Devices FPGA reference design openwifi is built on top of, pinned to tag `2022_R2`) sits at `adi-hdl/`, and `openofdm` (branch `dot11zynq`) sits at `ip/openofdm_rx/`. A fresh `openwifi-hw` clone has these as **empty directories** until you run `./prepare_adi_lib.sh` and `./get_ip_openofdm_rx.sh` (or `git submodule update --init`).
 
 ## Where do I look for…?
 
@@ -127,7 +124,7 @@ Both repos: `openwifi-hw/boards/<board_name>/` (Vivado project) and `openwifi/ke
 [`openwifi-hw-img`](https://github.com/open-sdr/openwifi-hw-img), `boards/<board_name>/sdk/`.
 
 ### …the authoritative docs / app notes
-`openwifi/doc/` and `openwifi/doc/app_notes/`. This wiki is a reorganized companion to those files — when the wiki and the repo disagree, trust the repo (and please fix the wiki).
+`openwifi/doc/` and `openwifi/doc/app_notes/`. This wiki is a reorganized companion to those files; when the wiki and the repo disagree, trust the repo (and please fix the wiki).
 
 ## Repository directory maps
 
@@ -172,7 +169,7 @@ openwifi-hw/
 
 ## Licensing and contributing across the repos
 
-All openwifi repositories are **dual-licensed**: [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html) for the open-source release, with commercial/advanced-feature licensing available via [openwifi.tech](https://openwifi.tech). Individual files may be GPL-2.0-or-later or BSD-3-Clause, and vendored third-party components (Analog Devices HDL, the Xilinx Viterbi decoder, openofdm) carry their own terms — check per-file headers for your use case.
+All openwifi repositories are **dual-licensed**: [AGPLv3](https://www.gnu.org/licenses/agpl-3.0.en.html) for the open-source release, with commercial/advanced-feature licensing available via [openwifi.tech](https://openwifi.tech). Individual files may be GPL-2.0-or-later or BSD-3-Clause, and vendored third-party components (Analog Devices HDL, the Xilinx Viterbi decoder, openofdm) carry their own terms, so check per-file headers for your use case.
 
 Contributing to **any** repo requires signing a Contributor License Agreement (Individual or Entity, generated via the [Project Harmony](http://www.harmonyagreements.org/) framework) and emailing it to `Filip.Louagie@UGent.be` before your first contribution. See each repo's `CONTRIBUTING.md`.
 

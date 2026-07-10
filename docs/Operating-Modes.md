@@ -2,15 +2,15 @@
 
 openwifi presents a normal Linux Wi-Fi interface (`sdr0`), so you drive it with the same tools you'd use for any card: `hostapd`, `wpa_supplicant`, `iw`, `iwconfig`. This page walks through each mode. Throughout, **"on board"** means commands run over ssh on the SDR board, and **"on PC"** means commands run on your computer.
 
-Two reminders that apply to every mode:
+A few reminders that apply to every mode:
 
-- Mount the TX and RX antennas as close to perpendicular as you can — good TX/RX isolation matters.
+- Mount the TX and RX antennas as close to perpendicular as you can, since good TX/RX isolation matters.
 - The **ADRV9361-Z7035 has very low 5 GHz TX power**; keep nodes close on that board.
 - Any ssh session below can instead be a USB-UART serial console.
 
 ## Access Point
 
-The `fosdem.sh` demo already does this — it runs `hostapd` with `hostapd-openwifi.conf` (SSID "openwifi"), a DHCP server, and a webserver. To do it by hand or understand the pieces:
+The `fosdem.sh` demo already does this: it runs `hostapd` with `hostapd-openwifi.conf` (SSID "openwifi"), a DHCP server, and a webserver. To do it by hand or understand the pieces:
 
 ```bash
 cd openwifi
@@ -19,14 +19,14 @@ cd openwifi
 cat /proc/interrupts        # run a few times; "sdr,tx_itrpt1" count should keep growing
 ```
 
-The growing TX-interrupt count is the AP transmitting its periodic beacon. Under the hood this is stock `hostapd` — edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
+The growing TX-interrupt count is the AP transmitting its periodic beacon. Under the hood this is stock `hostapd`; edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
 
 ## Client (station)
 
 Connect openwifi to another AP (which can be a second openwifi board or any commercial AP):
 
 ```bash
-service network-manager stop        # keep NetworkManager from fighting you
+service network-manager stop        # stop NetworkManager from interfering
 cd openwifi
 ./wgd.sh
 ifconfig sdr0 up
@@ -83,7 +83,7 @@ The second node should discover and **join the same Cell ID** automatically. Onc
 
 ## Monitor mode
 
-Monitor mode puts the receiver into "capture everything" — including control frames and frames with bad CRC — and is the prerequisite for packet injection and for most research captures.
+Monitor mode puts the receiver into "capture everything" (including control frames and frames with bad CRC), and is the prerequisite for packet injection and for most research captures.
 
 ```bash
 cd openwifi
@@ -99,7 +99,7 @@ iw dev sdr0 interface add mon0 type monitor && ifconfig mon0 up
 
 ## Packet injection and fuzzing
 
-Because the whole PHY is open, openwifi is a strong platform for physical-layer testing and fuzzing — you can craft frames and control FPGA behavior directly, rather than measuring through many stack layers as `ping`/`iperf` force you to. openwifi ships an `inject_80211` tool (adapted from *packetspammer*).
+Because the whole PHY is open, openwifi is a strong platform for physical-layer testing and fuzzing: you can craft frames and control FPGA behavior directly, rather than measuring through many stack layers as `ping`/`iperf` force you to. openwifi ships an `inject_80211` tool (adapted from *packetspammer*).
 
 **Build it on the board:**
 

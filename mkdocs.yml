@@ -7,25 +7,33 @@ edit_uri: edit/master/docs/
 
 theme:
   name: material
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    repo: fontawesome/brands/github
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: indigo
-      accent: indigo
+      primary: teal
+      accent: teal
       toggle:
-        icon: material/brightness-7
+        icon: material/weather-night
         name: Switch to dark mode
     - media: "(prefers-color-scheme: dark)"
       scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: teal
+      accent: teal
       toggle:
-        icon: material/brightness-4
+        icon: material/weather-sunny
         name: Switch to light mode
   features:
     - navigation.instant
+    - navigation.instant.progress
     - navigation.tracking
     - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.sections
     - navigation.top
     - navigation.footer
     - search.suggest
@@ -33,6 +41,9 @@ theme:
     - content.code.copy
     - content.action.edit
     - toc.follow
+
+extra_css:
+  - assets/stylesheets/extra.css
 
 markdown_extensions:
   - admonition

@@ -46,7 +46,7 @@ These are the day-to-day knobs. Most have a convenience script in `user_space/`;
 ./sdrctl dev sdr0 set reg rf 0 20000     # 20 dB attenuation (unit: dB×1000). Default 0 dB.
 ```
 
-For an initial attenuation at driver-load time, load with `insmod sdr.ko init_tx_att=20000` (you can edit the `insmod` line at the end of `wgd.sh`). To *increase* TX power beyond default you can raise `tx_intf` register 13 (digital IQ gain) — but too much hurts EVM and long-packet quality, so tune carefully — or add an external PA.
+For an initial attenuation at driver-load time, load with `insmod sdr.ko init_tx_att=20000` (you can edit the `insmod` line at the end of `wgd.sh`). To *increase* TX power beyond default you can raise `tx_intf` register 13 (digital IQ gain), though too much hurts EVM and long-packet quality, so tune carefully, or add an external PA.
 
 > **Cable-test caution:** don't connect two boards by cable *during* setup. AD9361 tuning can emit strong TX that damages the other board's RX. Bring both sides up first, apply attenuation, then connect the cable.
 
@@ -92,7 +92,7 @@ The driver auto-sets a per-channel threshold. To inspect and override:
 
 ### Receiver sensitivity ("action threshold")
 
-Sometimes *too* sensitive is bad — the receiver chases weak background packets instead of your target. Ignore signals below a threshold:
+Sometimes *too* sensitive is bad, because the receiver chases weak background packets instead of your target. Ignore signals below a threshold:
 
 ```bash
 ./sdrctl dev sdr0 set reg drv_rx 0 70   # ignore anything weaker than −70 dBm
@@ -117,7 +117,7 @@ Contention-window min/max per queue:
 ./cw_max_min_cfg.sh 0               # hand control back to Linux (see note below)
 ```
 
-The hex nibbles encode log2 values: `b5` for q3 means CWmax=2¹¹−1=2047, CWmin=2⁵−1=31. Caveat: giving `0` doesn't re-apply Linux's values automatically (Linux only sets them once at bring-up) — either record and restore them yourself, or reload the NIC.
+The hex nibbles encode log2 values: `b5` for q3 means CWmax=2¹¹−1=2047, CWmin=2⁵−1=31. Caveat: giving `0` doesn't re-apply Linux's values automatically (Linux only sets them once at bring-up), so either record and restore them yourself, or reload the NIC.
 
 ### Retransmission and ACK control (xpu register 11)
 
@@ -168,11 +168,11 @@ You can push up to 512 raw IQ samples into `tx_intf` and transmit them for test 
 
 ## Time slicing (network slicing)
 
-openwifi can gate each of its four TX queues to a fraction of a repeating time cycle, keyed by destination MAC address — useful for TDMA-style scheduling and TSN experiments. Configure a slice via parameters:
+openwifi can gate each of its four TX queues to a fraction of a repeating time cycle, keyed by destination MAC address, which is useful for TDMA-style scheduling and TSN experiments. Configure a slice via parameters:
 
 | `para_name` | Meaning |
 |---|---|
-| `slice_idx` | Which slice (0–3) subsequent commands configure. **Set to 4 when done to synchronize all slices** — otherwise slice start/end times won't line up. |
+| `slice_idx` | Which slice (0–3) subsequent commands configure. **Set to 4 when done to synchronize all slices**; otherwise slice start/end times won't line up. |
 | `addr` | Target MAC for this slice (last 32 bits; e.g. `b94cb1c1` for `6c:fd:b9:4c:b1:c1`) |
 | `slice_total` | Cycle length in µs (e.g. `49999` for 50 ms) |
 | `slice_start` | Slice start time in µs (e.g. `10000` for 10 ms) |
@@ -201,8 +201,8 @@ The tables below list the commonly used registers. For the full set, read the mo
 |---|---|
 | 0 | Override non-HT unicast data rate: 0=auto; 4..11 = 6,9,12,18,24,36,48,54 Mbps |
 | 1 | Override HT unicast data rate: 0=auto; 4..11 = 6.5,13,19.5,26,39,52,58.5,65 Mbps (+16 for short GI) |
-| 2 | Override VHT (11ac) rate — not implemented |
-| 3 | Override HE (11ax) rate — not implemented |
+| 2 | Override VHT (11ac) rate (not implemented) |
+| 3 | Override HE (11ax) rate (not implemented) |
 | 4 | TX antenna selection: 0=tx1, 1=tx2 |
 | 7 | dmesg print control |
 
@@ -233,7 +233,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 | 13 | Delay from RX DMA complete to RX interrupt (unit 0.1 µs) |
 | 16 | RX antenna selection: 0=ant0, 1=ant1 (default 0) |
 
-(Registers 5,7,9,10,12 are DMA-to-CPU controls — see `rx_intf.v`.)
+(Registers 5,7,9,10,12 are DMA-to-CPU controls; see `rx_intf.v`.)
 
 ### `tx_intf` (FPGA TX interface)
 
@@ -280,7 +280,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 | 1 | Pilot scrambler initial state (low 7 bits; default 127) |
 | 2 | Data scrambler initial state (low 7 bits; default 127) |
 
-### `xpu` (low MAC) — the big one
+### `xpu` (low MAC): the big one
 
 | reg | Meaning |
 |---|---|
@@ -329,4 +329,4 @@ Beyond registers, the driver exposes rich per-packet counters through sysfs, wra
 ./stat_enable.sh 0               # turn statistics off
 ```
 
-The counter names match variable names in `sdr.c`, so grepping the source tells you the precise meaning. There are also FPGA-level event counters exposed through the side channel — see [Research Features](Research-Features.md#fpga-event-counters).
+The counter names match variable names in `sdr.c`, so grepping the source tells you the precise meaning. There are also FPGA-level event counters exposed through the side channel; see [Research Features](Research-Features.md#fpga-event-counters).

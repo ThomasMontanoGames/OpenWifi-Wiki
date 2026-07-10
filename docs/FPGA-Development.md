@@ -2,12 +2,12 @@
 
 This page covers building and modifying the FPGA design in the [openwifi-hw](https://github.com/open-sdr/openwifi-hw) repository: full bitstream builds, editing and simulating individual IP cores, conditional compilation, changing the baseband clock, migrating to new Vivado/ADI releases, and porting to a new board.
 
-openwifi's FPGA design is built **on top of the [Analog Devices HDL reference designs](https://github.com/analogdevicesinc/hdl)** — openwifi adds its own IP cores and modifications to ADI's board projects. For anything that isn't openwifi-specific, the ADI wiki is often the fastest source of answers.
+openwifi's FPGA design is built **on top of the [Analog Devices HDL reference designs](https://github.com/analogdevicesinc/hdl)**: openwifi adds its own IP cores and modifications to ADI's board projects. For anything that isn't openwifi-specific, the ADI wiki is often the fastest source of answers.
 
 ## Prerequisites
 
 - **Vivado 2022.2 with Vitis** installed (you need `.../Vitis`, *not* `Vitis_HLS`). If Vitis is missing, add it via *Xilinx Design Tools → Add Design Tools for Devices 2022.2*.
-- The **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado. (This eval license is why a running board's decoder halts after ~2 hours — see [Troubleshooting](Troubleshooting.md).)
+- The **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado. (This eval license is why a running board's decoder halts after ~2 hours; see [Troubleshooting](Troubleshooting.md).)
 - Ubuntu 18/20/22 LTS (others may work).
 - Required packages, e.g. `sudo apt install libtinfo5`. On Ubuntu 24 LTS the default `libtinfo6` won't do; install `libtinfo5` manually:
 
@@ -90,7 +90,7 @@ Most cores ship a top-level testbench (`*_tb.v`), which is the fastest way to de
 2. In Vivado: *Sources → Simulation Sources → sim_1 → dot11_tb*.
 3. *SIMULATION → Run Simulation → Run Behavioral Simulation.* The first run is slow because sub-IP cores compile once; later runs are fast.
 4. Press **Run All (F3)** to run to completion.
-5. The testbench uses `$fopen`/`$fscanf`/`$fwrite` to read test vectors and dump variables for later checking — read `*_tb.v` to see the flow. Simulation-specific settings live in `openofdm_rx_pre_def.v`.
+5. The testbench uses `$fopen`/`$fscanf`/`$fwrite` to read test vectors and dump variables for later checking; read `*_tb.v` to see the flow. Simulation-specific settings live in `openofdm_rx_pre_def.v`.
 6. After editing design files, use **Relaunch Simulation**. Drag any signal from *SIMULATION → Scope* (e.g. `dot11_tb → dot11_inst → ofdm_decoder_inst → viterbi_inst`) into the waveform view and relaunch to inspect it.
 
 ## Conditional compilation with Verilog macros
@@ -119,7 +119,7 @@ The default baseband clock is 100 MHz, set by `NUM_CLK_PER_US` at the top of `op
 
 ## High-Level Synthesis (HLS) modules
 
-Two receiver modules — channel estimation (`ch_gain_cal`) and equalization (`equalizer`) — are also available as C++ that Vitis HLS turns into Verilog, which can speed up algorithm development.
+Two receiver modules, channel estimation (`ch_gain_cal`) and equalization (`equalizer`), are also available as C++ that Vitis HLS turns into Verilog, which can speed up algorithm development.
 
 **To build with the HLS receiver:** follow the bitstream build up to *before* generating `ip_repo`, then switch `openofdm_rx` to the HLS branch:
 
@@ -152,10 +152,10 @@ The primary reference is Xilinx UG994 (*Designing IP Subsystems Using IP Integra
 openwifi's baseline is `2021_r1` of the ADI HDL reference designs. The porting mindset is: **diff openwifi against the matching ADI reference design, then replicate those changes on your target board.**
 
 1. Open the ADI reference design for your platform (e.g. `hdl/projects/fmcomms2/zc706`) and the corresponding openwifi board design (`openwifi-hw/boards/zc706_fmcs2`) side by side.
-2. Use *Open Block Design* and compare both the **diagram** and the **Address Editor** — that's where openwifi's additions show up.
+2. Use *Open Block Design* and compare both the **diagram** and the **Address Editor**; that's where openwifi's additions show up.
 3. The addresses and interrupts of every FPGA block hooked to the ARM bus must be reflected in the board's device tree, `openwifi/kernel_boot/boards/<board_name>/devicetree.dts`. Linux parses `devicetree.dtb` at boot to discover these blocks. (openwifi obtains a `.dts` by running `dtc` on the ADI image's `.dtb`, then edits it to match the added/modified blocks.)
 4. Study the image-build scripts (see [Software Development Workflow](Software-Development-Workflow.md#building-a-full-sd-image-from-scratch)) to understand how `devicetree.dtb`, `BOOT.BIN`, and the kernel come together into a bootable SD image.
 
 ## Debugging on hardware
 
-Use the Xilinx **ILA** (Integrated Logic Analyzer) to watch internal FPGA signals in real time — invaluable for understanding the low-MAC and interface state machines in `xpu`, `tx_intf`, and `rx_intf`. Enable the debug macros (see conditional compilation above) to insert ILA cores; the prebuilt `.ltx` in openwifi-hw-img matches the shipped bitstreams. Background and an example are in [openwifi-hw issue #39](https://github.com/open-sdr/openwifi-hw/issues/39). See also the [GPIO/LED map](https://github.com/open-sdr/openwifi-hw/blob/master/gpio_led.md), which routes signals like `tx_bb_is_ongoing`, `tx_rf_is_ongoing`, `fcs_ok`, and `demod_is_ongoing` to board LEDs and PMOD pins for scope/logic-analyzer probing.
+Use the Xilinx **ILA** (Integrated Logic Analyzer) to watch internal FPGA signals in real time, which is invaluable for understanding the low-MAC and interface state machines in `xpu`, `tx_intf`, and `rx_intf`. Enable the debug macros (see conditional compilation above) to insert ILA cores; the prebuilt `.ltx` in openwifi-hw-img matches the shipped bitstreams. Background and an example are in [openwifi-hw issue #39](https://github.com/open-sdr/openwifi-hw/issues/39). See also the [GPIO/LED map](https://github.com/open-sdr/openwifi-hw/blob/master/gpio_led.md), which routes signals like `tx_bb_is_ongoing`, `tx_rf_is_ongoing`, `fcs_ok`, and `demod_is_ongoing` to board LEDs and PMOD pins for scope/logic-analyzer probing.

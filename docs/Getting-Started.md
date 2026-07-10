@@ -10,9 +10,9 @@ This page takes you from an empty SD card to a working openwifi access point tha
 - An SD card, 16 GB or larger.
 - Two antennas suitable for 2.4/5 GHz (or SMA cables + at least 30 dB attenuation for conducted tests).
 - An Ethernet cable between the board and your PC.
-- Optionally a USB-UART cable for a serial console — invaluable when networking doesn't come up.
+- Optionally a USB-UART cable for a serial console, which is invaluable when networking doesn't come up.
 
-**Supported boards** — the most common ones are below; the full matrix, per-board hardware notes, and the GPIO/LED debug map are on the [Supported Boards](Supported-Boards.md) page.
+**Supported boards.** The most common ones are below; the full matrix, per-board hardware notes, and the GPIO/LED debug map are on the [Supported Boards](Supported-Boards.md) page.
 
 | `board_name` | Hardware | Vivado license needed to rebuild FPGA? |
 |---|---|---|
@@ -26,7 +26,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 | `sdrpi` | HexSDR Raspberry-Pi-sized SDR | No |
 | `neptunesdr`, `LibreSDR` | Low-cost Zynq-7020 + AD9361 boards (community-supported, unofficial) | No |
 
-The `board_name` string matters: it selects which FPGA image and boot files you use throughout the project (the same string names the board in all the [repos](Repositories.md)). The "Vivado license" column only matters if you rebuild the FPGA yourself — the prebuilt image works regardless. If you have no hardware at all, the imec **w-iLab.t** testbed offers remote access to openwifi-ready boards.
+The `board_name` string matters: it selects which FPGA image and boot files you use throughout the project (the same string names the board in all the [repos](Repositories.md)). The "Vivado license" column only matters if you rebuild the FPGA yourself; the prebuilt image works regardless. If you have no hardware at all, the imec **w-iLab.t** testbed offers remote access to openwifi-ready boards.
 
 **A note on the ZedBoard-class FPGAs.** Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi) have less FPGA memory. A few features (notably IQ capture buffer length) have reduced limits on them; the relevant pages call this out.
 
@@ -86,7 +86,7 @@ Two things to know:
 - The default configuration uses **channel 44 (5 GHz)**. If your client device is 2.4 GHz-only, edit `hostapd-openwifi.conf` on the board (channel/band) and re-run `fosdem.sh`.
 - The FPGA uses an **evaluation license of the Xilinx Viterbi decoder, which halts after roughly two hours** of operation. Symptoms: reception dies; `./sdrctl dev sdr0 get reg rx 20` returns the same value forever. The fix is simply to reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle the board.
 
-Also note: the ADRV9361-Z7035 has very low TX power in the 5 GHz band — keep devices close when using that board on 5 GHz.
+Also note: the ADRV9361-Z7035 has very low TX power in the 5 GHz band, so keep devices close when using that board on 5 GHz.
 
 ## 5. Give clients internet access (optional)
 
@@ -102,7 +102,7 @@ where `<board_nic>` is the PC interface wired to the board and `<internet_nic>` 
 
 ## 6. What just happened?
 
-The board is a small Linux computer. `wgd.sh` loaded the openwifi FPGA design and kernel driver, which registered a normal Linux Wi-Fi interface called **`sdr0`**. Everything after that — `hostapd`, DHCP, `iw`, `tcpdump` — is stock Linux behaving exactly as it would with a commercial Wi-Fi card. That is the central idea of openwifi, and the [Architecture Overview](Architecture.md) explains how it's achieved.
+The board is a small Linux computer. `wgd.sh` loaded the openwifi FPGA design and kernel driver, which registered a normal Linux Wi-Fi interface called **`sdr0`**. Everything after that (`hostapd`, DHCP, `iw`, `tcpdump`) is stock Linux behaving exactly as it would with a commercial Wi-Fi card. That is the central idea of openwifi, and the [Architecture Overview](Architecture.md) explains how it's achieved.
 
 ## Alternative: OpenWrt
 

@@ -84,7 +84,7 @@ Once `system_top.bit.bin` is in the board's `openwifi/` directory, `wgd.sh` will
 
 ## Reloading driver and FPGA without rebooting
 
-This is the workflow that makes iterating tolerable. `wgd.sh` can reload the driver and/or FPGA live, and switch between different builds — no reboot, no power cycle. Keep your on-board files current with `user_space/` to use it.
+This is the workflow that makes iteration fast. `wgd.sh` can reload the driver and/or FPGA live and switch between different builds with no reboot and no power cycle. Keep your on-board files current with `user_space/` to use it.
 
 **Driver only.** Ensure `system_top.bit.bin` is *not* in the directory; `wgd.sh` then loads just the `.ko` files.
 
@@ -110,7 +110,7 @@ Then run `./wgd.sh` on the board as usual.
 ./wgd.sh ./drv_and_fpga_myvariant.tar.gz
 ```
 
-This makes it trivial to keep, ship, and switch between variants. To build a variant, either work on a separate branch, or use conditional-compile arguments (driver `make_all.sh` extra args; FPGA Verilog macros) and rename the package to record which options are on. Note: `drv_and_fpga_package_gen.sh` calls `make_all.sh` without extra args by default — if you rely on conditional-compile flags, add them there too.
+This makes it trivial to keep, ship, and switch between variants. To build a variant, either work on a separate branch, or use conditional-compile arguments (driver `make_all.sh` extra args; FPGA Verilog macros) and rename the package to record which options are on. Note: `drv_and_fpga_package_gen.sh` calls `make_all.sh` without extra args by default, so if you rely on conditional-compile flags, add them there too.
 
 **Full `wgd.sh` usage** (also via `./wgd.sh -h`): a numeric first argument sets `test_mode`; `remote` downloads then loads (optionally into a target dir); a directory name loads from that directory; a `.tar.gz` is unpacked and loaded. A trailing argument sets `test_mode`.
 
@@ -124,7 +124,7 @@ For larger updates (kernel, modules, device tree, rootfs) there are paired host/
 
 - **Kernel + modules + device tree:** host-side `prepare_kernel.sh`, `boot_bin_gen.sh`, `transfer_kernel_image_module_to_board.sh`; board-side `populate_kernel_image_module_reboot.sh` (run it again after the first reboot if the kernel *version* changed, so symlinks point at the new version).
 - **Driver + user space:** host-side `make_all.sh` + `transfer_driver_userspace_to_board.sh`; board-side `populate_driver_userspace.sh`.
-- **Over FTP:** stand up an anonymous FTP server on the PC rooted at your `openwifi` directory, then on the board `./sdcard_boot_update.sh $BOARD_NAME` (pulls `uImage`, `BOOT.BIN`, `devicetree.dtb` into the boot partition — power-cycle after) and `./wgd.sh remote` (pulls driver files and brings up `sdr0`).
+- **Over FTP:** stand up an anonymous FTP server on the PC rooted at your `openwifi` directory, then on the board `./sdcard_boot_update.sh $BOARD_NAME` (pulls `uImage`, `BOOT.BIN`, `devicetree.dtb` into the boot partition, then power-cycle) and `./wgd.sh remote` (pulls driver files and brings up `sdr0`).
 - **rootfs as a disk:** on the PC, *File manager → Connect to Server → `sftp://root@192.168.10.122/root`* (password `openwifi`).
 - Refreshing the ADI rootfs tools is also worthwhile: on the board, clone `linux_image_ADI-scripts`, `apt update`, then run `adi_update_tools.sh` (see the [ADI Kuiper update guide](https://wiki.analog.com/resources/tools-software/linux-software/kuiper-linux/update)).
 
