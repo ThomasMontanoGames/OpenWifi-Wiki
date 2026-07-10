@@ -13,7 +13,7 @@ Pages live in `docs/` and are organized into sections defined in [`mkdocs.yml`](
 - **Developing** — the software workflow, boot/kernel/device tree, and the FPGA design and IP cores
 - **Research** — CSI, IQ capture, and the other research features
 - **Application notes** — an index of the upstream application notes
-- **Reference** — troubleshooting, a glossary, and the FAQ
+- **Help & Support** — troubleshooting, a glossary, the FAQ, and how to contribute
 
 For the exact page list and order, see [`mkdocs.yml`](mkdocs.yml) or the [live site](https://thomasmontanogames.github.io/OpenWifi-Wiki/). The theme and custom styling live in `mkdocs.yml` and [`docs/assets/stylesheets/extra.css`](docs/assets/stylesheets/extra.css).
 

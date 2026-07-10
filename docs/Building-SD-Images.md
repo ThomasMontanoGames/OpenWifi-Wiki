@@ -137,7 +137,7 @@ route add default gw 192.168.10.1
 ping <some_host_you_know>
 ```
 
-Resolve any connectivity problem before continuing.
+Resolve any connectivity problem before continuing. (To make forwarding persistent on the PC, uncomment `net.ipv4.ip_forward=1` in `/etc/sysctl.conf`.)
 
 ### 6. Install tools and build the on-board utilities
 

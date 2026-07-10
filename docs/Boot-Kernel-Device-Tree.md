@@ -91,8 +91,8 @@ openwifi_<arch>_ad9361.dtso ──dtc──► openwifi.dtbo ┤            (+ f
 overlays/<board>.dtso ──dtc──► <board>.dtbo ───────┘             decompiled for sanity)
 ```
 
-!!! info "Where this design comes from"
-    This modular, overlay-based device-tree system is the work of **Robbe Gaeremynck** (IDLab, Ghent University–imec), who is the author credited in `construct_device_tree.sh`. The NLnet project [*Extensive openwifi support for OpenWRT*](https://nlnet.nl/project/OpenWifi-OpenWRT/) set out to **modularize openwifi's hardware description** so it can be ported across the whole board matrix in a maintainable way, and to **break openwifi's dependency on ADI Kuiper Linux** so it can target OpenWrt. Splitting the tree into a shared openwifi overlay plus small per-board overlays (instead of one hand-maintained tree per board) is what makes the porting flow below tractable.
+!!! info "Why it's built this way"
+    This modular, overlay-based device-tree system came out of the NLnet project [*Extensive openwifi support for OpenWRT*](https://nlnet.nl/project/OpenWifi-OpenWRT/), which set out to **modularize openwifi's hardware description** so it can be ported across the whole board matrix in a maintainable way, and to **break openwifi's dependency on ADI Kuiper Linux** so it can target OpenWrt. Splitting the tree into a shared openwifi overlay plus small per-board overlays (instead of one hand-maintained tree per board) is what makes the porting flow below tractable.
 
 !!! note "Most shipped boards include a fixed `devicetree.dts`"
     If a board directory already contains a prebuilt `devicetree.dts`, `construct_device_tree.sh` **only recompiles the overlays and stops** — it trusts the shipped tree. The stock-`.dts`-plus-`fdtoverlay` path is what you use when bringing up a *new* board that doesn't have a prebuilt tree yet. The script keeps a `board_name → stock .dts` map internally (e.g. `zed_fmcs2 → zynq-zed.dts`, `adrv9364z7020 → zynq-adrv9364.dts`).
