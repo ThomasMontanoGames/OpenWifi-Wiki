@@ -135,14 +135,19 @@
   margin: 1.6rem auto;
   max-width: 100%;
 }
-.md-typeset figure img,
+/* Content raster images sit on a white matte so transparent line-art
+   diagrams (e.g. the CSI-fuzzer figures) stay readable in dark mode. Opaque
+   screenshots are unaffected — the matte only shows through transparency.
+   Inline SVG diagrams are theme-aware <svg> elements and are excluded. */
+.md-typeset img {
+  display: block;
+  margin-inline: auto;
+  border-radius: 10px;
+  border: 1px solid var(--ow-rule);
+  background: #ffffff;
+}
 .md-typeset figure svg {
   border-radius: 10px;
-}
-/* frame raster screenshots subtly; leave inline SVG diagrams borderless */
-.md-typeset figure img {
-  border: 1px solid var(--ow-rule);
-  background: var(--md-default-bg-color);
 }
 .md-typeset figcaption {
   color: var(--md-default-fg-color--light);
@@ -151,9 +156,6 @@
   max-width: 44rem;
   margin: 0.7rem auto 0;
 }
-
-/* Standalone images (not in <figure>) get the same gentle frame */
-.md-typeset p > img { border-radius: 10px; }
 
 /* ---- Header: wordmark logo instead of the text title ---- */
 .md-header__button.md-logo img {

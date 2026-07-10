@@ -40,7 +40,7 @@ The project is split across four repositories, because the driver and the FPGA d
 
 ## Where to go next
 
-**New to the project?** Read these in order:
+**New to the project?** Read these five in order — they take you from "what is this" to bringing up your own board:
 
 1. [The Repositories](Repositories.md) — the four repos, why the project is split, and where to look for anything. The best first stop for onboarding.
 2. [Getting Started](Getting-Started.md) — hardware you need, flashing the SD card, bringing up your first openwifi AP.
@@ -48,24 +48,29 @@ The project is split across four repositories, because the driver and the FPGA d
 4. [Supported Boards](Supported-Boards.md) — the board matrix, per-board hardware notes, and the GPIO/LED debug map.
 5. [Operating Modes](Operating-Modes.md) — AP, client, ad-hoc, monitor, and packet injection walkthroughs.
 
-**Using and controlling the system:**
+**Using and controlling the system**
 
-6. [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md) — the register interface and the everyday knobs: TX power, rates, gain, CCA, ACK behavior, antenna selection, arbitrary frequencies.
+- [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md) — the register interface and the everyday knobs: TX power, rates, gain, CCA, ACK behavior, antenna selection, arbitrary frequencies.
 
-**Developing:**
+**Developing**
 
-7. [Software Development Workflow](Software-Development-Workflow.md) — rebuilding the driver, reloading driver + FPGA without rebooting, building full SD images.
-8. [FPGA Development](FPGA-Development.md) — building the bitstream from source, modifying and simulating IP cores, HLS, porting to new boards.
-9. [FPGA IP Cores](FPGA-IP-Cores.md) — a reference for the six custom cores: the real-time MAC, the OFDM TX/RX chains, and the capture side channel.
+- [Software Development Workflow](Software-Development-Workflow.md) — rebuilding the driver and reloading driver + FPGA without rebooting.
+- [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md) — the boot chain, kernel patches, and the device-tree overlay system — the key page for porting to a new board.
+- [Building SD Images](Building-SD-Images.md) — building a Kuiper or OpenWrt card from scratch, step by step.
+- [FPGA Development](FPGA-Development.md) — building the bitstream from source, modifying and simulating IP cores, HLS, porting to new boards.
+- [FPGA IP Cores](FPGA-IP-Cores.md) — a reference for the six custom cores: the real-time MAC, the OFDM TX/RX chains, and the capture side channel.
 
-**Research features:**
+**Research features**
 
-10. [CSI, IQ Capture and Research Features](Research-Features.md) — CSI extraction, CSI radar, CSI fuzzer, IQ capture, loopback testing, counters and statistics.
+- [CSI, IQ Capture and Research Features](Research-Features.md) — CSI extraction, CSI radar, CSI fuzzer, IQ capture, loopback testing, counters and statistics.
+- [Application Notes](Application-Notes.md) — an index of the upstream application notes, with figures and links into the relevant wiki sections.
 
-**When things go wrong:**
+**Help & support**
 
-11. [Troubleshooting and Known Issues](Troubleshooting.md)
-12. [FAQ and Resources](FAQ-and-Resources.md) — 802.11b compatibility, ASIC questions, publications, citing openwifi, licensing, community channels.
+- [Troubleshooting and Known Issues](Troubleshooting.md) — problems by symptom, plus the debugging tools.
+- [Glossary](Glossary.md) — the Wi-Fi, FPGA/SoC, and Linux acronyms used across the wiki.
+- [FAQ and Resources](FAQ-and-Resources.md) — 802.11b compatibility, ASIC questions, publications, citing openwifi, licensing, community channels.
+- [Contributing](Contributing.md) — the CLA, dev-environment setup, and how to propose a change.
 
 ## License and attribution
 

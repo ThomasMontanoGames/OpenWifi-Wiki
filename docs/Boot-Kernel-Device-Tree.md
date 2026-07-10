@@ -85,7 +85,7 @@ Three ingredients go in:
 The script compiles each overlay with `dtc`, preprocesses and compiles the stock `.dts`, then fuses them with `fdtoverlay`:
 
 <figure>
-<svg viewBox="0 0 940 240" role="img" aria-label="How construct_device_tree.sh builds a board device tree: the stock board .dts is compiled with cpp and dtc into default_devicetree.dtb; the shared openwifi overlay and the per-board overlay are each compiled with dtc into .dtbo files; fdtoverlay then fuses all three into the board's devicetree.dtb, plus a decompiled full_devicetree.dts for a sanity check." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
+<svg viewBox="0 0 940 240" role="img" aria-label="How construct_device_tree.sh builds a board device tree: the stock_board.dts is compiled with cpp and dtc into default_devicetree.dtb; the shared openwifi overlay and the per-board overlay are each compiled with dtc into .dtbo files; fdtoverlay then fuses all three into the board's devicetree.dtb, plus a decompiled full_devicetree.dts for a sanity check." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
   <defs>
     <marker id="dt-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.6"/>
@@ -98,7 +98,7 @@ The script compiles each overlay with `dtc`, preprocesses and compiles the stock
     <rect x="12" y="98" width="200" height="44" rx="10"/>
     <rect x="12" y="178" width="200" height="44" rx="10"/>
   </g>
-  <text x="112" y="44" text-anchor="middle" font-size="11" fill="currentColor">stock board .dts</text>
+  <text x="112" y="44" text-anchor="middle" font-size="11" fill="currentColor">stock_board.dts</text>
   <text x="112" y="124" text-anchor="middle" font-size="10.5" fill="currentColor">openwifi_&lt;arch&gt;_ad9361.dtso</text>
   <text x="112" y="204" text-anchor="middle" font-size="10.5" fill="currentColor">overlays/&lt;board&gt;.dtso</text>
 

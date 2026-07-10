@@ -60,7 +60,7 @@ Or cite the code base:
 
 ## Selected publications
 
-openwifi underpins a large and growing body of research across several themes. A full, categorized list (Feature/System, TSN/Real-Time, CSI Sensing/Security, WiFi & Cellular 5G/6G) is maintained in [`doc/publications.md`](https://github.com/open-sdr/openwifi/blob/master/doc/publications.md). Highlights:
+openwifi underpins a large and growing body of research across several themes. A full, categorized list (Feature/System, TSN/Real-Time, CSI Sensing/Security, Wi-Fi & Cellular 5G/6G) is maintained in [`doc/publications.md`](https://github.com/open-sdr/openwifi/blob/master/doc/publications.md). Highlights:
 
 - **The founding paper:** Jiao et al., *openwifi: a free and open-source IEEE802.11 SDR implementation on SoC*, VTC2020-Spring.
 - **CSI sensing & privacy:** the CSI fuzzer work (ACM WiSec 2021) and *Privacy Protection in WiFi Sensing via CSI Fuzzing*.

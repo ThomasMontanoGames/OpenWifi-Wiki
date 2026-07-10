@@ -71,7 +71,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![Dual-antenna collision-capture setup](assets/img/iq_2ant-setup.png)
     ![Dual-antenna capture: rx0 vs rx1](assets/img/iq_2ant-screen-shot.jpg)
 
-??? note "WiFi packet, CSI and IQ self-loopback test"
+??? note "Wi-Fi packet, CSI and IQ self-loopback test"
     Verify the TX→RX path end-to-end at the packet, CSI, and IQ level, either over the air (antennas close together) or entirely inside the FPGA. The FPGA-internal loopback provides an ideal, distortion-free "golden" reference.
 
     [Read in this wiki →](Research-Features.md#self-loopback-testing) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/packet-iq-self-loopback-test.md)
@@ -87,7 +87,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
 
     [Read in this wiki →](Operating-Modes.md#packet-injection-and-fuzzing) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/inject_80211.md)
 
-??? note "owfuzz — a WiFi protocol fuzzing tool (external)"
+??? note "owfuzz — a Wi-Fi protocol fuzzing tool (external)"
     A third-party 802.11 protocol fuzzer built on openwifi, with a published list of discovered vulnerabilities. Hosted outside the openwifi repos.
 
     [Read in this wiki →](Operating-Modes.md#packet-injection-and-fuzzing) · [Project ↗](https://github.com/alipay/WiFi-Protocol-Fuzzing-Tool) · [Discovered vulnerabilities ↗](https://github.com/alipay/Owfuzz#discovered-vulnerabilities)
