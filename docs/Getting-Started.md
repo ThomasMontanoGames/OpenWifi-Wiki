@@ -106,4 +106,4 @@ The board is a small Linux computer. `wgd.sh` loaded the openwifi FPGA design an
 
 ## Alternative: OpenWrt
 
-Prefer a router-style experience with the LuCI web UI? Prebuilt OpenWrt images with openwifi baked in exist for most boards. Flash the image, boot, and an `openwrt-openwifi` SSID appears on 2.4 GHz channel 1 within about a minute. See the [OpenWrt build instructions](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/openwrt/README.md) for the support matrix, usage examples, and how to build your own image.
+Prefer a router-style experience with the LuCI web UI? Prebuilt OpenWrt images with openwifi baked in are available for most boards. Flash the image, boot, and an `openwrt-openwifi` SSID appears on 2.4 GHz channel 1 within about a minute. See the [OpenWrt build instructions](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/openwrt/README.md) for the support matrix, usage examples, and how to build your own image.

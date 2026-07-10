@@ -77,6 +77,8 @@ nav:
       - FPGA IP Cores: FPGA-IP-Cores.md
   - Research:
       - CSI, IQ & Research Features: Research-Features.md
+  - App Notes:
+      - Application Notes: Application-Notes.md
   - Reference:
       - Troubleshooting: Troubleshooting.md
       - FAQ & Resources: FAQ-and-Resources.md
