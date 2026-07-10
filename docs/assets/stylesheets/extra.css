@@ -155,6 +155,18 @@
 /* Standalone images (not in <figure>) get the same gentle frame */
 .md-typeset p > img { border-radius: 10px; }
 
+/* ---- Header: wordmark logo instead of the text title ---- */
+.md-header__button.md-logo img {
+  height: 1.7rem;
+  width: auto;
+}
+/* The wordmark already says "Openwifi", so hide the redundant text title
+   in the header. Use visibility (not display:none) so the element still
+   acts as the flex spacer that keeps the search bar right-aligned. */
+.md-header__title {
+  visibility: hidden;
+}
+
 /* ---- Nav: section labels a touch stronger ---- */
 .md-nav__item--section > .md-nav__link {
   font-weight: 700;

@@ -7,6 +7,8 @@ edit_uri: edit/master/docs/
 
 theme:
   name: material
+  logo: assets/img/openwifi-wordmark-white.png
+  favicon: assets/img/openwifi-favicon.png
   font:
     text: Inter
     code: JetBrains Mono
@@ -49,6 +51,7 @@ markdown_extensions:
   - admonition
   - sane_lists
   - attr_list
+  - def_list
   - md_in_html
   - pymdownx.details
   - pymdownx.superfences
@@ -73,6 +76,7 @@ nav:
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
   - Developing:
       - Software Development Workflow: Software-Development-Workflow.md
+      - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
       - FPGA Development: FPGA-Development.md
       - FPGA IP Cores: FPGA-IP-Cores.md
   - Research:
@@ -81,4 +85,5 @@ nav:
       - Application Notes: Application-Notes.md
   - Reference:
       - Troubleshooting: Troubleshooting.md
+      - Glossary: Glossary.md
       - FAQ & Resources: FAQ-and-Resources.md
