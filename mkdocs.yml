@@ -55,6 +55,7 @@ extra_css:
 
 markdown_extensions:
   - admonition
+  - footnotes
   - sane_lists
   - attr_list
   - def_list
@@ -77,6 +78,7 @@ nav:
       - Getting Started: Getting-Started.md
       - Architecture Overview: Architecture.md
       - Supported Boards: Supported-Boards.md
+      - Specifications: Specifications.md
   - Using openwifi:
       - Operating Modes: Operating-Modes.md
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
