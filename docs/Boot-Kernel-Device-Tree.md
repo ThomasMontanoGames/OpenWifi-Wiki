@@ -18,6 +18,22 @@ BOOT partition
 
 The sequence: the SoC's boot ROM loads **BOOT.BIN**, whose **FSBL** (First Stage Boot Loader) initializes DDR and clocks, programs the **FPGA bitstream**, and hands off to **U-Boot**, which loads the **kernel** and the **device tree** and starts Linux. Linux then reads the device tree to discover the FPGA's AXI peripherals (including openwifi's cores) and binds drivers to them.
 
+```mermaid
+flowchart TB
+    rom["SoC boot ROM"] --> fsbl
+    subgraph bootbin["BOOT.BIN"]
+        direction LR
+        fsbl["FSBL<br/>init DDR + clocks"] --> bit["FPGA bitstream<br/>programs the PL"] --> uboot["U-Boot"]
+    end
+    uboot --> kernel["Linux kernel<br/>uImage / Image"]
+    uboot --> dtb["devicetree.dtb<br/>the hardware description"]
+    kernel --> linux["Linux starts"]
+    dtb --> linux
+    linux --> bind["Driver binds to the sdr,* FPGA nodes<br/>discovered from the device tree"]
+```
+
+<p style="text-align:center"><em>The boot chain. On 64-bit ZynqMP (ZCU102) the <code>BOOT.BIN</code> stage list grows — PMUFW before the bitstream, ATF (BL31) after it — as detailed just below.</em></p>
+
 ### 32-bit vs 64-bit boot
 
 The two SoC families build BOOT.BIN differently, which is why ZCU102 is "the odd one out":

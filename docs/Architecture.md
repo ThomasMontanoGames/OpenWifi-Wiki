@@ -20,6 +20,31 @@ Layered from top to bottom:
 
 Because it registers a normal Linux network interface (`sdr0`), every tool that works with a commercial card works here too, which is the core idea behind openwifi.
 
+```mermaid
+flowchart TB
+    subgraph host["Software — Linux on the ARM cores (PS)"]
+        direction TB
+        tools["User space<br/>hostapd · wpa_supplicant · iw · tcpdump · sdrctl"]
+        stack["Kernel: cfg80211 / mac80211<br/>the upper MAC (association, management)"]
+        drv["openwifi driver (sdr.c)<br/>implements the mac80211 API · creates NIC sdr0"]
+        tools --> stack --> drv
+    end
+    subgraph pl["FPGA fabric (PL) — the openwifi-hw design"]
+        direction TB
+        intf["tx_intf / rx_intf / side_ch<br/>DMA + per-packet metadata"]
+        lowmac["xpu — real-time low MAC<br/>CSMA/CA · hardware ACK · TSF timer"]
+        phy["openofdm_tx / openofdm_rx<br/>OFDM PHY"]
+        intf <--> lowmac
+        intf <--> phy
+    end
+    rf["AD9361 RF front end · 70 MHz–6 GHz"]
+
+    drv <-->|"AXI bus: register writes + DMA"| intf
+    phy <-->|"IQ samples · real-time SPI control"| rf
+```
+
+<p style="text-align:center"><em>The SoftMAC split: the <strong>upper</strong> MAC and everything above it run in Linux software, while the <strong>low</strong> MAC (<code>xpu</code>) and the PHY run in FPGA fabric you can read and rebuild. The processor reaches every FPGA core over the AXI bus.</em></p>
+
 ## How the driver talks to Linux: the mac80211 API
 
 The Linux `mac80211` subsystem defines a set of callbacks (`ieee80211_ops`) that every SoftMAC driver implements. That shared contract is why one kernel can drive Wi-Fi chips from dozens of vendors. openwifi's `sdr.c` implements the relevant subset. The most important callbacks:

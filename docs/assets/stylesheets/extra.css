@@ -241,6 +241,19 @@
   background: color-mix(in srgb, var(--md-primary-fg-color) 8%, transparent);
 }
 
+/* ---- Mermaid diagrams: center by default ----
+   Material renders each diagram as an <svg> inside a .mermaid block. Center
+   the SVG horizontally (it renders inline-block) and let it use the full
+   column width but never overflow it. */
+.md-typeset .mermaid {
+  text-align: center;
+}
+.md-typeset .mermaid svg {
+  display: inline-block;
+  max-width: 100%;
+  height: auto;
+}
+
 /* ---- Grid cards (Material built-in) spacing polish ---- */
 .md-typeset .grid.cards > ul > li,
 .md-typeset .grid > .card {

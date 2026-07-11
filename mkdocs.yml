@@ -42,18 +42,21 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
+    - navigation.path
     - navigation.top
     - navigation.footer
     - search.suggest
     - search.highlight
     - content.code.copy
     - content.action.edit
+    - content.tooltips
     - toc.follow
 
 extra_css:
   - assets/stylesheets/extra.css
 
 markdown_extensions:
+  - abbr
   - admonition
   - footnotes
   - sane_lists
@@ -61,9 +64,19 @@ markdown_extensions:
   - def_list
   - md_in_html
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        # Render ```mermaid blocks as diagrams (theme-aware, no extra dependency).
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.inlinehilite
   - pymdownx.highlight
+  # Auto-append the shared abbreviation list to every page so acronyms defined
+  # once in includes/abbreviations.md get hover tooltips wiki-wide.
+  - pymdownx.snippets:
+      auto_append:
+        - includes/abbreviations.md
   - tables
   - toc:
       permalink: true
