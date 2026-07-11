@@ -113,6 +113,9 @@ openwifi pins several toolchains and upstream projects, and they intentionally *
 | Xilinx Viterbi decoder | **evaluation license** | Vivado IP catalog | The eval license halts a running receiver after ~2 hours; a paid license removes the limit. |
 | Build-host OS | **Ubuntu 18 / 20 / 22 LTS** | not pinned | Ubuntu 24 needs `libtinfo5` installed manually (see [FPGA Development](FPGA-Development.md#prerequisites)). |
 
+!!! note "Driver and FPGA ship as a matched set"
+    openwifi's releases are codenamed (for example `v1.5.0` *shahecheng*, `v1.2.0` *leuven*) and version the driver and the FPGA design **together**, because the two sides share a register-map contract (`driver/hw_def.h` on the driver side, each core's `*_s_axi.v` on the FPGA side). Run a driver against the bitstream from the **same** release rather than mixing across versions; the `wgd.sh` hot-reload flow exists to swap matched driver + FPGA pairs on a running board without rebooting (see [Software Development Workflow](Software-Development-Workflow.md)). There is no formal cross-version compatibility matrix, so when in doubt, match versions. The full release history and notes live on the [openwifi releases page](https://github.com/open-sdr/openwifi/releases).
+
 ## Where do I look for…?
 
 A quick index from "I need to change X" to "open this repo/directory."
