@@ -28,7 +28,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 
 The `board_name` string matters: it selects which FPGA image and boot files you use throughout the project (the same string names the board in all the [repos](Repositories.md)). The "Vivado license" column only matters if you rebuild the FPGA yourself; the prebuilt image works regardless. If you have no hardware at all, the imec **w-iLab.t** testbed offers remote access to openwifi-ready boards.
 
-**A note on the ZedBoard-class FPGAs.** Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi) have less FPGA memory. A few features (notably IQ capture buffer length) have reduced limits on them; the relevant pages call this out.
+**A note on the ZedBoard-class FPGAs.** Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi, and others — see [Supported Boards](Supported-Boards.md#the-board-matrix) for the full list) have less FPGA memory. A few features (notably IQ capture buffer length) have reduced limits on them; the relevant pages call this out.
 
 ## 2. Flash the SD card
 

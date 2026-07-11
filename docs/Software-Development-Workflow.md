@@ -22,6 +22,8 @@ sudo apt install flex bison libssl-dev device-tree-compiler u-boot-tools -y
 
 Throughout, **`ARCH_BIT`** is `32` for Zynq-7000 boards and `64` for Zynq MPSoC (ZCU102).
 
+For the exact toolchain, kernel, and image versions these builds expect, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
+
 ## Rebuilding the driver
 
 1. Prepare the Analog Devices kernel source once (this is what the driver builds against):

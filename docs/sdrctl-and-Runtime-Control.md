@@ -75,8 +75,8 @@ To choose a good manual value, run under AGC, enable stats (`./stat_enable.sh`),
 ### Antenna selection
 
 ```bash
-./sdrctl dev sdr0 set reg drv_tx 4 1    # TX antenna: 0=tx0 (default), 1=tx1
-./sdrctl dev sdr0 set reg drv_rx 4 1    # RX antenna: 0=rx0 (default), 1=rx1
+./sdrctl dev sdr0 set reg drv_tx 4 1    # TX antenna: 0=ant0 (default), 1=ant1
+./sdrctl dev sdr0 set reg drv_rx 4 1    # RX antenna: 0=ant0 (default), 1=ant1
 ```
 
 ### CCA / LBT (listen-before-talk) threshold
@@ -192,7 +192,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 | reg | Meaning |
 |---|---|
 | 0 | Receiver action threshold. Ignore signals weaker than this. `N` means −N dBm. |
-| 4 | RX antenna selection: 0=rx1, 1=rx2 |
+| 4 | RX antenna selection: 0=ant0 (default), 1=ant1 |
 | 7 | dmesg print control (see [Troubleshooting](Troubleshooting.md#driver-dmesg-logging)) |
 
 ### `drv_tx` (driver TX)
@@ -203,7 +203,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 | 1 | Override HT unicast data rate: 0=auto; 4..11 = 6.5,13,19.5,26,39,52,58.5,65 Mbps (+16 for short GI) |
 | 2 | Override VHT (11ac) rate (not implemented) |
 | 3 | Override HE (11ax) rate (not implemented) |
-| 4 | TX antenna selection: 0=tx1, 1=tx2 |
+| 4 | TX antenna selection: 0=ant0 (default), 1=ant1 |
 | 7 | dmesg print control |
 
 ### `drv_xpu` (driver low-MAC)
@@ -231,7 +231,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 | 6 | Abnormal packet-length threshold (bits 31-16); DMA terminates if length outside 14..threshold |
 | 11 | RX digital IQ gain (left-shift count; default 4) |
 | 13 | Delay from RX DMA complete to RX interrupt (unit 0.1 µs) |
-| 16 | RX antenna selection: 0=ant0, 1=ant1 (default 0) |
+| 16 | RX antenna selection: 0=ant0 (default), 1=ant1 |
 
 (Registers 5,7,9,10,12 are DMA-to-CPU controls; see `rx_intf.v`.)
 

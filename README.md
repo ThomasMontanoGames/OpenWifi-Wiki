@@ -1,6 +1,6 @@
 # openwifi Wiki (rebuilt)
 
-A reorganized, public-facing wiki for the [openwifi](https://github.com/open-sdr/openwifi) and [openwifi-hw](https://github.com/open-sdr/openwifi-hw) projects, written for onboarding new contributors. It consolidates the two repositories' READMEs, the project document, all application notes, the image-build and boot/device-tree details, the FPGA IP-core and per-board hardware detail, a glossary, and the known-issues list into sixteen cross-linked pages, with instructions rewritten for clarity.
+A reorganized, public-facing wiki for the [openwifi](https://github.com/open-sdr/openwifi) and [openwifi-hw](https://github.com/open-sdr/openwifi-hw) projects, written for onboarding new contributors. It consolidates the two repositories' READMEs, the project document, all application notes, the image-build and boot/device-tree details, the FPGA IP-core and per-board hardware detail, a glossary, and the known-issues list into eighteen cross-linked pages, with instructions rewritten for clarity.
 
 Built with [MkDocs](https://www.mkdocs.org/) + [Material](https://squidfunk.github.io/mkdocs-material/) and published to GitHub Pages on every push to `master`.
 

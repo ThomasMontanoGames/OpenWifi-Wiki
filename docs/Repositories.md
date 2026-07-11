@@ -98,6 +98,21 @@ The two you will clone and work with day to day are **openwifi** and **openwifi-
 - **At build time**, the driver must agree with the FPGA on the **register map**. That contract is expressed in two mirror-image places: `openwifi/driver/hw_def.h` (the addresses the driver writes) and each core's `*_s_axi.v` in `openwifi-hw/ip/` (the registers the FPGA implements). A driver file and its FPGA counterpart usually even share a name (`xpu.c` ↔ `xpu.v`). This is why the two repos are versioned together in spirit even though they are separate in git.
 - **The submodule chain**: `openwifi-hw` pulls in two submodules. [`analogdevicesinc/hdl`](https://github.com/analogdevicesinc/hdl) (the Analog Devices FPGA reference design openwifi is built on top of, pinned to tag `2022_R2`) sits at `adi-hdl/`, and `openofdm` (branch `dot11zynq`) sits at `ip/openofdm_rx/`. A fresh `openwifi-hw` clone has these as **empty directories** until you run `./prepare_adi_lib.sh` and `./get_ip_openofdm_rx.sh` (or `git submodule update --init`).
 
+## Versions this wiki targets
+
+openwifi pins several toolchains and upstream projects, and they deliberately **don't all share a version number** — a 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or upstream README states a version different from the table below, **trust the upstream repo**: treat this as a snapshot from the last time the wiki was reconciled (the date is in the page footer), and bumping it when upstream moves is a welcome contribution.
+
+| Component | Target version | Set / pinned in | Notes |
+|---|---|---|---|
+| Vivado + Vitis | **2022.2** (needs `Vitis`, not `Vitis_HLS`) | openwifi-hw build scripts | Free tier suffices for Zynq-7020 boards; ZC706 / ZCU102 / Z7035 / RFSoC4x2 need a license to *rebuild* the FPGA. See [FPGA Development](FPGA-Development.md#prerequisites). |
+| ADI HDL reference design (`adi-hdl` submodule) | tag **`2022_R2`** | `openwifi-hw` submodule pin | The FPGA design is built on top of it (`prepare_adi_lib.sh`). |
+| ADI Linux kernel (`adi-linux` / `adi-linux-64`) | branch **`2026_R1`**, Linux **6.12** | `prepare_kernel.sh` | Patched by `ad9361_v6_12.patch`. See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#the-kernel). |
+| `openofdm` receiver (submodule) | branch **`dot11zynq`** (HLS variant **`dot11zynq_hls`**) | `get_ip_openofdm_rx.sh` | Backs the `openofdm_rx` core. |
+| ADI Kuiper base image | **2023-12-13 release** (`image_2023-12-13-ADI-Kuiper-full.zip`, tagged `2022_r2`) | flashed manually | Just the starting rootfs; you build a current kernel on top. See [Building SD Images](Building-SD-Images.md#adi-kuiper-build-from-scratch). |
+| OpenWrt (alternative to Kuiper) | branch **`nlnet`** = OpenWrt **24.10**, Linux **6.6**, mac80211 **6.12** | `openwrt-openwifi` repo | Docker-only build, no Vivado. See [Building SD Images](Building-SD-Images.md#openwrt). |
+| Xilinx Viterbi decoder | **evaluation license** | Vivado IP catalog | The eval license halts a running receiver after ~2 hours; a paid license removes the limit. |
+| Build-host OS | **Ubuntu 18 / 20 / 22 LTS** | — | Ubuntu 24 needs `libtinfo5` installed manually (see [FPGA Development](FPGA-Development.md#prerequisites)). |
+
 ## Where do I look for…?
 
 A quick index from "I need to change X" to "open this repo/directory."

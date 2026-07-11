@@ -16,7 +16,7 @@ openwifi's FPGA design is built **on top of the [Analog Devices HDL reference de
   sudo dpkg -i ./libtinfo5_6.1-1ubuntu1.18.04.1_amd64.deb
   ```
 
-Set `export XILINX_DIR=/opt/Xilinx` and `export BOARD_NAME=<your board>` first. (Note: the *software* side of openwifi historically referenced Vivado 2021.1; the current openwifi-hw build targets 2022.2. Match the version the repo README states at the time you build.)
+Set `export XILINX_DIR=/opt/Xilinx` and `export BOARD_NAME=<your board>` first. (Note: the *software* side of openwifi historically referenced Vivado 2021.1; the current openwifi-hw build targets 2022.2. Match the version the repo README states at the time you build.) For the full toolchain/branch matrix, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
 
 ## Building the bitstream
 
@@ -149,7 +149,7 @@ The primary reference is Xilinx UG994 (*Designing IP Subsystems Using IP Integra
 
 ## Porting to a new board
 
-openwifi's baseline is `2021_r1` of the ADI HDL reference designs. The porting mindset is: **diff openwifi against the matching ADI reference design, then replicate those changes on your target board.**
+openwifi's baseline is tag `2022_R2` of the ADI HDL reference designs (the `adi-hdl` submodule pin). The porting mindset is: **diff openwifi against the matching ADI reference design, then replicate those changes on your target board.**
 
 1. Open the ADI reference design for your platform (e.g. `hdl/projects/fmcomms2/zc706`) and the corresponding openwifi board design (`openwifi-hw/boards/zc706_fmcs2`) side by side.
 2. Use *Open Block Design* and compare both the **diagram** and the **Address Editor**; that's where openwifi's additions show up.
