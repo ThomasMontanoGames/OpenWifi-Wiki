@@ -1,13 +1,13 @@
 # Contributing
 
-openwifi is an open project and welcomes contributions — driver fixes, FPGA improvements, new board support, and documentation. This page covers the one legal prerequisite (the CLA), how to set up a development environment, which repository a change belongs in, and where to reach the community. Each repo's own `CONTRIBUTING.md` is the authoritative source.
+openwifi is an open project and welcomes contributions: driver fixes, FPGA improvements, new board support, and documentation. This page covers the one legal prerequisite (the CLA), how to set up a development environment, which repository a change belongs in, and where to reach the community. Each repo's own `CONTRIBUTING.md` is the authoritative source.
 
 ## 1. Sign the CLA first
 
 Before your **first** contribution to any openwifi repository, you must sign a **Contributor License Agreement** (generated with the [Project Harmony](http://www.harmonyagreements.org/) framework) and email it to **`Filip.Louagie@UGent.be`**:
 
-- **Individual CLA** — for contributions you make personally.
-- **Entity CLA** — if you contribute on behalf of a company or organization.
+- **Individual CLA**: for contributions you make personally.
+- **Entity CLA**: if you contribute on behalf of a company or organization.
 
 The forms are linked from each repository's `CONTRIBUTING.md` (for example, [openwifi/CONTRIBUTING.md](https://github.com/open-sdr/openwifi/blob/master/CONTRIBUTING.md)). It's a one-time step and covers all the openwifi repos.
 
@@ -31,7 +31,7 @@ openwifi is [split across several repos](Repositories.md) by toolchain, so the f
 | The OFDM receiver internals | [openofdm](https://github.com/open-sdr/openofdm) (`dot11zynq` branch) |
 
 !!! warning "Keep the driver and FPGA register maps in sync"
-    If your change touches a register, the driver side (`openwifi/driver/hw_def.h`) and the FPGA side (the core's `*_s_axi.v` in `openwifi-hw/ip/`) must agree — they are two halves of the same contract. See [FPGA IP Cores](FPGA-IP-Cores.md#how-a-register-write-reaches-a-core).
+    If your change touches a register, the driver side (`openwifi/driver/hw_def.h`) and the FPGA side (the core's `*_s_axi.v` in `openwifi-hw/ip/`) must agree; they are two halves of the same contract. See [FPGA IP Cores](FPGA-IP-Cores.md#how-a-register-write-reaches-a-core).
 
 ## 4. Propose the change
 
@@ -51,8 +51,8 @@ See [FAQ & Resources](FAQ-and-Resources.md#community-and-support) for the full l
 
 ## 6. Licensing
 
-openwifi is dual-licensed: **AGPLv3** for the open-source release, with commercial licensing via [openwifi.tech](https://openwifi.tech). Individual files may be GPL-2.0-or-later or BSD-3-Clause, and vendored third-party components carry their own terms. Your contributions are accepted under the project's license — that is what the CLA in step 1 formalizes. See [FAQ → License](FAQ-and-Resources.md#license).
+openwifi is dual-licensed: **AGPLv3** for the open-source release, with commercial licensing via [openwifi.tech](https://openwifi.tech). Individual files may be GPL-2.0-or-later or BSD-3-Clause, and vendored third-party components carry their own terms. Your contributions are accepted under the project's license; that is what the CLA in step 1 formalizes. See [FAQ → License](FAQ-and-Resources.md#license).
 
 ## Contributing to this wiki
 
-This wiki is a **companion** to the upstream docs, not a replacement — the repositories are always the source of truth. If the wiki and a repo disagree, trust the repo, and fixing the wiki to match is itself a welcome contribution. The wiki lives in its own repository and is edited via pull request there; the pages are plain Markdown built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), and `mkdocs build --strict` must pass (it fails on any broken internal link).
+This wiki is a **companion** to the upstream docs, not a replacement; the repositories are always the source of truth. If the wiki and a repo disagree, trust the repo, and fixing the wiki to match is itself a welcome contribution. The wiki lives in its own repository and is edited via pull request there; the pages are plain Markdown built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), and `mkdocs build --strict` must pass (it fails on any broken internal link).

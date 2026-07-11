@@ -6,12 +6,12 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
 
 ## Getting on the air: two-SDR links
 
-??? note "Communication between two SDR boards — AP and client mode"
+??? note "Communication between two SDR boards: AP and client mode"
     Step-by-step for an access-point + client link between two openwifi boards using stock `hostapd` and `wpa_supplicant`. Covers confirming beacon transmission via `/proc/interrupts`, associating the client, and getting an IP over the link.
 
     [Read in this wiki →](Operating-Modes.md#access-point) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ap-client-two-sdr.md)
 
-??? note "Communication between two SDR boards — ad-hoc mode"
+??? note "Communication between two SDR boards: ad-hoc mode"
     Bring two boards into the same 802.11 ad-hoc (IBSS) cell with `sdr-ad-hoc-up.sh`, confirm both nodes converge on the same Cell ID, and ping across. Includes the antenna-isolation and 5 GHz TX-power caveats.
 
     [Read in this wiki →](Operating-Modes.md#ad-hoc-ibss) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ad-hoc-two-sdr.md)
@@ -19,7 +19,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
 ## CSI and sensing
 
 ??? note "From CSI (Channel State Information) to CSI (Chip State Information)"
-    Per-packet CSI — timestamp, frequency offset, channel response, and equalizer output — streamed to a PC through the FPGA side channel. Shows the data path, the 64-bit packet format, how to filter captures by MAC address, and the display scripts.
+    Per-packet CSI (timestamp, frequency offset, channel response, and equalizer output) streamed to a PC through the FPGA side channel. Shows the data path, the 64-bit packet format, how to filter captures by MAC address, and the display scripts.
 
     [Read in this wiki →](Research-Features.md#csi-channel-state-information) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/csi.md)
 
@@ -64,7 +64,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![MATLAB Tx-ACK-GAP analysis](assets/img/iq-ack-timing-matlab-tx-ack-gap.jpg)
 
 ??? note "Capture dual-antenna TX/RX IQ (collision capture)"
-    Capture IQ from a second *monitoring* antenna coherently alongside the main antenna. Placed near a peer node, the monitoring antenna catches collisions — moments when both link ends transmit at once — via a dedicated collision trigger.
+    Capture IQ from a second *monitoring* antenna coherently alongside the main antenna. Placed near a peer node, the monitoring antenna catches collisions (moments when both link ends transmit at once) via a dedicated collision trigger.
 
     [Read in this wiki →](Research-Features.md#dual-antenna-iq-collision-capture) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_2ant.md)
 
@@ -87,7 +87,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
 
     [Read in this wiki →](Operating-Modes.md#packet-injection-and-fuzzing) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/inject_80211.md)
 
-??? note "owfuzz — a Wi-Fi protocol fuzzing tool (external)"
+??? note "owfuzz: a Wi-Fi protocol fuzzing tool (external)"
     A third-party 802.11 protocol fuzzer built on openwifi, with a published list of discovered vulnerabilities. Hosted outside the openwifi repos.
 
     [Read in this wiki →](Operating-Modes.md#packet-injection-and-fuzzing) · [Project ↗](https://github.com/alipay/WiFi-Protocol-Fuzzing-Tool) · [Discovered vulnerabilities ↗](https://github.com/alipay/Owfuzz#discovered-vulnerabilities)
@@ -117,13 +117,13 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
 
 ## Runtime control and dev workflow
 
-??? note "Frequent tricks — Gain / Att / Frequency / CCA / LBT / CSMA / CW / Sensitivity"
+??? note "Frequent tricks: Gain / Att / Frequency / CCA / LBT / CSMA / CW / Sensitivity"
     A cookbook of everyday runtime overrides: TX power and attenuation, RX gain, CCA/LBT threshold, NAV/DIFS/EIFS/CW, ACK and retransmission control, antenna selection, frequency restriction and arbitrary tuning, TX rate, and arbitrary IQ transmission.
 
     [Read in this wiki →](sdrctl-and-Runtime-Control.md#common-runtime-tasks-the-frequent-tricks) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/frequent_trick.md)
 
 ??? note "Driver and FPGA dynamic reloading"
-    Hot-reload the driver and/or FPGA bitstream on a running board with `wgd.sh` — no reboot, no power cycle — and keep several driver/FPGA variants side by side for quick switching.
+    Hot-reload the driver and/or FPGA bitstream on a running board with `wgd.sh`: no reboot, no power cycle, and keep several driver/FPGA variants side by side for quick switching.
 
     [Read in this wiki →](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/drv_fpga_dynamic_loading.md)
 

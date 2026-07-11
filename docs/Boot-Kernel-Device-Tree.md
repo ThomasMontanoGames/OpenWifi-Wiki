@@ -1,6 +1,6 @@
 # Boot, Kernel and Device Tree
 
-This page explains how an openwifi board actually boots: the boot image, the kernel and its patches, and — in the most detail — the **device tree**, which is the piece that tells Linux where the FPGA blocks live and is the main thing you edit when porting to a new board.
+This page explains how an openwifi board actually boots: the boot image, the kernel and its patches, and, in the most detail, the **device tree**, which is the piece that tells Linux where the FPGA blocks live and is the main thing you edit when porting to a new board.
 
 If you just want to flash a card and run, see [Getting Started](Getting-Started.md). If you want to rebuild the driver or a full SD image, see [Software Development Workflow](Software-Development-Workflow.md). This page is for understanding and modifying the boot chain itself. All paths below are in the [openwifi](https://github.com/open-sdr/openwifi) repo under `kernel_boot/` unless noted.
 
@@ -28,7 +28,7 @@ The two SoC families build BOOT.BIN differently, which is why ZCU102 is "the odd
 | BOOT.BIN stages | FSBL → bitstream → U-Boot | FSBL → **PMUFW** → bitstream → **ATF (BL31)** → U-Boot |
 | Kernel image | `uImage` (U-Boot format) | `Image` |
 | Device tree file | `devicetree.dtb` | `system.dtb` |
-| Extra firmware | — | PMU firmware + ARM Trusted Firmware |
+| Extra firmware | none | PMU firmware + ARM Trusted Firmware |
 
 - **`build_boot_bin.sh`** takes `system_top.<hdf|xsa>` and `u-boot.elf`, uses Xilinx `xsct` to build the FSBL from the hardware description, and `bootgen` to pack FSBL + bitstream + U-Boot into `BOOT.BIN`.
 - **`build_zynqmp_boot_bin.sh`** additionally builds/collects the **PMU firmware** and the **ARM Trusted Firmware BL31** stage (it can `download` and build ATF, matched to your Vitis version), then packs them with per-stage attributes (`a53-0`, `el-3`/`trustzone`, `el-2`, `pl`) into a ZynqMP `BOOT.BIN`.
@@ -65,7 +65,7 @@ Four small patches (in `kernel_boot/`, documented in `kernel_patch_readme.md`) a
 
 ## The device tree
 
-This is the heart of a board port. The **device tree** is a data structure describing the hardware — every peripheral, its register address, its interrupts, its clocks — that Linux reads at boot to know what exists. openwifi's driver is a Linux **platform driver** that binds to a device-tree node with `compatible = "sdr,sdr"`; it learns the AXI addresses and interrupts of every FPGA core *from the device tree*. If the device tree doesn't match the FPGA build, the driver won't find the hardware (or will bind to the wrong addresses).
+This is the heart of a board port. The **device tree** is a data structure describing the hardware (every peripheral, its register address, its interrupts, its clocks) that Linux reads at boot to know what exists. openwifi's driver is a Linux **platform driver** that binds to a device-tree node with `compatible = "sdr,sdr"`; it learns the AXI addresses and interrupts of every FPGA core *from the device tree*. If the device tree doesn't match the FPGA build, the driver won't find the hardware (or will bind to the wrong addresses).
 
 ### How openwifi builds a board's device tree
 
@@ -78,9 +78,9 @@ construct_device_tree.sh $BOARD_NAME $ARCH   # ARCH = 32 or 64
 
 Three ingredients go in:
 
-1. **The stock board device tree** — the ordinary ADI/Xilinx `.dts` for the board (e.g. `zynq-zed.dts`, `zynqmp-zcu102-rev1.1.dts`). This describes the ARM SoC, DDR, Ethernet, UART, SD, etc. — everything *except* openwifi.
-2. **`openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso`** — the **architecture-wide** openwifi overlay. It adds the openwifi FPGA IP blocks and the AD9361 binding, and is shared by *all* boards of that architecture.
-3. **`overlays/<board_name>.dtso`** — the **board-specific** overlay: the AD9361 reference-clock frequency, board LEDs/GPIO, and any board-unique glue.
+1. **The stock board device tree**: the ordinary ADI/Xilinx `.dts` for the board (e.g. `zynq-zed.dts`, `zynqmp-zcu102-rev1.1.dts`). This describes the ARM SoC, DDR, Ethernet, UART, SD, etc. (everything *except* openwifi).
+2. **`openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso`**: the **architecture-wide** openwifi overlay. It adds the openwifi FPGA IP blocks and the AD9361 binding, and is shared by *all* boards of that architecture.
+3. **`overlays/<board_name>.dtso`**: the **board-specific** overlay: the AD9361 reference-clock frequency, board LEDs/GPIO, and any board-unique glue.
 
 The script compiles each overlay with `dtc`, preprocesses and compiles the stock `.dts`, then fuses them with `fdtoverlay`:
 
@@ -149,7 +149,7 @@ The script compiles each overlay with `dtc`, preprocesses and compiles the stock
     This modular, overlay-based device-tree system came out of the NLnet project [*Extensive openwifi support for OpenWRT*](https://nlnet.nl/project/OpenWifi-OpenWRT/), which set out to **modularize openwifi's hardware description** so it can be ported across the whole board matrix in a maintainable way, and to **break openwifi's dependency on ADI Kuiper Linux** so it can target OpenWrt. Splitting the tree into a shared openwifi overlay plus small per-board overlays (instead of one hand-maintained tree per board) is what makes the porting flow below tractable.
 
 !!! note "Most shipped boards include a fixed `devicetree.dts`"
-    If a board directory already contains a prebuilt `devicetree.dts`, `construct_device_tree.sh` **only recompiles the overlays and stops** — it trusts the shipped tree. The stock-`.dts`-plus-`fdtoverlay` path is what you use when bringing up a *new* board that doesn't have a prebuilt tree yet. The script keeps a `board_name → stock .dts` map internally (e.g. `zed_fmcs2 → zynq-zed.dts`, `adrv9364z7020 → zynq-adrv9364.dts`).
+    If a board directory already contains a prebuilt `devicetree.dts`, `construct_device_tree.sh` **only recompiles the overlays and stops**: it trusts the shipped tree. The stock-`.dts`-plus-`fdtoverlay` path is what you use when bringing up a *new* board that doesn't have a prebuilt tree yet. The script keeps a `board_name → stock .dts` map internally (e.g. `zed_fmcs2 → zynq-zed.dts`, `adrv9364z7020 → zynq-adrv9364.dts`).
 
 ### What the openwifi overlay adds
 
@@ -162,15 +162,15 @@ The shared `openwifi_32_ad9361.dtso` inserts (as device-tree fragments):
     |---|---|---|---|
     | `sdr` | (no reg; the driver's bind node) | `sdr,sdr` | 29, 30, 33, 34 |
     | `tx_intf` | `0x83c00000` | `sdr,tx_intf` | 34 |
-    | `openofdm_tx` | `0x83c10000` | `sdr,openofdm_tx` | — |
+    | `openofdm_tx` | `0x83c10000` | `sdr,openofdm_tx` | none |
     | `rx_intf` | `0x83c20000` | `sdr,rx_intf` | 29, 30 |
-    | `openofdm_rx` | `0x83c30000` | `sdr,openofdm_rx` | — |
-    | `xpu` | `0x83c40000` | `sdr,xpu` | — |
+    | `openofdm_rx` | `0x83c30000` | `sdr,openofdm_rx` | none |
+    | `xpu` | `0x83c40000` | `sdr,xpu` | none |
     | `side_ch` | `0x83c50000` | `sdr,side_ch` | (DMA) |
     | `tx_dma` | `0x80400000` | `xlnx,axi-dma-1.00.a` | 35, 36 |
     | `rx_dma` | `0x80410000` | `xlnx,axi-dma-1.00.a` | 31, 32 |
-    | `cf-ad9361-lpc` | `0x79020000` | `adi,axi-ad9361` | — |
-    | `cf-ad9361-dds-core-lpc` | `0x79024000` | `adi,axi-ad9361-dds` | — |
+    | `cf-ad9361-lpc` | `0x79020000` | `adi,axi-ad9361` | none |
+    | `cf-ad9361-dds-core-lpc` | `0x79024000` | `adi,axi-ad9361-dds` | none |
 
     The `sdr` node ties the driver to the DMA engines (`dmas = <&rx_dma 1 &tx_dma 0>`) and interrupts; `side_ch` has its own DMA pair. An `i2c@41600000` bus (power monitor, ADC, EEPROM) is also declared.
 
@@ -255,15 +255,15 @@ A practical sequence:
 
     Confirm the `fpga-axi@0` block shows your `sdr,*` nodes at the right addresses and that `ad9361-phy@0` has your clock.
 
-6. **Boot and verify.** After building `BOOT.BIN` + kernel + this `devicetree.dtb` into an SD image (see [Software Development Workflow](Software-Development-Workflow.md#building-a-full-sd-image-from-scratch)), boot with a UART console attached. On a good boot you'll see the AD9361 probe and the `sdr,sdr` driver bind. If it doesn't, the device-tree addresses/interrupts almost certainly disagree with the FPGA — recheck step 1. Common failures (SPI-flash env, wrong DDR size, ZCU102 SD/SODIMM, no UART) are in [Troubleshooting](Troubleshooting.md#boot-and-networking).
+6. **Boot and verify.** After building `BOOT.BIN` + kernel + this `devicetree.dtb` into an SD image (see [Software Development Workflow](Software-Development-Workflow.md#building-a-full-sd-image-from-scratch)), boot with a UART console attached. On a good boot you'll see the AD9361 probe and the `sdr,sdr` driver bind. If it doesn't, the device-tree addresses/interrupts almost certainly disagree with the FPGA. Recheck step 1. Common failures (SPI-flash env, wrong DDR size, ZCU102 SD/SODIMM, no UART) are in [Troubleshooting](Troubleshooting.md#boot-and-networking).
 
 !!! tip "The device tree is where the FPGA meets Linux"
-    A board port is really two halves that must agree: the **FPGA side** (the openwifi-hw Vivado project, which fixes addresses/interrupts — see [FPGA Development](FPGA-Development.md#porting-to-a-new-board)) and the **device-tree side** (this page, which tells Linux those same addresses/interrupts). Get the two to match and the rest of openwifi — driver, `sdrctl`, everything above — works unchanged, because it's all keyed off the `sdr,*` `compatible` strings, not the board.
+    A board port is really two halves that must agree: the **FPGA side** (the openwifi-hw Vivado project, which fixes addresses/interrupts; see [FPGA Development](FPGA-Development.md#porting-to-a-new-board)) and the **device-tree side** (this page, which tells Linux those same addresses/interrupts). Get the two to match and the rest of openwifi (driver, `sdrctl`, everything above) works unchanged, because it's all keyed off the `sdr,*` `compatible` strings, not the board.
 
 ## Related pages
 
-- [Software Development Workflow](Software-Development-Workflow.md) — rebuilding the kernel, transferring images, and building a full SD card.
-- [FPGA Development → Porting to a new board](FPGA-Development.md#porting-to-a-new-board) — the FPGA half of a board port.
-- [Supported Boards](Supported-Boards.md) — per-board hardware notes and the 32-bit vs 64-bit boot differences.
-- [Architecture](Architecture.md#how-the-driver-talks-to-linux-the-mac80211-api) — why the driver is a device-tree platform driver.
-- [Troubleshooting → Boot and networking](Troubleshooting.md#boot-and-networking) — boot failures and fixes.
+- [Software Development Workflow](Software-Development-Workflow.md): rebuilding the kernel, transferring images, and building a full SD card.
+- [FPGA Development → Porting to a new board](FPGA-Development.md#porting-to-a-new-board): the FPGA half of a board port.
+- [Supported Boards](Supported-Boards.md): per-board hardware notes and the 32-bit vs 64-bit boot differences.
+- [Architecture](Architecture.md#how-the-driver-talks-to-linux-the-mac80211-api): why the driver is a device-tree platform driver.
+- [Troubleshooting → Boot and networking](Troubleshooting.md#boot-and-networking): boot failures and fixes.

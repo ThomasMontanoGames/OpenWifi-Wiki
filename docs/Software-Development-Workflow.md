@@ -132,4 +132,4 @@ For larger updates (kernel, modules, device tree, rootfs) there are paired host/
 
 ## Building a full SD image from scratch
 
-Two base operating systems are supported, **ADI Kuiper** (Debian/Ubuntu-like) and **OpenWrt** (router-style with LuCI). The full step-by-step for both — flashing the base image, the rootfs edits, `update_sdcard.sh`, and the OpenWrt Docker build — is on the dedicated [Building SD Images](Building-SD-Images.md) page. Kuiper builds want Vivado 2022.2 (with Vitis) and the `flex bison libssl-dev device-tree-compiler u-boot-tools` packages; the OpenWrt build needs only Docker.
+Two base operating systems are supported, **ADI Kuiper** (Debian/Ubuntu-like) and **OpenWrt** (router-style with LuCI). The full step-by-step for both (flashing the base image, the rootfs edits, `update_sdcard.sh`, and the OpenWrt Docker build) is on the dedicated [Building SD Images](Building-SD-Images.md) page. Kuiper builds want Vivado 2022.2 (with Vitis) and the `flex bison libssl-dev device-tree-compiler u-boot-tools` packages; the OpenWrt build needs only Docker.

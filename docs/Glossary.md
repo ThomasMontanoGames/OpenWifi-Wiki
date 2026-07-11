@@ -213,7 +213,7 @@ Side channel (`side_ch`)
 :   openwifi's FPGA capture engine: it taps the receiver's IQ and the demodulator's internal results (CSI, equalizer) and DMAs them to the host, independent of the normal packet path. See [FPGA IP Cores](FPGA-IP-Cores.md#side_ch-the-csi-iq-capture-side-channel).
 
 SIFS
-:   Short Interframe Space: the brief gap before an ACK — 10 µs in 2.4 GHz (802.11g) and 16 µs in 5 GHz (802.11a). Meeting SIFS timing is why the low MAC has to be in hardware.
+:   Short Interframe Space: the brief gap before an ACK, 10 µs in 2.4 GHz (802.11g) and 16 µs in 5 GHz (802.11a). Meeting SIFS timing is why the low MAC has to be in hardware.
 
 SoftMAC
 :   A Wi-Fi design where the upper MAC runs in host software (Linux `mac80211`) rather than on the chip. openwifi is a SoftMAC design, which is why standard Linux tools work over `sdr0`.

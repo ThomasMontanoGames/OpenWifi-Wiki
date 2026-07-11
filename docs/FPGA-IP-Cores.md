@@ -106,43 +106,43 @@ Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) a
 
 ---
 
-## `xpu` — the real-time MAC
+## `xpu`: the real-time MAC
 
 `xpu` (sometimes read as "transceiver/eXtensible processing unit") is the central core of openwifi and the largest: its register file `xpu_s_axi.v` (48 KB, 64 registers) is the biggest single source file in the IP tree. It implements everything that has to happen in **microseconds** (too fast for the Linux MAC to handle), which is exactly why openwifi can meet 802.11 timing that a pure-software MAC cannot.
 
 What lives inside (`ip/xpu/src/`, 21 Verilog files):
 
-- **`csma_ca.v`** — the CSMA/CA (DCF) state machine proper. It consumes NAV/DIFS/EIFS enable flags, the contention-window exponent, SIFS/slot/DIFS/backoff timing parameters, MAC-address match, and TX-status feedback to arbitrate channel access exactly per the 802.11 distributed coordination function. This is the hardware DCF, offloaded from `mac80211`.
-- **`tx_control.v`** — sequences packet transmission (the largest logic file at 30 KB).
-- **`tsf_timer.v`** — the 64-bit TSF (Timing Synchronization Function) counter, the 802.11 clock that timestamps received packets and drives timing-critical MAC operations. Readable via `xpu` regs 58/59, loadable via regs 2/3.
-- **`pkt_filter_ctl.v`** — packet address/type filtering (the FPGA side of `openwifi_configure_filter()`; monitor mode opens this fully).
-- **`phy_rx_parse.v`** — parses PHY-header fields coming out of the receiver.
-- **`rssi.v`, `iq_rssi_to_db.v`, `cca.v`, `dc_rm.v`, `mv_avg*.v`** — clear-channel-assessment / carrier sensing and RSSI measurement (moving-average power, DC removal).
-- **`time_slice_gen.v`** — generates the gating for the four hardware TX queues (`slice_en[0:3]`), the mechanism behind [MAC-address time slicing](sdrctl-and-Runtime-Control.md#time-slicing-network-slicing).
-- **`spi.v`** — an SPI master used to control the AD9361 TX chain in real time (turning the TX LO/switch on just before a packet and off just after; see [Architecture](Architecture.md#rf-and-baseband-the-frequencyclock-design)).
-- **`cw_exp.v`, `tx_on_detection.v`, `edge_to_flip.v`, `fifo_sample_delay.v`, `n_sym_len14_pkt.v`** — contention-window exponent, TX-onset detection, and assorted timing/FIFO helpers.
+- **`csma_ca.v`**: the CSMA/CA (DCF) state machine proper. It consumes NAV/DIFS/EIFS enable flags, the contention-window exponent, SIFS/slot/DIFS/backoff timing parameters, MAC-address match, and TX-status feedback to arbitrate channel access exactly per the 802.11 distributed coordination function. This is the hardware DCF, offloaded from `mac80211`.
+- **`tx_control.v`**: sequences packet transmission (the largest logic file at 30 KB).
+- **`tsf_timer.v`**: the 64-bit TSF (Timing Synchronization Function) counter, the 802.11 clock that timestamps received packets and drives timing-critical MAC operations. Readable via `xpu` regs 58/59, loadable via regs 2/3.
+- **`pkt_filter_ctl.v`**: packet address/type filtering (the FPGA side of `openwifi_configure_filter()`; monitor mode opens this fully).
+- **`phy_rx_parse.v`**: parses PHY-header fields coming out of the receiver.
+- **`rssi.v`, `iq_rssi_to_db.v`, `cca.v`, `dc_rm.v`, `mv_avg*.v`**: clear-channel-assessment / carrier sensing and RSSI measurement (moving-average power, DC removal).
+- **`time_slice_gen.v`**: generates the gating for the four hardware TX queues (`slice_en[0:3]`), the mechanism behind [MAC-address time slicing](sdrctl-and-Runtime-Control.md#time-slicing-network-slicing).
+- **`spi.v`**: an SPI master used to control the AD9361 TX chain in real time (turning the TX LO/switch on just before a packet and off just after; see [Architecture](Architecture.md#rf-and-baseband-the-frequencyclock-design)).
+- **`cw_exp.v`, `tx_on_detection.v`, `edge_to_flip.v`, `fifo_sample_delay.v`, `n_sym_len14_pkt.v`**: contention-window exponent, TX-onset detection, and assorted timing/FIFO helpers.
 
 `xpu` connects to *both* the RF/ADC path (`ddc_i/q`, `mute_adc_out_to_bb`) and the demodulator (`demod_is_ongoing`, `pkt_header_valid`, `fcs_ok`, `pkt_rate`, `pkt_len`), which is why it can implement hardware ACK generation and reception, retransmission, and CCA. It is addressed by the driver as register space `xpu` (category 6) and its git build revision is readable at register 63.
 
 ---
 
-## `openofdm_tx` — the OFDM transmitter
+## `openofdm_tx`: the OFDM transmitter
 
 Turns a MAC frame into baseband IQ samples. It reads bytes from a 64-bit-wide, 1024-deep TX BRAM (shared with `tx_intf` and `xpu`) and produces I/Q through the full 802.11 transmit chain: scrambling, convolutional encoding, puncturing/interleaving, modulation mapping, pilot and preamble insertion, and an IFFT.
 
 Notable source (`ip/openofdm_tx/src/`, 28 files):
 
-- **`dot11_tx.v`** — the 802.11 TX datapath FSM.
-- **The IFFT pipeline** — `ifftmain.v`, `ifftstage.v`, `butterfly.v`, `hwbfly.v`, and partial-product multipliers (`bimpy.v`, `longbimpy.v`).
-- **`convenc.v` + `punc_interlv_lut.v`** — convolutional encoder and the punctured-interleave lookup ROMs. `punc_interlv_lut.v` (128 KB) is the largest single file in the whole IP tree; it holds the FEC puncturing/interleaving patterns for every 802.11 MCS.
-- **Preamble ROMs** — `l_stf_rom.v` / `l_ltf_rom.v` (legacy short/long training fields) and `ht_stf_rom.v` / `ht_ltf_rom.v` (802.11n HT training fields).
-- **`modulation.v`, `crc32_tx.v`, `bitreverse.v`, `dpram.v`, `axi_fifo_bram.v`** — the modulation mapper, frame CRC, and buffering.
+- **`dot11_tx.v`**: the 802.11 TX datapath FSM.
+- **The IFFT pipeline**: `ifftmain.v`, `ifftstage.v`, `butterfly.v`, `hwbfly.v`, and partial-product multipliers (`bimpy.v`, `longbimpy.v`).
+- **`convenc.v` + `punc_interlv_lut.v`**: convolutional encoder and the punctured-interleave lookup ROMs. `punc_interlv_lut.v` (128 KB) is the largest single file in the whole IP tree; it holds the FEC puncturing/interleaving patterns for every 802.11 MCS.
+- **Preamble ROMs**: `l_stf_rom.v` / `l_ltf_rom.v` (legacy short/long training fields) and `ht_stf_rom.v` / `ht_ltf_rom.v` (802.11n HT training fields).
+- **`modulation.v`, `crc32_tx.v`, `bitreverse.v`, `dpram.v`, `axi_fifo_bram.v`**: the modulation mapper, frame CRC, and buffering.
 
 Addressed as register space `tx` (category 5); scrambler seeds are at regs 1/2 (default 127).
 
 ---
 
-## `openofdm_rx` — the OFDM receiver
+## `openofdm_rx`: the OFDM receiver
 
 The receive counterpart: it detects the preamble, synchronizes, estimates the channel, equalizes, and Viterbi-decodes, handing parsed bytes (`byte_in`, `fcs_ok`, `pkt_rate`, `pkt_len`) up to `xpu` and `rx_intf`. It is the core that most affects **receiver sensitivity** (documented per band/board around −92 dBm at MCS0 / −73 dBm at MCS7 on FMCOMMS2 at 2.4 GHz).
 
@@ -152,20 +152,20 @@ Addressed as register space `rx` (category 4). Its `signal_watchdog` submodule p
 
 ---
 
-## `tx_intf` — the transmit RF/DAC interface
+## `tx_intf`: the transmit RF/DAC interface
 
 Sits between the OFDM transmitter and the AD9361 DAC. It owns the 64-bit-wide, 1024-deep TX BRAM that `openofdm_tx` reads from, packages transmit I/Q for the DAC (via ADI's `axi_ad9361_dac_dma` / `util_ad9361_dac_upack` blocks), streams frame data in over AXI-Stream DMA from the driver, and raises the TX-done interrupt and LEDs (`tx_itrpt_led`, `tx_end_led`).
 
 Two research-relevant pieces live here:
 
-- **`csi_fuzzer.v`** — injects a controlled *artificial* channel response into the transmitter, the hardware behind the [CSI fuzzer](Research-Features.md#csi-fuzzer-privacy-protection) privacy feature (`tx_intf` register 5).
-- **`ht_sig_crc_calc.v`** — computes the CRC for the 802.11n HT-SIG field.
+- **`csi_fuzzer.v`**: injects a controlled *artificial* channel response into the transmitter, the hardware behind the [CSI fuzzer](Research-Features.md#csi-fuzzer-privacy-protection) privacy feature (`tx_intf` register 5).
+- **`ht_sig_crc_calc.v`**: computes the CRC for the 802.11n HT-SIG field.
 
 Also here: `tx_bit_intf.v` (the raw-bit/PHY-level TX interface, the largest file in this core), `dac_intf.v`, `tx_iq_intf.v` (which holds the 512-sample arbitrary-IQ FIFO), and `tx_status_fifo.v`. Addressed as register space `tx_intf` (category 3); see the [tx_intf register table](sdrctl-and-Runtime-Control.md#tx_intf-fpga-tx-interface).
 
 ---
 
-## `rx_intf` — the receive RF/ADC interface
+## `rx_intf`: the receive RF/ADC interface
 
 The mirror of `tx_intf`. It unpacks raw ADC samples from the AD9361 (via ADI's `axi_ad9361_adc_dma` / `util_ad9361_adc_pack`), converts them into per-antenna I/Q streams, appends FCS/sequence-number bookkeeping onto received frames (`byte_to_word_fcs_sn_insert.v`), drives status LEDs (`fcs_ok_led`), and DMAs packets plus their metadata up to the processor.
 
@@ -173,7 +173,7 @@ The 16-byte metadata header that `rx_intf` prepends to each received packet is e
 
 ---
 
-## `side_ch` — the CSI / IQ capture side channel
+## `side_ch`: the CSI / IQ capture side channel
 
 openwifi's signature research core. `side_ch` taps into the receiver's I/Q datapath *and* the OFDM demodulator's internal results, buffers them, and streams them out over its own AXI-Stream DMA channel, completely independent of the normal packet RX/TX path. This is what lets you pull per-packet **CSI, equalizer output, frequency offset, raw IQ, AGC gain, and RSSI** up to a PC.
 

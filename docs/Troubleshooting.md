@@ -65,7 +65,7 @@ Reboot and re-read to confirm.
 
 **`Unsupported PRODUCT_ID 0xFF`** at AD9361 probe: same root cause as above (EEPROM/FRU). See the fru_tools references.
 
-**`Unsupported PRODUCT_ID 0x00`** at AD9361 probe: a different failure from the `0xFF` case above. `0x00` means the AD9361 / FMCOMMS front end **did not power up correctly** — the driver is reading back all-zeros because the chip isn't alive, not because of a bad EEPROM. Check the board's power: that the FMCOMMS card is fully seated, that its supply rails are up, and that the carrier is delivering enough current to the front end. Once the RF board powers up properly, the probe reads the correct PRODUCT_ID.
+**`Unsupported PRODUCT_ID 0x00`** at AD9361 probe: a different failure from the `0xFF` case above. `0x00` means the AD9361 / FMCOMMS front end **did not power up correctly**: the driver is reading back all-zeros because the chip isn't alive, not because of a bad EEPROM. Check the board's power: that the FMCOMMS card is fully seated, that its supply rails are up, and that the carrier is delivering enough current to the front end. Once the RF board powers up properly, the probe reads the correct PRODUCT_ID.
 
 **ZCU102 kernel panic due to RTC / panic due to hardware capacitor & current load.** Tracked upstream: [#366](https://github.com/open-sdr/openwifi/issues/366) and [#457](https://github.com/open-sdr/openwifi/issues/457).
 

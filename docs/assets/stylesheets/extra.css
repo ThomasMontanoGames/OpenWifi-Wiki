@@ -1,5 +1,5 @@
 /* ============================================================
-   openwifi Wiki — "Refined technical" theme layer
+   openwifi Wiki: "Refined technical" theme layer
    Builds on Material for MkDocs. Uses Material CSS variables so
    everything adapts to light (default) and dark (slate) schemes.
    ============================================================ */
@@ -143,7 +143,7 @@
 }
 /* Content raster images sit on a white matte so transparent line-art
    diagrams (e.g. the CSI-fuzzer figures) stay readable in dark mode. Opaque
-   screenshots are unaffected — the matte only shows through transparency.
+   screenshots are unaffected; the matte only shows through transparency.
    Inline SVG diagrams are theme-aware <svg> elements and are excluded. */
 .md-typeset img {
   display: block;

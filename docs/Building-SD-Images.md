@@ -2,8 +2,8 @@
 
 openwifi boots from an SD card running one of two base operating systems, and you can build either from scratch:
 
-- **ADI Kuiper** — a Debian/Ubuntu-like image (the classic openwifi environment; what the `fosdem.sh` demo and most app notes assume).
-- **OpenWrt** — a router-style image with the LuCI web UI, with openwifi packaged as a kernel module.
+- **ADI Kuiper**: a Debian/Ubuntu-like image (the classic openwifi environment; what the `fosdem.sh` demo and most app notes assume).
+- **OpenWrt**: a router-style image with the LuCI web UI, with openwifi packaged as a kernel module.
 
 !!! tip "You may not need to build anything"
     Prebuilt images exist for both. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
@@ -91,9 +91,9 @@ cd openwifi/user_space
 
 It builds and copies onto the card:
 
-- the **kernel image** — `adi-linux-64/arch/arm64/boot/Image` (64-bit) or `adi-linux/arch/arm/boot/uImage` (32-bit);
-- the **device tree** — `kernel_boot/boards/zcu102_fmcs2/system.dtb` (64-bit) or `kernel_boot/boards/$BOARD_NAME/devicetree.dtb` (32-bit);
-- **`BOOT.BIN`** — from `kernel_boot/boards/$BOARD_NAME/output_boot_bin/BOOT.BIN`;
+- the **kernel image**: `adi-linux-64/arch/arm64/boot/Image` (64-bit) or `adi-linux/arch/arm/boot/uImage` (32-bit);
+- the **device tree**: `kernel_boot/boards/zcu102_fmcs2/system.dtb` (64-bit) or `kernel_boot/boards/$BOARD_NAME/devicetree.dtb` (32-bit);
+- **`BOOT.BIN`**: from `kernel_boot/boards/$BOARD_NAME/output_boot_bin/BOOT.BIN`;
 - the openwifi **driver**, and the **`user_space` + `webserver`** files.
 
 (See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md) for how those three artifacts are built.)
@@ -176,7 +176,7 @@ Connect a phone or laptop to the **"openwifi"** SSID; you should get a `192.168.
 
 - The demo defaults to **channel 44 (5 GHz)**. For a 2.4 GHz-only client, edit `hostapd-openwifi.conf` on the board and re-run `fosdem.sh`.
 - The Xilinx **Viterbi decoder halts after ~2 hours** (evaluation license); reload the FPGA or power-cycle to recover.
-- The **adrv9361z7035 has very low 5 GHz TX power** — keep nodes close on that board.
+- The **adrv9361z7035 has very low 5 GHz TX power**: keep nodes close on that board.
 
 You now have the same result as a prebuilt card, but built from scratch. See [Getting Started → Start the access point](Getting-Started.md#4-start-the-access-point) for more on the bring-up, and [Research Features](Research-Features.md#csi-channel-state-information) to start capturing CSI.
 
@@ -195,7 +195,7 @@ OpenWrt packages openwifi as a kernel module and gives you the LuCI web UI. The 
 | Board | Supported | Tested |
 |---|---|---|
 | `zc706_fmcs2`, `zed_fmcs2`, `adrv9364z7020`, `adrv9361z7035` | ✅ | ✅ |
-| `zcu102_fmcs2` | ✅ | ✅ ⚠️ (fails on some boards — see [Troubleshooting](Troubleshooting.md#openwrt-specific)) |
+| `zcu102_fmcs2` | ✅ | ✅ ⚠️ (fails on some boards, see [Troubleshooting](Troubleshooting.md#openwrt-specific)) |
 | `zc702_fmcs2`, `antsdr`, `e310v2`, `antsdr_e200`, `sdrpi`, `neptunesdr` | ✅ | (untested) |
 
 ### OpenWrt quick start (prebuilt image)
@@ -211,13 +211,13 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
 2. Boot the board. After about a minute an **`openwrt-openwifi`** SSID appears on 2.4 GHz channel 1. Connecting gives you an IP but no internet yet.
 
-3. Give the board (and its clients) internet through your PC. Connect Ethernet (the board assigns your PC `192.168.10.1`), find your interface names with `ip addr`, then run — first argument is the PC's internet-facing interface, second is the board-facing one:
+3. Give the board (and its clients) internet through your PC. Connect Ethernet (the board assigns your PC `192.168.10.1`), find your interface names with `ip addr`, then run (first argument is the PC's internet-facing interface, second is the board-facing one):
 
     ```bash
     ./give_board_internet_access.sh wlan0 eth0
     ```
 
-4. Reach **LuCI** at `http://192.168.10.122` (from the PC) or `http://192.168.13.1` (from a device on the `openwrt-openwifi` SSID). There is no password by default — set one for any real use. Network → Wireless is where you tweak the radio:
+4. Reach **LuCI** at `http://192.168.10.122` (from the PC) or `http://192.168.13.1` (from a device on the `openwrt-openwifi` SSID). There is no password by default. Set one for any real use. Network → Wireless is where you tweak the radio:
 
     ![OpenWrt LuCI wireless configuration page](assets/img/openwrt-luci-wireless.png)
 
@@ -270,7 +270,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
     Handy extras: **Network → SSH → openssh-sftp-server** (enables `scp` to the board) and **Utilities → Editors → nano**.
 
-6. **Build**, keeping the job count low (about 3) to avoid dependency-ordering errors — retry with fewer jobs if it fails:
+6. **Build**, keeping the job count low (about 3) to avoid dependency-ordering errors (retry with fewer jobs if it fails):
 
     ```bash
     make -j$(PKG_JOBS) V=sc
@@ -280,7 +280,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
 ### OpenWrt tips
 
-- **Userspace tools are pre-installed.** The openwifi package puts all `user_space` files under `/root/openwifi` (so the app-note scripts work), and installs the compiled tools (`sdrctl`, `inject_80211`, `analyze_80211`, `side_ch_ctl`) into `/usr/bin` — they're in `$PATH`, so no `./` or specific directory needed.
+- **Userspace tools are pre-installed.** The openwifi package puts all `user_space` files under `/root/openwifi` (so the app-note scripts work), and installs the compiled tools (`sdrctl`, `inject_80211`, `analyze_80211`, `side_ch_ctl`) into `/usr/bin`: they're in `$PATH`, so no `./` or specific directory needed.
 - **Kernel modules are packed in.** No manual copying; `insmod side_ch` just works.
 - **SSH uses mDNS:** `ssh root@openwrt.lan`, no password by default.
 - The app-note [IQ and CSI workflows](Research-Features.md) work on OpenWrt with minor differences (e.g. `insmod side_ch iq_len_init=4095`, then `side_ch_ctl` and the host-side Python display scripts as usual).
@@ -303,7 +303,7 @@ You can also bind-mount the OpenWrt tree under `/workdir` so paths printed in th
 
 ## Related pages
 
-- [Getting Started](Getting-Started.md) — flashing a prebuilt image and first bring-up.
-- [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md) — how the kernel, device tree, and `BOOT.BIN` that these builds install are produced.
-- [Software Development Workflow](Software-Development-Workflow.md) — driver rebuilds and the live reload loop.
-- [Troubleshooting](Troubleshooting.md#boot-and-networking) — boot and OpenWrt-specific issues.
+- [Getting Started](Getting-Started.md): flashing a prebuilt image and first bring-up.
+- [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md): how the kernel, device tree, and `BOOT.BIN` that these builds install are produced.
+- [Software Development Workflow](Software-Development-Workflow.md): driver rebuilds and the live reload loop.
+- [Troubleshooting](Troubleshooting.md#boot-and-networking): boot and OpenWrt-specific issues.

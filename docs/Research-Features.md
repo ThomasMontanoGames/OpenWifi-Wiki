@@ -21,10 +21,10 @@ gcc -o side_ch_ctl side_ch_ctl.c
 
 `side_ch_ctl` uses a compact command syntax you'll see throughout this page:
 
-- `./side_ch_ctl whXhY` — **w**rite register **X** with **h**ex value **Y**
-- `./side_ch_ctl whXdY` — write register X with **d**ecimal value Y
-- `./side_ch_ctl rhX` — read register X
-- `./side_ch_ctl g` or `gN` — start capturing; `g` polls every 100 ms, `gN` every N ms
+- `./side_ch_ctl whXhY`: **w**rite register **X** with **h**ex value **Y**
+- `./side_ch_ctl whXdY`: write register X with **d**ecimal value Y
+- `./side_ch_ctl rhX`: read register X
+- `./side_ch_ctl g` or `gN`: start capturing; `g` polls every 100 ms, `gN` every N ms
 
 Everything below works not only in monitor mode but also alongside live AP/client/ad-hoc operation; bring the link up first, then start the side channel.
 
@@ -269,15 +269,15 @@ Full walkthrough in the [loopback note](https://github.com/open-sdr/openwifi/blo
 
 ### Driver-level (sysfs)
 
-Comprehensive per-packet TX/RX counters are on the [sdrctl page](sdrctl-and-Runtime-Control.md#statistics-via-sysfs) — `stat_enable.sh`, `tx_stat_show.sh`, `rx_stat_show.sh` (with PER calculation), `tx_prio_queue_show.sh`, `rx_gain_show.sh`, per-peer filtering, and ACK inclusion.
+Comprehensive per-packet TX/RX counters are on the [sdrctl page](sdrctl-and-Runtime-Control.md#statistics-via-sysfs): `stat_enable.sh`, `tx_stat_show.sh`, `rx_stat_show.sh` (with PER calculation), `tx_prio_queue_show.sh`, `rx_gain_show.sh`, per-peer filtering, and ACK inclusion.
 
 ### FPGA event counters
 
 Two additional counter sources live in the FPGA:
 
-**openofdm_rx watchdog counters** — the `signal_watchdog` inside `openofdm_rx` detects abnormal signals early so the receiver isn't tied up chasing junk. Select an event with `sdrctl dev sdr0 set reg rx 17 <type>` (0 = phase offset too big, 1 = too many small equalizer outputs, 2 = DC / slow sine detected, 3 = packet too short, 4 = packet too long), read the count with `get reg rx 30`, and clear it by writing any value to reg 30.
+**openofdm_rx watchdog counters**: the `signal_watchdog` inside `openofdm_rx` detects abnormal signals early so the receiver isn't tied up chasing junk. Select an event with `sdrctl dev sdr0 set reg rx 17 <type>` (0 = phase offset too big, 1 = too many small equalizer outputs, 2 = DC / slow sine detected, 3 = packet too short, 4 = packet too long), read the count with `get reg rx 30`, and clear it by writing any value to reg 30.
 
-**Side-channel PHY RX/TX counters** — after `insmod side_ch.ko`, registers 26–31 count paired events (each register has two selectable sources chosen by bits in register 19), e.g. short/long preamble detected, `phy_tx_start`/`phy_tx_done`, header-valid strobes, RSSI-above-threshold, AGC lock/gain-change, and "data packet for me with good FCS." Set the addr2 target in register 7 and the RSSI-event threshold in register 9; read a counter with `rhX`; reset one by writing any value to registers 26–31. The exact event→register mapping is in the [FPGA counter note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/perf_counter.md).
+**Side-channel PHY RX/TX counters**: after `insmod side_ch.ko`, registers 26–31 count paired events (each register has two selectable sources chosen by bits in register 19), e.g. short/long preamble detected, `phy_tx_start`/`phy_tx_done`, header-valid strobes, RSSI-above-threshold, AGC lock/gain-change, and "data packet for me with good FCS." Set the addr2 target in register 7 and the RSSI-event threshold in register 9; read a counter with `rhX`; reset one by writing any value to registers 26–31. The exact event→register mapping is in the [FPGA counter note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/perf_counter.md).
 
 ### High-rate register logging (`fast_reg_log`)
 

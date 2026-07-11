@@ -51,7 +51,7 @@ There is not one "openwifi repo"; there are four, each with a distinct job, a di
   <text x="482" y="145" fill="currentColor">bitstreams per</text>
   <text x="482" y="164" fill="currentColor">board (.xsa / .bit)</text>
   <line x1="480" y1="262" x2="666" y2="262" stroke="currentColor" stroke-opacity="0.12"/>
-  <text x="482" y="281" font-size="11" font-weight="600" fill="#c2740a">none — just download</text>
+  <text x="482" y="281" font-size="11" font-weight="600" fill="#c2740a">none, just download</text>
 
   <!-- card 4: openofdm (rose) -->
   <rect x="694" y="58" width="214" height="240" rx="12" fill="currentColor" fill-opacity="0.03" stroke="#be3d73" stroke-opacity="0.45" stroke-width="1.4"/>
@@ -100,7 +100,7 @@ The two you will clone and work with day to day are **openwifi** and **openwifi-
 
 ## Versions this wiki targets
 
-openwifi pins several toolchains and upstream projects, and they deliberately **don't all share a version number** — a 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or upstream README states a version different from the table below, **trust the upstream repo**: treat this as a snapshot from the last time the wiki was reconciled (the date is in the page footer), and bumping it when upstream moves is a welcome contribution.
+openwifi pins several toolchains and upstream projects, and they intentionally **don't all share a version number**. A 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or upstream README states a version different from the table below, **trust the upstream repo**: treat this as a snapshot from the last time the wiki was reconciled (the date is in the page footer), and bumping it when upstream moves is a welcome contribution.
 
 | Component | Target version | Set / pinned in | Notes |
 |---|---|---|---|
@@ -111,26 +111,26 @@ openwifi pins several toolchains and upstream projects, and they deliberately **
 | ADI Kuiper base image | **2023-12-13 release** (`image_2023-12-13-ADI-Kuiper-full.zip`, tagged `2022_r2`) | flashed manually | Just the starting rootfs; you build a current kernel on top. See [Building SD Images](Building-SD-Images.md#adi-kuiper-build-from-scratch). |
 | OpenWrt (alternative to Kuiper) | branch **`nlnet`** = OpenWrt **24.10**, Linux **6.6**, mac80211 **6.12** | `openwrt-openwifi` repo | Docker-only build, no Vivado. See [Building SD Images](Building-SD-Images.md#openwrt). |
 | Xilinx Viterbi decoder | **evaluation license** | Vivado IP catalog | The eval license halts a running receiver after ~2 hours; a paid license removes the limit. |
-| Build-host OS | **Ubuntu 18 / 20 / 22 LTS** | — | Ubuntu 24 needs `libtinfo5` installed manually (see [FPGA Development](FPGA-Development.md#prerequisites)). |
+| Build-host OS | **Ubuntu 18 / 20 / 22 LTS** | not pinned | Ubuntu 24 needs `libtinfo5` installed manually (see [FPGA Development](FPGA-Development.md#prerequisites)). |
 
 ## Where do I look for…?
 
 A quick index from "I need to change X" to "open this repo/directory."
 
 ### …runtime behavior (rates, power, CCA, ACK, slicing)
-`openwifi/user_space/` — dozens of helper scripts wrap `sdrctl` register writes. Start with the [sdrctl & Runtime Control](sdrctl-and-Runtime-Control.md) page. The tool itself is `openwifi/user_space/sdrctl_src/`.
+`openwifi/user_space/`: dozens of helper scripts wrap `sdrctl` register writes. Start with the [sdrctl & Runtime Control](sdrctl-and-Runtime-Control.md) page. The tool itself is `openwifi/user_space/sdrctl_src/`.
 
 ### …the driver / how Linux talks to the hardware
-`openwifi/driver/` — `sdr.c` (the `mac80211` driver), `sdrctl_intf.c` (the `sdrctl` netlink handler), `sysfs_intf.c` (statistics), `hw_def.h` (register addresses). See [Architecture](Architecture.md).
+`openwifi/driver/`: `sdr.c` (the `mac80211` driver), `sdrctl_intf.c` (the `sdrctl` netlink handler), `sysfs_intf.c` (statistics), `hw_def.h` (register addresses). See [Architecture](Architecture.md).
 
 ### …the PHY (OFDM modulation/demodulation) or the real-time MAC (CSMA/CA, ACK, TSF)
-`openwifi-hw/ip/` — one directory per IP core. `xpu/` is the real-time MAC, `openofdm_tx/` and `openofdm_rx/` are the PHY, `tx_intf/`/`rx_intf/` are the RF/DAC/ADC interfaces, `side_ch/` is CSI/IQ capture. See [FPGA IP Cores](FPGA-IP-Cores.md).
+`openwifi-hw/ip/`: one directory per IP core. `xpu/` is the real-time MAC, `openofdm_tx/` and `openofdm_rx/` are the PHY, `tx_intf/`/`rx_intf/` are the RF/DAC/ADC interfaces, `side_ch/` is CSI/IQ capture. See [FPGA IP Cores](FPGA-IP-Cores.md).
 
 ### …CSI / IQ capture (the research features)
 Three places cooperate: `openwifi-hw/ip/side_ch/` (the FPGA capture engine), `openwifi/driver/side_ch/` (the `side_ch.ko` kernel module), and `openwifi/user_space/side_ch_ctl_src/` (the `side_ch_ctl` tool plus the Python/MATLAB display scripts). See [Research Features](Research-Features.md).
 
 ### …how a board boots (kernel, device tree, u-boot, BOOT.BIN)
-`openwifi/kernel_boot/` — per-board boot artifacts under `boards/<board_name>/`, kernel patches, and the device-tree overlay machinery (`construct_device_tree.sh`, `openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso`). See [Software Development Workflow](Software-Development-Workflow.md).
+`openwifi/kernel_boot/`: per-board boot artifacts under `boards/<board_name>/`, kernel patches, and the device-tree overlay machinery (`construct_device_tree.sh`, `openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso`). See [Software Development Workflow](Software-Development-Workflow.md).
 
 ### …adding or porting a board
 Both repos: `openwifi-hw/boards/<board_name>/` (Vivado project) and `openwifi/kernel_boot/boards/<board_name>/` (device tree + boot files). See [FPGA Development → Porting to a new board](FPGA-Development.md#porting-to-a-new-board).
@@ -160,7 +160,7 @@ openwifi/
 ├── doc/               # architecture reference, app notes, known issues, publications, videos
 │   ├── app_notes/          # CSI, IQ, fuzzer, radar, injection, 802.11n, HLS, etc.
 │   ├── img_build_instruction/  # Kuiper and OpenWrt SD-image build guides
-│   └── known_issue/            # notter.md — the canonical troubleshooting list
+│   └── known_issue/            # notter.md: the canonical troubleshooting list
 └── README.md
 ```
 
