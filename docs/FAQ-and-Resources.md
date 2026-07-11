@@ -76,7 +76,7 @@ A curated playlist lives in [`doc/videos.md`](https://github.com/open-sdr/openwi
 - First public demo and the FOSDEM 2020/2021/2022 presentations.
 - FSF LibrePlanet 2021: *The dawn of the free/libre WiFi chip*.
 - Feature demos: CSI, WiFi CSI Radar (joint communication and sensing), and the CSI fuzzer (plus an ACM WiSec interview).
-- Conceptual talks: *How a Wi-Fi chip works internally* (CCC GPN22) and *An open-source Wi-Fi chip — What, Why and How?* (FSiC 2024).
+- Conceptual talks: *How a Wi-Fi chip works internally* (CCC GPN22) and *An open-source Wi-Fi chip, What, Why and How?* (FSiC 2024).
 
 ## Community and support
 
