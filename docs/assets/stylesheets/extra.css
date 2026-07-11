@@ -43,6 +43,20 @@
 /* Header title a little tighter */
 .md-header__title { font-weight: 700; letter-spacing: -0.01em; }
 
+/* ---- Anchored headings clear the sticky chrome ----
+   Following a permalink or a TOC entry scrolls the heading to the very top,
+   where the sticky header (and sticky tabs) would otherwise cover it. Offset
+   the scroll target so the heading lands just below that chrome. This affects
+   only scroll position, not layout spacing. Tune if it feels too high/low. */
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4,
+.md-typeset h5,
+.md-typeset h6 {
+  scroll-margin-top: 3.6rem;
+}
+
 /* ---- Wider layout ----
    Give the content column more room (Material's default is fairly narrow),
    then use a "breakout" measure: cap running prose at a readable line
@@ -87,7 +101,7 @@
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  font-size: 0.76rem;
+  font-size: 0.8rem;
 }
 .md-typeset table:not([class]) th {
   background: var(--md-default-fg-color--lightest);
@@ -133,7 +147,7 @@
   border-left-width: 3px;
   border-radius: 10px;
   box-shadow: none;
-  font-size: 0.76rem;
+  font-size: 0.8rem;
 }
 
 /* ---- Figures & captions (diagrams, screenshots) ---- */

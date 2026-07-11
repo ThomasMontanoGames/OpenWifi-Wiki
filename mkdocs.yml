@@ -83,6 +83,13 @@ markdown_extensions:
 
 plugins:
   - search
+  # Adds a per-page "last updated" date (from git history) shown at the
+  # bottom of each page. fallback_to_build_date keeps builds working when
+  # full git history isn't available (e.g. a shallow checkout).
+  - git-revision-date-localized:
+      type: date
+      enable_creation_date: false
+      fallback_to_build_date: true
 
 extra:
   social:
