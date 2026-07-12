@@ -40,37 +40,97 @@ The project is split across four repositories, because the driver and the FPGA d
 
 ## Where to go next
 
-**New to the project?** Read these five in order; they take you from "what is this" to bringing up your own board:
+**New to the project?** Follow these five in order; they take you from "what is this" to bringing up your own board.
 
-1. [The Repositories](Repositories.md): the four repos, why the project is split, and where to look for anything. The best first stop for onboarding.
-2. [Getting Started](Getting-Started.md): hardware you need, flashing the SD card, bringing up your first openwifi AP.
-3. [Architecture Overview](Architecture.md): how the FPGA, driver, and Linux stack fit together. Required reading before touching code.
-4. [Supported Boards](Supported-Boards.md): the board matrix, per-board hardware notes, and the GPIO/LED debug map.
-5. [Operating Modes](Operating-Modes.md): AP, client, ad-hoc, monitor, and packet injection walkthroughs.
+<div class="grid cards" markdown>
 
-**Using and controlling the system**
+-   :material-source-branch:{ .lg .middle } __1. The Repositories__
 
-- [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md): the register interface and the everyday knobs: TX power, rates, gain, CCA, ACK behavior, antenna selection, arbitrary frequencies.
+    ---
 
-**Developing**
+    The four repos, why the project is split, and where to look for anything. The best first stop for onboarding.
 
-- [Software Development Workflow](Software-Development-Workflow.md): rebuilding the driver and reloading driver + FPGA without rebooting.
-- [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md): the boot chain, kernel patches, and the device-tree overlay system, the key page for porting to a new board.
-- [Building SD Images](Building-SD-Images.md): building a Kuiper or OpenWrt card from scratch, step by step.
-- [FPGA Development](FPGA-Development.md): building the bitstream from source, modifying and simulating IP cores, HLS, porting to new boards.
-- [FPGA IP Cores](FPGA-IP-Cores.md): a reference for the six custom cores: the real-time MAC, the OFDM TX/RX chains, and the capture side channel.
+    [:octicons-arrow-right-24: The Repositories](Repositories.md)
 
-**Research features**
+-   :material-rocket-launch:{ .lg .middle } __2. Getting Started__
 
-- [CSI, IQ Capture and Research Features](Research-Features.md): CSI extraction, CSI radar, CSI fuzzer, IQ capture, loopback testing, counters and statistics.
-- [Application Notes](Application-Notes.md): an index of the upstream application notes, with figures and links into the relevant wiki sections.
+    ---
 
-**Help & support**
+    The hardware you need, flashing the SD card, and bringing up your first openwifi AP.
 
-- [Troubleshooting and Known Issues](Troubleshooting.md): problems by symptom, plus the debugging tools.
-- [Glossary](Glossary.md): the Wi-Fi, FPGA/SoC, and Linux acronyms used across the wiki.
-- [FAQ and Resources](FAQ-and-Resources.md): 802.11b compatibility, ASIC questions, publications, citing openwifi, licensing, community channels.
-- [Contributing](Contributing.md): the CLA, dev-environment setup, and how to propose a change.
+    [:octicons-arrow-right-24: Getting Started](Getting-Started.md)
+
+-   :material-sitemap:{ .lg .middle } __3. Architecture Overview__
+
+    ---
+
+    How the FPGA, driver, and Linux stack fit together. Required reading before touching code.
+
+    [:octicons-arrow-right-24: Architecture Overview](Architecture.md)
+
+-   :material-developer-board:{ .lg .middle } __4. Supported Boards__
+
+    ---
+
+    The board matrix, per-board hardware notes, and the GPIO/LED debug map.
+
+    [:octicons-arrow-right-24: Supported Boards](Supported-Boards.md)
+
+-   :material-access-point:{ .lg .middle } __5. Operating Modes__
+
+    ---
+
+    AP, client, ad-hoc, monitor, and packet injection walkthroughs.
+
+    [:octicons-arrow-right-24: Operating Modes](Operating-Modes.md)
+
+</div>
+
+**Explore by area.** Each card jumps into a part of the project; the sidebar lists every page within that area.
+
+<div class="grid cards" markdown>
+
+-   :material-access-point:{ .lg .middle } __Using openwifi__
+
+    ---
+
+    Run openwifi as an AP, client, ad-hoc, or monitor, and control it at runtime with `sdrctl`: TX power, rates, gain, CCA, ACK behavior, and frequency.
+
+    [:octicons-arrow-right-24: Operating Modes](Operating-Modes.md)
+
+-   :material-tools:{ .lg .middle } __Developing__
+
+    ---
+
+    Rebuild the driver, work on the FPGA IP cores, build SD images, and port openwifi to a new board.
+
+    [:octicons-arrow-right-24: Software Development Workflow](Software-Development-Workflow.md)
+
+-   :material-waveform:{ .lg .middle } __Research features__
+
+    ---
+
+    Per-packet CSI, raw IQ capture, CSI radar and fuzzer, loopback testing, and the counters and statistics.
+
+    [:octicons-arrow-right-24: Research Features](Research-Features.md)
+
+-   :material-file-document-multiple:{ .lg .middle } __Application notes__
+
+    ---
+
+    An index of the upstream application notes, with figures and links into the relevant wiki sections.
+
+    [:octicons-arrow-right-24: Application Notes](Application-Notes.md)
+
+-   :material-lifebuoy:{ .lg .middle } __Help & support__
+
+    ---
+
+    Troubleshooting by symptom, the glossary, the FAQ and resources, and how to contribute.
+
+    [:octicons-arrow-right-24: Troubleshooting](Troubleshooting.md)
+
+</div>
 
 ## License and attribution
 

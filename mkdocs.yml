@@ -42,7 +42,9 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
-    - navigation.path
+    # Lets the "Home" tab open the home page directly, via the untitled
+    # index.md entry under the Home section in `nav` (see the nav comment).
+    - navigation.indexes
     - navigation.top
     - navigation.footer
     - search.suggest
@@ -63,6 +65,11 @@ markdown_extensions:
   - attr_list
   - def_list
   - md_in_html
+  # Enables `:material-*:` / `:octicons-*:` icon shortcodes, used for the
+  # icons on the home page grid cards.
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.details
   - pymdownx.superfences:
       custom_fences:
@@ -101,8 +108,11 @@ extra:
       name: openwifi releases
 
 nav:
-  - Getting oriented:
-      - Home: index.md
+  # `navigation.indexes` makes the first (untitled) entry under a section its
+  # landing page. Only "Home" uses it: the untitled index.md makes the Home
+  # tab open the home page instead of just expanding the section.
+  - Home:
+      - index.md
       - The Repositories: Repositories.md
       - Getting Started: Getting-Started.md
       - Architecture Overview: Architecture.md
@@ -117,10 +127,13 @@ nav:
       - Building SD Images: Building-SD-Images.md
       - FPGA Development: FPGA-Development.md
       - FPGA IP Cores: FPGA-IP-Cores.md
+  # Research is a single-page section: the short tab label ("Research") comes
+  # from the section name, while the sidebar entry derives its full title
+  # ("CSI, IQ Capture and Research Features") from the page's H1 — so the key
+  # "CSI/IQ" wording stays visible without a hand-maintained nav label.
   - Research:
-      - CSI, IQ & Research Features: Research-Features.md
-  - App Notes:
-      - Application Notes: Application-Notes.md
+      - Research-Features.md
+  - App Notes: Application-Notes.md
   - Help & Support:
       - Troubleshooting: Troubleshooting.md
       - Glossary: Glossary.md

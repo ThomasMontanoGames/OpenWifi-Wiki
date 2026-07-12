@@ -278,3 +278,9 @@
   border-color: var(--md-accent-fg-color);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
 }
+/* Tint the leading card icon (the `:material-*:{ .lg .middle }` glyph, which
+   Material renders in the card's first paragraph) with the brand accent so
+   cards read as a set and match the teal palette. */
+.md-typeset .grid.cards > ul > li > p:first-child .twemoji.lg {
+  color: var(--md-accent-fg-color);
+}
