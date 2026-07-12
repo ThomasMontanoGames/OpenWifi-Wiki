@@ -20,30 +20,81 @@ Layered from top to bottom:
 
 Because it registers a normal Linux network interface (`sdr0`), every tool that works with a commercial card works here too, which is the core idea behind openwifi.
 
-```mermaid
-flowchart TB
-    subgraph host["Software — Linux on the ARM cores (PS)"]
-        direction TB
-        tools["User space<br/>hostapd · wpa_supplicant · iw · tcpdump · sdrctl"]
-        stack["Kernel: cfg80211 / mac80211<br/>the upper MAC (association, management)"]
-        drv["openwifi driver (sdr.c)<br/>implements the mac80211 API · creates NIC sdr0"]
-        tools --> stack --> drv
-    end
-    subgraph pl["FPGA fabric (PL) — the openwifi-hw design"]
-        direction TB
-        intf["tx_intf / rx_intf / side_ch<br/>DMA + per-packet metadata"]
-        lowmac["xpu — real-time low MAC<br/>CSMA/CA · hardware ACK · TSF timer"]
-        phy["openofdm_tx / openofdm_rx<br/>OFDM PHY"]
-        intf <--> lowmac
-        intf <--> phy
-    end
-    rf["AD9361 RF front end · 70 MHz–6 GHz"]
+<figure class="ow-svgfig">
+<svg viewBox="0 0 760 800" width="760" height="800" role="img"
+     aria-label="openwifi architecture: software on the ARM cores (PS) drives the openwifi-hw FPGA fabric (PL) over the AXI bus, and the PHY drives the AD9361 RF front end."
+     style="max-width:100%;height:auto;color:var(--md-default-fg-color);font-family:var(--md-text-font-family,inherit)">
+  <defs>
+    <marker id="ow-arrow" viewBox="0 0 10 10" refX="9" refY="5"
+            markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
+    </marker>
+  </defs>
 
-    drv <-->|"AXI bus: register writes + DMA"| intf
-    phy <-->|"IQ samples · real-time SPI control"| rf
-```
+  <!-- ===== Container: Software (PS) ===== -->
+  <rect x="30" y="40" width="700" height="290" rx="12"
+        fill="currentColor" fill-opacity="0.025"
+        stroke="currentColor" stroke-opacity="0.22" stroke-width="1.2"/>
+  <text x="48" y="66" text-anchor="start" font-size="12.5" font-weight="600"
+        fill="currentColor" fill-opacity="0.72">Software — Linux on the ARM cores (PS)</text>
 
-<p style="text-align:center"><em>The SoftMAC split: the <strong>upper</strong> MAC and everything above it run in Linux software, while the <strong>low</strong> MAC (<code>xpu</code>) and the PHY run in FPGA fabric you can read and rebuild. The processor reaches every FPGA core over the AXI bus.</em></p>
+  <!-- Container: FPGA fabric (PL) -->
+  <rect x="30" y="380" width="700" height="270" rx="12"
+        fill="currentColor" fill-opacity="0.025"
+        stroke="currentColor" stroke-opacity="0.22" stroke-width="1.2"/>
+  <text x="48" y="406" text-anchor="start" font-size="12.5" font-weight="600"
+        fill="currentColor" fill-opacity="0.72">FPGA fabric (PL) — the openwifi-hw design</text>
+
+  <!-- ===== Connectors (drawn before nodes so borders sit on top) ===== -->
+  <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-opacity="0.8">
+    <!-- tools -> stack -> drv -->
+    <path d="M380,142 V166" marker-end="url(#ow-arrow)"/>
+    <path d="M380,224 V248" marker-end="url(#ow-arrow)"/>
+    <!-- drv <-> intf : AXI bus (straight, crosses both container borders) -->
+    <path d="M380,306 V424" marker-start="url(#ow-arrow)" marker-end="url(#ow-arrow)"/>
+    <!-- intf <-> lowmac / phy : right-angle fan-out -->
+    <path d="M330,482 V512 H215 V560" marker-start="url(#ow-arrow)" marker-end="url(#ow-arrow)"/>
+    <path d="M430,482 V512 H545 V560" marker-start="url(#ow-arrow)" marker-end="url(#ow-arrow)"/>
+    <!-- PL fabric <-> rf : the whole FPGA fabric interfaces to RF
+         (I/Q via the iq_intf/adc/dac blocks, gain/AGC via xpu) -->
+    <path d="M380,650 V712" marker-start="url(#ow-arrow)" marker-end="url(#ow-arrow)"/>
+  </g>
+
+  <!-- Edge labels (offset from the lines so nothing strikes through) -->
+  <g font-size="11.5" fill="currentColor" fill-opacity="0.7">
+    <text x="396" y="356" text-anchor="start">AXI bus:</text>
+    <text x="396" y="371" text-anchor="start">register writes + DMA</text>
+    <text x="396" y="676" text-anchor="start">I/Q samples ·</text>
+    <text x="396" y="691" text-anchor="start">realtime gain/AGC</text>
+  </g>
+
+  <!-- ===== Nodes ===== -->
+  <g font-size="12.5" text-anchor="middle">
+    <!-- PS nodes (teal) -->
+    <g>
+      <rect x="205" y="84" width="350" height="58" rx="8" fill="#0d9488" fill-opacity="0.12" stroke="#0d9488" stroke-width="1.4"/>
+      <text fill="currentColor"><tspan x="380" y="108">User space</tspan><tspan x="380" dy="17">hostapd · wpa_supplicant · iw · tcpdump · sdrctl</tspan></text>
+      <rect x="205" y="166" width="350" height="58" rx="8" fill="#0d9488" fill-opacity="0.12" stroke="#0d9488" stroke-width="1.4"/>
+      <text fill="currentColor"><tspan x="380" y="190">Kernel: cfg80211 / mac80211</tspan><tspan x="380" dy="17">the upper MAC (association, management)</tspan></text>
+      <rect x="205" y="248" width="350" height="58" rx="8" fill="#0d9488" fill-opacity="0.12" stroke="#0d9488" stroke-width="1.4"/>
+      <text fill="currentColor"><tspan x="380" y="272">openwifi driver (sdr.c)</tspan><tspan x="380" dy="17">implements the mac80211 API · creates NIC sdr0</tspan></text>
+    </g>
+    <!-- PL nodes (indigo) -->
+    <g>
+      <rect x="205" y="424" width="350" height="58" rx="8" fill="#6366f1" fill-opacity="0.12" stroke="#6366f1" stroke-width="1.4"/>
+      <text fill="currentColor"><tspan x="380" y="448">tx_intf / rx_intf / side_ch</tspan><tspan x="380" dy="17">DMA + per-packet metadata</tspan></text>
+      <rect x="70" y="560" width="290" height="64" rx="8" fill="#6366f1" fill-opacity="0.12" stroke="#6366f1" stroke-width="1.4"/>
+      <text fill="currentColor"><tspan x="215" y="587">xpu — real-time low MAC</tspan><tspan x="215" dy="17">CSMA/CA · hardware ACK · TSF timer</tspan></text>
+      <rect x="400" y="560" width="290" height="64" rx="8" fill="#6366f1" fill-opacity="0.12" stroke="#6366f1" stroke-width="1.4"/>
+      <text fill="currentColor"><tspan x="545" y="587">openofdm_tx / openofdm_rx</tspan><tspan x="545" dy="17">OFDM PHY</tspan></text>
+    </g>
+    <!-- RF front end (neutral: external analog part) -->
+    <rect x="230" y="712" width="300" height="60" rx="8" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.4"/>
+    <text fill="currentColor"><tspan x="380" y="737">AD9361 RF front end</tspan><tspan x="380" dy="17">70 MHz–6 GHz</tspan></text>
+  </g>
+</svg>
+<figcaption>The SoftMAC split. <span style="color:#0d9488;font-weight:700">Teal</span> = software on the Linux/ARM cores (PS): the upper MAC and everything above it. <span style="color:#6366f1;font-weight:700">Indigo</span> = the openwifi-hw design in FPGA fabric (PL) you can read and rebuild: the low MAC (<code>xpu</code>) and the PHY. The processor reaches every FPGA core over the AXI bus; the AD9361 RF front end is the external analog radio.</figcaption>
+</figure>
 
 ## How the driver talks to Linux: the mac80211 API
 

@@ -18,21 +18,75 @@ BOOT partition
 
 The sequence: the SoC's boot ROM loads **BOOT.BIN**, whose **FSBL** (First Stage Boot Loader) initializes DDR and clocks, programs the **FPGA bitstream**, and hands off to **U-Boot**, which loads the **kernel** and the **device tree** and starts Linux. Linux then reads the device tree to discover the FPGA's AXI peripherals (including openwifi's cores) and binds drivers to them.
 
-```mermaid
-flowchart TB
-    rom["SoC boot ROM"] --> fsbl
-    subgraph bootbin["BOOT.BIN"]
-        direction LR
-        fsbl["FSBL<br/>init DDR + clocks"] --> bit["FPGA bitstream<br/>programs the PL"] --> uboot["U-Boot"]
-    end
-    uboot --> kernel["Linux kernel<br/>uImage / Image"]
-    uboot --> dtb["devicetree.dtb<br/>the hardware description"]
-    kernel --> linux["Linux starts"]
-    dtb --> linux
-    linux --> bind["Driver binds to the sdr,* FPGA nodes<br/>discovered from the device tree"]
-```
+<figure>
+<svg viewBox="0 0 940 420" role="img" aria-label="The openwifi boot chain: the SoC boot ROM loads BOOT.BIN, whose stages run in order — FSBL (init DDR and clocks), then the FPGA bitstream (programs the PL), then U-Boot. U-Boot loads the Linux kernel (uImage / Image), which boots into a running Linux, and also loads the device tree blob (devicetree.dtb), which is not code but a hardware description that the running kernel reads. From the device tree the driver binds to the sdr,* FPGA nodes." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
+  <defs>
+    <marker id="boot-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.6"/>
+    </marker>
+  </defs>
 
-<p style="text-align:center"><em>The boot chain. On 64-bit ZynqMP (ZCU102) the <code>BOOT.BIN</code> stage list grows — PMUFW before the bitstream, ATF (BL31) after it — as detailed just below.</em></p>
+  <!-- SoC boot ROM -->
+  <rect x="380" y="18" width="180" height="40" rx="10" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3"/>
+  <text x="470" y="43" text-anchor="middle" font-size="12" fill="currentColor">SoC boot ROM</text>
+
+  <!-- boot ROM -> BOOT.BIN -->
+  <line x1="470" y1="58" x2="470" y2="78" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none" marker-end="url(#boot-arrow)"/>
+
+  <!-- BOOT.BIN container (subgraph) -->
+  <rect x="170" y="78" width="600" height="78" rx="12" fill="currentColor" fill-opacity="0.03" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.3" stroke-dasharray="5 4"/>
+  <text x="184" y="95" font-size="10.5" font-weight="700" fill="currentColor" fill-opacity="0.7">BOOT.BIN</text>
+
+  <!-- BOOT.BIN inner stages (LR) -->
+  <g fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3">
+    <rect x="195" y="102" width="160" height="46" rx="10"/>
+    <rect x="390" y="102" width="160" height="46" rx="10"/>
+  </g>
+  <rect x="585" y="102" width="160" height="46" rx="10" fill="#c2740a" fill-opacity="0.08" stroke="#c2740a" stroke-opacity="0.6" stroke-width="1.5"/>
+  <text x="275" y="121" text-anchor="middle" font-size="11" fill="currentColor">FSBL</text>
+  <text x="275" y="137" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">init DDR + clocks</text>
+  <text x="470" y="121" text-anchor="middle" font-size="11" fill="currentColor">FPGA bitstream</text>
+  <text x="470" y="137" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">programs the PL</text>
+  <text x="665" y="129" text-anchor="middle" font-size="12" font-weight="700" fill="#c2740a">U-Boot</text>
+
+  <!-- BOOT.BIN (U-Boot) loads the kernel (spine) + device tree (side input) -->
+  <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
+    <line x1="470" y1="156" x2="470" y2="204" marker-end="url(#boot-arrow)"/>
+    <line x1="700" y1="156" x2="700" y2="204" marker-end="url(#boot-arrow)"/>
+  </g>
+  <text x="505" y="182" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.65">U-Boot loads</text>
+
+  <!-- Linux kernel (the code that becomes running Linux) -->
+  <rect x="370" y="204" width="200" height="48" rx="10" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3"/>
+  <text x="470" y="224" text-anchor="middle" font-size="11.5" fill="currentColor">Linux kernel</text>
+  <text x="470" y="240" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">uImage / Image</text>
+
+  <!-- device tree: data, not code — dashed box off to the side -->
+  <rect x="605" y="204" width="190" height="48" rx="10" fill="currentColor" fill-opacity="0.03" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3" stroke-dasharray="5 4"/>
+  <text x="700" y="224" text-anchor="middle" font-size="11.5" fill="currentColor">devicetree.dtb</text>
+  <text x="700" y="240" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">hardware description (data)</text>
+
+  <!-- kernel -> Linux starts (spine) -->
+  <line x1="470" y1="252" x2="470" y2="290" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none" marker-end="url(#boot-arrow)"/>
+
+  <!-- Linux starts -->
+  <rect x="380" y="290" width="180" height="44" rx="10" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3"/>
+  <text x="470" y="317" text-anchor="middle" font-size="12" fill="currentColor">Linux starts</text>
+
+  <!-- Linux starts -> driver binds (spine) -->
+  <line x1="470" y1="334" x2="470" y2="360" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none" marker-end="url(#boot-arrow)"/>
+
+  <!-- device tree read by the running kernel -> driver binds -->
+  <line x1="700" y1="252" x2="700" y2="360" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none" stroke-dasharray="5 4" marker-end="url(#boot-arrow)"/>
+  <text x="710" y="300" text-anchor="start" font-size="9" fill="currentColor" fill-opacity="0.65">read by Linux</text>
+
+  <!-- driver binds (teal outcome) -->
+  <rect x="225" y="360" width="490" height="50" rx="12" fill="#0d9488" fill-opacity="0.06" stroke="#0d9488" stroke-opacity="0.55" stroke-width="1.5"/>
+  <text x="470" y="382" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0d9488">Driver binds to the sdr,* FPGA nodes</text>
+  <text x="470" y="398" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">discovered from the device tree</text>
+</svg>
+<figcaption><em>The boot chain. On 64-bit ZynqMP (ZCU102) the <code>BOOT.BIN</code> stage list grows — PMUFW before the bitstream, ATF (BL31) after it — as detailed just below.</em></figcaption>
+</figure>
 
 ### 32-bit vs 64-bit boot
 
