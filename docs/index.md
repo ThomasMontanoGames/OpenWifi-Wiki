@@ -3,7 +3,7 @@
 
 # openwifi Wiki
 
-A reorganized, plain-language guide to **openwifi**: a free and open-source, Linux `mac80211`-compatible, full-stack IEEE 802.11 (Wi-Fi) implementation that runs on SDR hardware built around Xilinx Zynq SoCs and the Analog Devices AD9361 RF front end.
+A reorganized, plain-language guide to **openwifi**: a free and open-source, Linux `mac80211`-compatible, full-stack IEEE 802.11 (Wi-Fi) implementation that runs on SDR hardware built around Xilinx Zynq SoCs, typically paired with the Analog Devices AD9361 RF front end.
 
 <div class="ow-hero__cta" markdown>
 [Get started](Getting-Started.md){ .ow-primary }

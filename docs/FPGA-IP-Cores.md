@@ -108,7 +108,7 @@ Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) a
 
 ## `xpu`: the real-time MAC
 
-`xpu` (sometimes read as "transceiver/eXtensible processing unit") is the central core of openwifi and the largest: its register file `xpu_s_axi.v` (48 KB, 64 registers) is the biggest single source file in the IP tree. It implements everything that has to happen in **microseconds** (too fast for the Linux MAC to handle), which is exactly why openwifi can meet 802.11 timing that a pure-software MAC cannot.
+`xpu` (sometimes read as "transceiver/eXtensible processing unit") is the central core of openwifi and the largest: its register file `xpu_s_axi.v` (48 KB, 64 registers) is the biggest register bank of any core, and twice the size of the other cores' banks. It implements everything that has to happen in **microseconds** (too fast for the Linux MAC to handle), which is exactly why openwifi can meet 802.11 timing that a pure-software MAC cannot.
 
 What lives inside (`ip/xpu/src/`, 21 Verilog files):
 

@@ -132,7 +132,7 @@ Change only the bits you mean to; other bits of this register have other jobs.
 ./sdrctl dev sdr0 set reg xpu 11 25     # 11001: keep the retx setting AND disable ACK TX
 ```
 
-The cleanest place to cap retransmissions is actually the driver, via `retry_limit_hw_value` in `openwifi_tx()`.
+The cleanest place to cap retransmissions is actually the driver, via `retry_limit_raw` (from which `retry_limit_hw_value` is derived) in `openwifi_tx()`.
 
 ### TX LO / RF-port control
 

@@ -100,7 +100,7 @@ The two you will clone and work with day to day are **openwifi** and **openwifi-
 
 ## Versions this wiki targets
 
-openwifi pins several toolchains and upstream projects, and they intentionally **don't all share a version number**. A 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or upstream README states a version different from the table below, **trust the upstream repo**: treat this as a snapshot from the last time the wiki was reconciled (the date is in the page footer), and bumping it when upstream moves is a welcome contribution.
+openwifi pins several toolchains and upstream projects, and they intentionally **don't all share a version number**. A 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or upstream README states a version different from the table below, **trust the upstream repo**: treat this as a snapshot from the last reconciliation with upstream (**11 July 2026**), and bumping it when upstream moves is a welcome contribution.
 
 | Component | Target version | Set / pinned in | Notes |
 |---|---|---|---|
@@ -133,7 +133,7 @@ A quick index from "I need to change X" to "open this repo/directory."
 Three places cooperate: `openwifi-hw/ip/side_ch/` (the FPGA capture engine), `openwifi/driver/side_ch/` (the `side_ch.ko` kernel module), and `openwifi/user_space/side_ch_ctl_src/` (the `side_ch_ctl` tool plus the Python/MATLAB display scripts). See [Research Features](Research-Features.md).
 
 ### …how a board boots (kernel, device tree, u-boot, BOOT.BIN)
-`openwifi/kernel_boot/`: per-board boot artifacts under `boards/<board_name>/`, kernel patches, and the device-tree overlay machinery (`construct_device_tree.sh`, `openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso`). See [Software Development Workflow](Software-Development-Workflow.md).
+`openwifi/kernel_boot/`: per-board boot artifacts under `boards/<board_name>/`, kernel patches, and the device-tree overlay machinery (`construct_device_tree.sh`, `openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso`). See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md).
 
 ### …adding or porting a board
 Both repos: `openwifi-hw/boards/<board_name>/` (Vivado project) and `openwifi/kernel_boot/boards/<board_name>/` (device tree + boot files). See [FPGA Development → Porting to a new board](FPGA-Development.md#porting-to-a-new-board).

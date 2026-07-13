@@ -14,7 +14,7 @@ Two ways to build the side-channel pieces:
 
 ```bash
 # side_ch.ko (on host):
-$OPENWIFI_DIR/driver/side_ch/make_driver.sh $OPENWIFI_DIR $XILINX_DIR ARCH_BIT
+$OPENWIFI_DIR/driver/side_ch/make_driver.sh $OPENWIFI_DIR $XILINX_DIR $ARCH_BIT   # ARCH_BIT: 32 or 64
 # side_ch_ctl (compile ON the board):
 gcc -o side_ch_ctl side_ch_ctl.c
 ```

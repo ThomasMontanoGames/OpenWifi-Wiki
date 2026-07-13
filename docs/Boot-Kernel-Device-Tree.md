@@ -92,7 +92,7 @@ The sequence: the SoC's boot ROM loads **BOOT.BIN**, whose **FSBL** (First Stage
 
 The two SoC families build BOOT.BIN differently, which is why ZCU102 is "the odd one out":
 
-| | Zynq-7000 (32-bit) | Zynq UltraScale+ / MPSoC (64-bit, ZCU102) |
+| | Zynq-7000 (32-bit) | Zynq UltraScale+ / MPSoC (64-bit, e.g. ZCU102) |
 |---|---|---|
 | Build script | `kernel_boot/build_boot_bin.sh` | `kernel_boot/build_zynqmp_boot_bin.sh` |
 | BOOT.BIN stages | FSBL → bitstream → U-Boot | FSBL → **PMUFW** → bitstream → **ATF (BL31)** → U-Boot |

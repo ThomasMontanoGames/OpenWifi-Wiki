@@ -12,6 +12,7 @@ Most host-side build steps expect these environment variables (use absolute path
 export XILINX_DIR=/opt/Xilinx                 # dir containing Vitis/, Vivado/, etc.
 export OPENWIFI_HW_IMG_DIR=/path/to/openwifi-hw-img
 export BOARD_NAME=zed_fmcs2                    # your board
+export ARCH_BIT=32                             # 32 for Zynq-7000; 64 for Zynq UltraScale+ (e.g. ZCU102)
 ```
 
 For driver builds you also need Vivado/Vitis installed (the driver is cross-compiled with the kernel toolchain) and a few packages:
@@ -20,7 +21,7 @@ For driver builds you also need Vivado/Vitis installed (the driver is cross-comp
 sudo apt install flex bison libssl-dev device-tree-compiler u-boot-tools -y
 ```
 
-Throughout, **`ARCH_BIT`** is `32` for Zynq-7000 boards and `64` for Zynq MPSoC (ZCU102).
+Throughout, **`ARCH_BIT`** is `32` for Zynq-7000 boards and `64` for Zynq UltraScale+ boards (e.g. the ZCU102).
 
 For the exact toolchain, kernel, and image versions these builds expect, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
 
@@ -30,14 +31,14 @@ For the exact toolchain, kernel, and image versions these builds expect, see [Ve
 
    ```bash
    cd openwifi/user_space
-   ./prepare_kernel.sh $XILINX_DIR ARCH_BIT
+   ./prepare_kernel.sh $XILINX_DIR $ARCH_BIT
    ```
 
 2. Compile the driver:
 
    ```bash
    cd openwifi/driver
-   ./make_all.sh $XILINX_DIR ARCH_BIT
+   ./make_all.sh $XILINX_DIR $ARCH_BIT
    # Extra args beyond these two become "#define" macros in pre_def.h
    # for conditional compilation (see below).
    ```

@@ -113,7 +113,7 @@ ssh root@192.168.10.122
 passwd            # change it to openwifi
 ```
 
-If login fails, see [Troubleshooting](Troubleshooting.md#boot-and-networking). Enlarge the root partition and reboot:
+If login fails, see [Troubleshooting](Troubleshooting.md#boot-and-networking). Enlarge the root partition (only needed if your SD card is larger than 16 GB) and reboot:
 
 ```bash
 raspi-config --expand-rootfs
@@ -273,7 +273,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 6. **Build**, keeping the job count low (about 3) to avoid dependency-ordering errors (retry with fewer jobs if it fails):
 
     ```bash
-    make -j$(PKG_JOBS) V=sc
+    make -j3 V=sc
     ```
 
 7. **Flash** the resulting image with the same `dd` procedure as the quick start (mind the different output path). Exit the container with `Ctrl+D` first.

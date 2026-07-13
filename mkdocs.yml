@@ -5,11 +5,12 @@ repo_url: https://github.com/ThomasMontanoGames/OpenWifi-Wiki
 repo_name: ThomasMontanoGames/OpenWifi-Wiki
 edit_uri: edit/master/docs/
 
-# Shown in the footer on every page. Bump the date whenever the wiki is
-# reconciled against the upstream repositories.
+# Shown in the footer on every page. Keep this line evergreen; the date of
+# the last upstream reconciliation lives on the Repositories page, in the
+# "Versions this wiki targets" section — bump it there when reconciling.
 copyright: >
-  This companion wiki was last reconciled with upstream on 11 July 2026.
-  The <a href="https://github.com/open-sdr/openwifi">openwifi repositories</a> remain authoritative.
+  A community companion wiki —
+  the <a href="https://github.com/open-sdr/openwifi">openwifi repositories</a> remain authoritative.
 
 theme:
   name: material
