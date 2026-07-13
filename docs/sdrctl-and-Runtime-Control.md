@@ -109,6 +109,8 @@ Convenience scripts read state with no argument, disable with `1`, enable with `
 ./cw_disable.sh 1      # fix contention window to 0 (no random backoff)
 ```
 
+Two finer-grained EIFS variants exist as well: `eifs_by_last_rx_fail_disable.sh` and `eifs_by_last_tx_fail_disable.sh` disable only the EIFS triggered by the last failed reception or the last failed transmission, with the same read/`1`/`0` convention. All of these scripts write the driver's `csma_cfg0` sysfs file, which when read prints the full NAV/DIFS/EIFS/CW override state in one line.
+
 Contention-window min/max per queue:
 
 ```bash

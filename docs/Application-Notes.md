@@ -63,8 +63,8 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![Two packets ~16 µs apart, the ACK timing](assets/img/iq-ack-timing-screen-shot.jpg)
     ![MATLAB Tx-ACK-GAP analysis](assets/img/iq-ack-timing-matlab-tx-ack-gap.jpg)
 
-??? note "Capture dual-antenna TX/RX IQ (collision capture)"
-    Capture IQ from a second *monitoring* antenna coherently alongside the main antenna. Placed near a peer node, the monitoring antenna catches collisions (moments when both link ends transmit at once) via a dedicated collision trigger.
+??? note "Capture dual-antenna TX/RX IQ (collision capture and TX IQ)"
+    Capture IQ from a second *monitoring* antenna coherently alongside the main antenna. Placed near a peer node, the monitoring antenna catches collisions (moments when both link ends transmit at once) via a dedicated collision trigger. The note also includes two quick starts for capturing the board's own TX IQ from inside the FPGA, one fired by a transmit-start trigger and one free-running.
 
     [Read in this wiki →](Research-Features.md#dual-antenna-iq-collision-capture) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_2ant.md)
 

@@ -224,6 +224,8 @@ Thresholds: RSSI via `wh9dY` (0–2047), AGC gain via `wh10dY` (0–127). For fr
 
 On AD9361 boards (FMCOMMS2/3, ADRV9361-Z7035) you can capture IQ from the *monitoring* antenna (rx1) coherently alongside the main antenna (rx0). Place rx1 near a peer node to catch collisions, moments when both link ends transmit at once. Set rx1's AGC to manual at a low gain in `rf_init.sh` (`echo manual > in_voltage1_gain_control_mode`; `echo 20 > in_voltage1_hardwaregain`), then use a short `pre_trigger_len` and a TX-done trigger (`wh8d23`), or the dedicated collision trigger (`wh8d29`, rx1 IQ above threshold while this SDR is transmitting). Capture with `iq_capture_2ant.py`. Full recipe in the [dual-antenna IQ note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_2ant.md).
 
+The same note carries two further quick starts that capture the board's **own TX IQ** from inside the FPGA rather than anything received over the air: a trigger mode that fires when the transmitter starts (`wh8d16`, with `wh5h2` tapping the IQ at the `openofdm_tx` core or `wh5h4` at `tx_intf`), and a free-running mode that streams transmit baseband continuously (`wh8d0` with source `wh5h3` or `wh5h5`). Both use a short capture window (`iq_len_init=511`, enough for the preambles and a few OFDM symbols) and the same `iq_capture_2ant.py` display.
+
 <figure markdown>
 ![Dual-antenna collision-capture setup](assets/img/iq_2ant-setup.png){ width="520" }
 <figcaption>Setup: the main antenna (rx0) handles comms and capture; a second monitoring antenna (rx1), placed near the peer, catches collisions.</figcaption>
