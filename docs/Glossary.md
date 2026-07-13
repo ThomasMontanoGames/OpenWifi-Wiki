@@ -102,7 +102,7 @@ FPGA
 :   Field-Programmable Gate Array: the reconfigurable logic fabric (inside the Zynq SoC) where openwifi's PHY and real-time MAC live.
 
 FRU
-:   Field-Replaceable Unit: here, the identification data in an FMCOMMS board's EEPROM. A wrong or empty FRU EEPROM can crash the host (notably ZCU102); reprogram it with `fru_tools`. See [Troubleshooting](Troubleshooting.md#hardware-quirks).
+:   Field-Replaceable Unit: here, the identification data in an FMCOMMS board's EEPROM. A wrong or empty FRU EEPROM can crash the host (notably ZCU102); reprogram it with `fru_tools`. See [Troubleshooting](Troubleshooting.md#fmcomms-board-causes-a-linux-crash-badempty-eeprom).
 
 FSBL
 :   First Stage Boot Loader. The initial boot stage built from the hardware description; on some boards it (rather than U-Boot SPL) is needed to initialize DDR correctly.
@@ -222,7 +222,7 @@ SoC
 :   System on Chip. openwifi runs on Xilinx Zynq / Zynq UltraScale+ SoCs, which combine ARM cores (PS) with FPGA fabric (PL).
 
 SODIMM
-:   Small Outline DIMM: the pluggable DRAM module used on some boards (e.g. ZCU102). Certain modules fail with the U-Boot SPL DDR bring-up. See [Troubleshooting](Troubleshooting.md#openwrt-specific).
+:   Small Outline DIMM: the pluggable DRAM module used on some boards (e.g. ZCU102). Certain modules fail with the U-Boot SPL DDR bring-up. See [Troubleshooting](Troubleshooting.md#no-uart-output-on-zcu102-under-openwrt).
 
 SoM
 :   System on Module: a small board carrying the SoC, RAM, and support circuitry, mounted on a larger carrier. The ADRV9364-Z7020 and ADRV9361-Z7035 are SoMs on the ADRV1CRR carrier.
@@ -231,7 +231,7 @@ SPI
 :   Serial Peripheral Interface. openwifi drives the AD9361's TX chain in real time over an FPGA-generated SPI link (`spi.v` in `xpu`) for fast TX/RX turnaround.
 
 SPL
-:   Secondary Program Loader: U-Boot's first-stage loader. On some 64-bit boards it mis-configures certain DDR modules, so the Xilinx FSBL is used instead. See [Troubleshooting](Troubleshooting.md#openwrt-specific).
+:   Secondary Program Loader: U-Boot's first-stage loader. On some 64-bit boards it mis-configures certain DDR modules, so the Xilinx FSBL is used instead. See [Troubleshooting](Troubleshooting.md#no-uart-output-on-zcu102-under-openwrt).
 
 sysfs
 :   The Linux virtual filesystem exposing kernel/driver variables as files. openwifi exposes its statistics and some controls through sysfs. See [sdrctl](sdrctl-and-Runtime-Control.md#statistics-via-sysfs).
@@ -258,7 +258,7 @@ VDMA
 :   Video DMA: a Xilinx AXI DMA variant for video streams. openwifi doesn't use it, but one kernel patch comments out a VDMA/AXI-HDMI call that otherwise breaks the build once Xilinx AXI DMA is enabled. See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#the-kernel-patches).
 
 Viterbi decoder
-:   The algorithm/IP that decodes the convolutional FEC on receive. openwifi uses a Xilinx Viterbi decoder IP; its **evaluation license** is why a running board's receiver halts after ~2 hours. See [Troubleshooting](Troubleshooting.md#client-link-problems).
+:   The algorithm/IP that decodes the convolutional FEC on receive. openwifi uses a Xilinx Viterbi decoder IP; its **evaluation license** is why a running board's receiver halts after ~2 hours. See [Troubleshooting](Troubleshooting.md#reception-dies-after-2-hours).
 
 Vivado / Vitis
 :   Xilinx's FPGA design tools. openwifi's FPGA build targets **Vivado 2022.2 with Vitis**. Some boards need a paid Vivado license to rebuild the FPGA; the prebuilt images need none.

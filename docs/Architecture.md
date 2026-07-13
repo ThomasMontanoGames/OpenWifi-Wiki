@@ -256,18 +256,18 @@ openwifi implements 802.11a/g (legacy OFDM) and a **single-stream 20 MHz subset 
 So the open-source release reaches a **theoretical 72.2 Mbps single-stream**, not the full-11n 600 Mbps (which requires 4×4 MIMO + 40 MHz).
 
 <figure markdown>
-![48 vs 52 OFDM data subcarriers](assets/img/subcarriers.png){ width="440" }
+![48 vs 52 OFDM data subcarriers](assets/img/subcarriers.png){ width="620" }
 <figcaption>More data subcarriers (48 → 52): openwifi implements this.</figcaption>
 </figure>
 
 <figure markdown>
-![800 ns vs 400 ns guard interval](assets/img/guard-interval.png){ width="440" }
+![800 ns vs 400 ns guard interval](assets/img/guard-interval.png){ width="620" }
 <figcaption>Short guard interval (800 → 400 ns): openwifi implements this.</figcaption>
 </figure>
 
 On the **MAC** side, 802.11n added frame aggregation. There are two flavors: **A-MSDU** (efficient, but one bit error invalidates the whole aggregate) and **A-MPDU** (per-subframe headers, so a single error only costs one retransmission, which is the more widely adopted choice).
 
-![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png)
+![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png){ width="620" }
 
 openwifi supports **A-MPDU aggregation experimentally** (`./wgd.sh 1`, which sets `test_mode` bit 0); A-MSDU is not supported. Background and the full derivation are in the [802.11n app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md).
 

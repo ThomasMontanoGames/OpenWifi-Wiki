@@ -24,7 +24,7 @@ Yes. The AD9361 tunes 70 MHz–6 GHz. Bring the system up on the nearest legal c
 
 ### My receiver stops working after about two hours. Broken?
 
-No. That's the Xilinx Viterbi decoder evaluation license halting. Reload the FPGA or power-cycle. See [Troubleshooting](Troubleshooting.md#client-link-problems).
+No. That's the Xilinx Viterbi decoder evaluation license halting. Reload the FPGA or power-cycle. See [Troubleshooting](Troubleshooting.md#reception-dies-after-2-hours).
 
 ### Do I need a paid Vivado license?
 

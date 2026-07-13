@@ -99,9 +99,9 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
 
     [Read in this wiki →](Architecture.md#what-openwifi-implements-of-80211agn) · [Upstream source ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md)
 
-    ![48 vs 52 OFDM data subcarriers](assets/img/subcarriers.png)
-    ![800 ns vs 400 ns guard interval](assets/img/guard-interval.png)
-    ![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png)
+    ![48 vs 52 OFDM data subcarriers](assets/img/subcarriers.png){ width="620" }
+    ![800 ns vs 400 ns guard interval](assets/img/guard-interval.png){ width="620" }
+    ![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png){ width="620" }
 
 ## Counters and statistics
 

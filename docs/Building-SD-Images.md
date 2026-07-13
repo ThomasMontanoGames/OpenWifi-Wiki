@@ -15,7 +15,7 @@ This page is the step-by-step for building from scratch. It assumes you understa
 | | ADI Kuiper | OpenWrt |
 |---|---|---|
 | Feels like | A small Debian/Ubuntu box | A Wi-Fi router (LuCI web UI) |
-| Best for | Research, the app-note workflows, full apt tooling | Deployment, router use cases, a self-contained package |
+| Best for | Research, the app-note workflows, full apt tooling | Router use cases |
 | Build needs | Vivado 2022.2 + Vitis | Just Docker (no Vivado) |
 | openwifi tools | Built on the board | Packaged into the image (in `$PATH`) |
 
@@ -195,7 +195,7 @@ OpenWrt packages openwifi as a kernel module and gives you the LuCI web UI. The 
 | Board | Supported | Tested |
 |---|---|---|
 | `zc706_fmcs2`, `zed_fmcs2`, `adrv9364z7020`, `adrv9361z7035` | ✅ | ✅ |
-| `zcu102_fmcs2` | ✅ | ✅ ⚠️ (fails on some boards, see [Troubleshooting](Troubleshooting.md#openwrt-specific)) |
+| `zcu102_fmcs2` | ✅ | ✅ ⚠️ (fails on some boards, see [Troubleshooting](Troubleshooting.md#no-uart-output-on-zcu102-under-openwrt)) |
 | `zc702_fmcs2`, `antsdr`, `e310v2`, `antsdr_e200`, `sdrpi`, `neptunesdr` | ✅ | (untested) |
 
 ### OpenWrt quick start (prebuilt image)

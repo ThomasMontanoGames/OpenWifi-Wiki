@@ -4,13 +4,21 @@ Grouped by symptom. When networking won't come up at all, reach for a **USB-UART
 
 ## Boot and networking
 
-**Can't ssh to the board on first boot.** Delete `/etc/network/interfaces.new` from the SD card's `rootfs` partition (on your PC). If it still fails, use the UART console (`/dev/ttyUSBx`, `/dev/ttyCH341USBx`, …) to watch the boot.
+### Can't ssh to the board on first boot
 
-**No UART console device appears** (antsdr e200 and similar CH341 adapters). Try `sudo apt remove brltty`, since brltty grabs the CH341 device. (Reference: the [CH341SER notes](https://github.com/juliagoda/CH341SER).)
+Delete `/etc/network/interfaces.new` from the SD card's `rootfs` partition (on your PC). If it still fails, use the UART console (`/dev/ttyUSBx`, `/dev/ttyCH341USBx`, …) to watch the boot.
 
-**`EXT4-fs error (device mmcblk0p2)` on first boot** (seen on neptunesdr). The flashing tool is suspect, so re-flash with a different one (GNOME Disks, Startup Disk Creator, or win32diskimager).
+### No UART console device appears
 
-**ZCU102 kernel panic: "Unable to mount root fs on unknown-block(179,2)."** The same SD card boots on some ZCU102 units but not others; the SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed:
+On antsdr e200 and similar CH341 adapters, try `sudo apt remove brltty`, since brltty grabs the CH341 device. (Reference: the [CH341SER notes](https://github.com/juliagoda/CH341SER).)
+
+### `EXT4-fs error (device mmcblk0p2)` on first boot
+
+Seen on neptunesdr. The flashing tool is suspect, so re-flash with a different one (GNOME Disks, Startup Disk Creator, or win32diskimager).
+
+### ZCU102 kernel panic: "Unable to mount root fs on unknown-block(179,2)"
+
+The same SD card boots on some ZCU102 units but not others; the SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed:
 
 ```
 xlnx,has-cd = <0x1>;
@@ -25,37 +33,51 @@ sdhci-caps = <0 0>;
 max-frequency = <19000000>;
 ```
 
-**Board won't boot at all (SPI flash suspected).** The on-board SPI flash holds some config (kernel file, AD9361 crystal frequency `ad9361_ext_refclk=0x2625a8b`). Interrupt boot in the UART console (press Enter before Linux loads) and reset the environment:
+### Board won't boot at all (SPI flash suspected)
+
+The on-board SPI flash holds some config (kernel file, AD9361 crystal frequency `ad9361_ext_refclk=0x2625a8b`). Interrupt boot in the UART console (press Enter before Linux loads) and reset the environment:
 
 ```
 Zynq> env default -a
 Zynq> saveenv
 ```
 
-**Wrong memory size on ADRV9361-Z7035 SoM** (Linux sees half the RAM). An old `u-boot.elf` hard-coded 512 MB. Rebuild u-boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) (`make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf`) and regenerate `BOOT.BIN`.
+### Wrong memory size on ADRV9361-Z7035 SoM
+
+Linux sees half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild u-boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) (`make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf`) and regenerate `BOOT.BIN`.
 
 ## Client / link problems
 
-**Client connects but gets no IP.** Restart the DHCP server on the board and reconnect from the client:
+### Client connects but gets no IP
+
+Restart the DHCP server on the board and reconnect from the client:
 
 ```bash
 service isc-dhcp-server restart
 ```
 
-**Big packet loss at slow ping, but fine at fast ping.** The *other* device's Wi-Fi power save is the usual culprit; it sleeps between your infrequent packets. Turn it off on that device:
+### Big packet loss at slow ping, but fine at fast ping
+
+The *other* device's Wi-Fi power save is the usual culprit; it sleeps between your infrequent packets. Turn it off on that device:
 
 ```bash
 iw dev wlan0 get power_save
 sudo iw dev wlan0 set power_save off
 ```
 
-**Ping-by-hostname fails (DNS).** Set `nameserver 8.8.8.8` in `/etc/resolv.conf` on the board.
+### Ping-by-hostname fails (DNS)
 
-**Reception dies after ~2 hours; `sdrctl dev sdr0 get reg rx 20` is frozen.** This is the **Xilinx Viterbi decoder evaluation license** halting, which is expected behavior, not a bug. Reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle. A proper license removes the limit.
+Set `nameserver 8.8.8.8` in `/etc/resolv.conf` on the board.
+
+### Reception dies after ~2 hours
+
+`sdrctl dev sdr0 get reg rx 20` is frozen. This is the **Xilinx Viterbi decoder evaluation license** halting, which is expected behavior, not a bug. Reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle. A proper license removes the limit.
 
 ## Hardware quirks
 
-**FMCOMMS board causes a Linux crash (bad/empty EEPROM).** Some FMCOMMS2/3/4 boards ship with a wrong or empty FRU EEPROM, which crashes some platforms (notably ZCU102). Reprogram it with [fru_tools](https://github.com/analogdevicesinc/fru_tools): boot the FMCOMMS board on a platform that *does* come up (e.g. a 32-bit zed/zc706/zc702), build `fru_tools`, locate the EEPROM (`find /sys -name eeprom`), confirm the mismatch with `fru-dump -i <eeprom> -b`, then write the correct master file, e.g.:
+### FMCOMMS board causes a Linux crash (bad/empty EEPROM)
+
+Some FMCOMMS2/3/4 boards ship with a wrong or empty FRU EEPROM, which crashes some platforms (notably ZCU102). Reprogram it with [fru_tools](https://github.com/analogdevicesinc/fru_tools): boot the FMCOMMS board on a platform that *does* come up (e.g. a 32-bit zed/zc706/zc702), build `fru_tools`, locate the EEPROM (`find /sys -name eeprom`), confirm the mismatch with `fru-dump -i <eeprom> -b`, then write the correct master file, e.g.:
 
 ```bash
 fru-dump -i ./masterfiles/AD-FMCOMMS4-EBZ-FRU.bin -o /sys/.../0-0050/eeprom
@@ -63,15 +85,23 @@ fru-dump -i ./masterfiles/AD-FMCOMMS4-EBZ-FRU.bin -o /sys/.../0-0050/eeprom
 
 Reboot and re-read to confirm.
 
-**`Unsupported PRODUCT_ID 0xFF`** at AD9361 probe: same root cause as above (EEPROM/FRU). See the fru_tools references.
+### `Unsupported PRODUCT_ID 0xFF` at AD9361 probe
 
-**`Unsupported PRODUCT_ID 0x00`** at AD9361 probe: a different failure from the `0xFF` case above. `0x00` means the AD9361 / FMCOMMS front end **did not power up correctly**: the driver is reading back all-zeros because the chip isn't alive, not because of a bad EEPROM. Check the board's power: that the FMCOMMS card is fully seated, that its supply rails are up, and that the carrier is delivering enough current to the front end. Once the RF board powers up properly, the probe reads the correct PRODUCT_ID.
+Same root cause as the bad/empty EEPROM above. See the fru_tools references.
 
-**ZCU102 kernel panic due to RTC / panic due to hardware capacitor & current load.** Tracked upstream: [#366](https://github.com/open-sdr/openwifi/issues/366) and [#457](https://github.com/open-sdr/openwifi/issues/457).
+### `Unsupported PRODUCT_ID 0x00` at AD9361 probe
+
+A different failure from the `0xFF` case above. `0x00` means the AD9361 / FMCOMMS front end **did not power up correctly**: the driver is reading back all-zeros because the chip isn't alive, not because of a bad EEPROM. Check the board's power: that the FMCOMMS card is fully seated, that its supply rails are up, and that the carrier is delivering enough current to the front end. Once the RF board powers up properly, the probe reads the correct PRODUCT_ID.
+
+### ZCU102 kernel panic (RTC / capacitor & current load)
+
+Tracked upstream: [#366](https://github.com/open-sdr/openwifi/issues/366) and [#457](https://github.com/open-sdr/openwifi/issues/457).
 
 ## Storage and long-run stability
 
-**"No space left on device"** (journald can't write). Logs filled the disk. Clean up and cap journald:
+### "No space left on device"
+
+journald can't write because logs filled the disk. Clean up and cap journald:
 
 ```bash
 systemd-tmpfiles --clean
@@ -90,25 +120,37 @@ ForwardToConsole=no
 ForwardToWall=no
 ```
 
-**Instability after a long uptime.** `lightdm` has a memory leak; disable it via `systemctl` if you don't need the desktop.
+### Instability after a long uptime
+
+`lightdm` has a memory leak; disable it via `systemctl` if you don't need the desktop.
 
 ## Build-host problems
 
-**Kernel config prompts for new options (GCC plugins, stack canary, Xen…).** After a host toolchain or minor kernel bump, new Kconfig options may appear during a kernel build. Choose **n** / the weakest option for these to avoid build failures or subtle issues.
+### Kernel config prompts for new options (GCC plugins, stack canary, Xen…)
 
-**`libidn.so.11` missing while running `boot_bin_gen.sh`.** Symlink your installed version (confirm the exact filename first):
+After a host toolchain or minor kernel bump, new Kconfig options may appear during a kernel build. Choose **n** / the weakest option for these to avoid build failures or subtle issues.
+
+### `libidn.so.11` missing while running `boot_bin_gen.sh`
+
+Symlink your installed version (confirm the exact filename first):
 
 ```bash
 sudo ln -s /usr/lib/x86_64-linux-gnu/libidn.so.12.6.3 /usr/lib/x86_64-linux-gnu/libidn.so.11
 ```
 
-**Vitis HLS: `'2xxxxxxxxx' is an invalid argument`** during `create_ip_repo.sh`. Apply [Xilinx article 76960](https://support.xilinx.com/s/article/76960).
+### Vitis HLS: `'2xxxxxxxxx' is an invalid argument`
 
-**Ubuntu 24: FPGA tools need `libtinfo5`** (default is `libtinfo6`). Install it manually (see [FPGA Development prerequisites](FPGA-Development.md#prerequisites)).
+Seen during `create_ip_repo.sh`. Apply [Xilinx article 76960](https://support.xilinx.com/s/article/76960).
+
+### Ubuntu 24: FPGA tools need `libtinfo5`
+
+The default is `libtinfo6`. Install `libtinfo5` manually (see [FPGA Development prerequisites](FPGA-Development.md#prerequisites)).
 
 ## OpenWrt-specific
 
-**No UART output on ZCU102 under OpenWrt.** Support was validated only on **ZCU102 HW Rev 1.1**, and even then some 4 GB SODIMM modules fail with the U-Boot SPL bootflow. Known-good module: `MTA8ATF51264HZ-2G6B1`; known-failing: `MTA4ATF51264HZ-2G6E1`. The robust fix is to use the **Zynq FSBL instead of U-Boot SPL** (FSBL reads the module's SPD EEPROM and configures DDR correctly), via the repo's `build_zynqmp_boot_bin.sh` or by generating `boot.bin` yourself with OpenWrt-built components. Full analysis is in the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md#no-uart-output-on-zcu102).
+### No UART output on ZCU102 under OpenWrt
+
+Support was validated only on **ZCU102 HW Rev 1.1**, and even then some 4 GB SODIMM modules fail with the U-Boot SPL bootflow. Known-good module: `MTA8ATF51264HZ-2G6B1`; known-failing: `MTA4ATF51264HZ-2G6E1`. The robust fix is to use the **Zynq FSBL instead of U-Boot SPL** (FSBL reads the module's SPD EEPROM and configures DDR correctly), via the repo's `build_zynqmp_boot_bin.sh` or by generating `boot.bin` yourself with OpenWrt-built components. Full analysis is in the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md#no-uart-output-on-zcu102).
 
 ## Debugging tools
 

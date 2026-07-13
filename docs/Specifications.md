@@ -136,7 +136,7 @@ See [FPGA Development](FPGA-Development.md) for the build flow.
 | 802.11ax / Wi-Fi 6 and later | Commercial only ([openwifi.tech](https://openwifi.tech))[^readme] |
 
 !!! info "Two-hour receiver limit on unlicensed Vivado"
-    A bitstream built against the **Xilinx Viterbi decoder evaluation license** halts the receiver after ~2 hours; reload the FPGA or use a paid license. This is a toolchain licensing limit, not an openwifi design limit. See [Troubleshooting](Troubleshooting.md#client-link-problems).
+    A bitstream built against the **Xilinx Viterbi decoder evaluation license** halts the receiver after ~2 hours; reload the FPGA or use a paid license. This is a toolchain licensing limit, not an openwifi design limit. See [Troubleshooting](Troubleshooting.md#reception-dies-after-2-hours).
 
 ## Sources
 
