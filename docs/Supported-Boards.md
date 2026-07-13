@@ -47,13 +47,13 @@ An enhanced ADALM-Pluto: Zynq-7020 + AD936x, usable both as a generic SDR (Pluto
 
 A smaller, cheaper sibling of the ANTSDR-E310. Its distinguishing feature: the **Ethernet MAC is moved to the PL (FPGA fabric) side** rather than the Zynq PS side. The rationale is bandwidth: at high SDR sample rates (>~15–20 Msps baseband ≈ 60–80 MB/s over Ethernet), the PS-side Zynq GEM controller would saturate the CPU. Moving Ethernet to PL frees the processor and also lets the E200 support the UHD driver (via MicroPhase's separate `antsdr_uhd` project). IIO-based SDR use is unaffected because it still uses the Zynq GEM.
 
-![ANTSDR-E200 structure](assets/img/e200-struct.svg){ width="640" }
+![ANTSDR-E200 structure](assets/img/e200-struct.svg){ width="800" }
 
 ### ANTSDR-E310 v2 (MicroPhase)
 
 An upgraded E310 aimed at LTE/GSM/Wi-Fi experimentation. Over the original E310 it adds **improved RF performance, an onboard GPS module, an external 10 MHz / PPS reference input, and a VCXO**. The combination of VCXO, external reference, and DAC gives a more accurate, stable clock (important for time-sync and TSN work). Like the E200 it puts Ethernet on the PL side, enabling UHD-driver-class throughput.
 
-![ANTSDR-E310 v2 structure](assets/img/e310v2-struct.png){ width="640" }
+![ANTSDR-E310 v2 structure](assets/img/e310v2-struct.png)
 
 ### SDRPi (HexSDR)
 
