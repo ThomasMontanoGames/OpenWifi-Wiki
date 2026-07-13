@@ -158,9 +158,9 @@ Capture raw baseband **IQ samples** with a wide set of trigger conditions, plus 
 # on the board:
 ./wgd.sh
 ./monitor_ch.sh sdr0 11
-insmod side_ch.ko iq_len_init=8187      # small FPGA (Z7020): use <4096, e.g. 4095
+insmod side_ch.ko iq_len_init=8187      # small FPGA (Zynq-7020): use <4096, e.g. 4095
 ./side_ch_ctl wh3h01                    # enable IQ capture, set IQ data source
-./side_ch_ctl wh11d4094                 # only needed on zed / adrv9364z7020 / zc702
+./side_ch_ctl wh11d4094                 # only needed on small-FPGA (Zynq-7020) boards
 ./side_ch_ctl g
 ```
 

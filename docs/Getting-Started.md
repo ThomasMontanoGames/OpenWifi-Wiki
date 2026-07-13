@@ -17,7 +17,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 | `board_name` | Hardware | Vivado license needed to rebuild FPGA? |
 |---|---|---|
 | `zc706_fmcs2` | Xilinx ZC706 + AD-FMCOMMS2/3/4 | Yes |
-| `zed_fmcs2` | Digilent/Avnet ZedBoard + AD-FMCOMMS2/3/4 | No |
+| `zed_fmcs2` | Avnet/Digilent ZedBoard + AD-FMCOMMS2/3/4 | No |
 | `zc702_fmcs2` | Xilinx ZC702 + AD-FMCOMMS2/3/4 | No |
 | `zcu102_fmcs2` | Xilinx ZCU102 (MPSoC, 64-bit) + AD-FMCOMMS2/3/4 | Yes |
 | `adrv9364z7020` | ADRV9364-Z7020 SoM + ADRV1CRR-BOB carrier | No |
@@ -30,7 +30,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
     It selects which FPGA image and boot files you use throughout the project (the same string names the board in all the [repos](Repositories.md)). The "Vivado license" column above only matters if you rebuild the FPGA yourself; the prebuilt image works regardless.
 
 !!! tip "No hardware?"
-    If you have no board at all, the imec **w-iLab.t** testbed offers remote access to openwifi-ready boards.
+    If you have no board at all, the imec **[w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html)** offers remote access to openwifi-ready boards.
 
 !!! note "ZedBoard-class boards (Zynq-7020) have tighter limits"
     Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi, and others; see [Supported Boards](Supported-Boards.md#the-board-matrix) for the full list) have less FPGA memory, so a few features (notably IQ capture buffer length) have reduced limits. The relevant pages call this out.

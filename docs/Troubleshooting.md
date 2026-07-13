@@ -8,7 +8,7 @@ Grouped by symptom. When networking won't come up at all, reach for a **USB-UART
 
 **No UART console device appears** (antsdr e200 and similar CH341 adapters). Try `sudo apt remove brltty`, since brltty grabs the CH341 device. (Reference: the [CH341SER notes](https://github.com/juliagoda/CH341SER).)
 
-**`EXT4-fs error (device mmcblk0p2)` on first boot** (seen on neptunesdr). The flashing tool is suspect, so re-flash with a different one (gnome-disks, Startup Disk Creator, or win32diskimager).
+**`EXT4-fs error (device mmcblk0p2)` on first boot** (seen on neptunesdr). The flashing tool is suspect, so re-flash with a different one (GNOME Disks, Startup Disk Creator, or win32diskimager).
 
 **ZCU102 kernel panic: "Unable to mount root fs on unknown-block(179,2)."** The same SD card boots on some ZCU102 units but not others; the SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed:
 

@@ -134,6 +134,6 @@ The project is split across four repositories, because the driver and the FPGA d
 
 ## License and attribution
 
-openwifi is dual-licensed: **AGPLv3** for the open-source release, with commercial licensing available via [openwifi.tech](https://openwifi.tech). The project incorporates third-party components (Analog Devices HDL, Xilinx IP such as the Viterbi decoder, the openofdm receiver) with their own license terms, so verify each component's license for your intended use. openwifi was created at Ghent University / imec (Xianjun Jiao, Michael Mehari, Wei Liu, and contributors) with funding from the EU H2020 ORCA project and NLnet/NGI Zero.
+openwifi is dual-licensed: **AGPLv3** for the open-source release, with commercial licensing available via [openwifi.tech](https://openwifi.tech). The project incorporates third-party components (Analog Devices HDL, Xilinx IP such as the Viterbi decoder, the openofdm receiver) with their own license terms, so verify each component's license for your intended use. openwifi was created at Ghent University / imec (Xianjun Jiao, Wei Liu, Michael Mehari, and contributors) with funding from the EU H2020 ORCA project and NLnet/NGI Zero.
 
 This wiki is a rewritten, restructured companion to the official documentation. The repositories remain the authoritative source; if this wiki and the repos disagree, trust the repos (and please fix the wiki!).

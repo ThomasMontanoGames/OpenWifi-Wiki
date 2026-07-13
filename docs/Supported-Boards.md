@@ -45,7 +45,7 @@ An enhanced ADALM-Pluto: Zynq-7020 + AD936x, usable both as a generic SDR (Pluto
 
 ### ANTSDR-E200 (MicroPhase)
 
-A smaller, cheaper sibling of the ANTSDR-E310. Its distinguishing feature: the **Ethernet MAC is moved to the PL (FPGA fabric) side** rather than the Zynq PS side. The rationale is bandwidth: at high SDR sample rates (>~15–20 MSPS baseband ≈ 60–80 MB/s over Ethernet), the PS-side Zynq GEM controller would saturate the CPU. Moving Ethernet to PL frees the processor and also lets the E200 support the UHD driver (via MicroPhase's separate `antsdr_uhd` project). IIO-based SDR use is unaffected because it still uses the Zynq GEM.
+A smaller, cheaper sibling of the ANTSDR-E310. Its distinguishing feature: the **Ethernet MAC is moved to the PL (FPGA fabric) side** rather than the Zynq PS side. The rationale is bandwidth: at high SDR sample rates (>~15–20 Msps baseband ≈ 60–80 MB/s over Ethernet), the PS-side Zynq GEM controller would saturate the CPU. Moving Ethernet to PL frees the processor and also lets the E200 support the UHD driver (via MicroPhase's separate `antsdr_uhd` project). IIO-based SDR use is unaffected because it still uses the Zynq GEM.
 
 ![ANTSDR-E200 structure](assets/img/e200-struct.svg){ width="640" }
 
@@ -57,7 +57,7 @@ An upgraded E310 aimed at LTE/GSM/Wi-Fi experimentation. Over the original E310 
 
 ### SDRPi (HexSDR)
 
-A Zynq-7020 + AD936x SDR in a **Raspberry-Pi form factor**. Notable spec: ZYNQ 7Z020CLG400, 1 GB PS-side DDR3, **two 1 Gb Ethernet ports (one PS, one PL)**, USB OTG, dual USB-UART (PS + PL), an onboard USB-to-JTAG debugger, microSD + bootable QSPI flash, and 27 PL-bank 3.3 V GPIO pins for connecting other modules. Its RF front end is FMCOMMS3-based with an added RF amplifier, plus a u-blox M8T GPS module and a 40 MHz VCXO.
+A Zynq-7020 + AD936x SDR in a **Raspberry-Pi form factor**. Notable spec: Zynq XC7Z020-CLG400, 1 GB PS-side DDR3, **two 1 Gb Ethernet ports (one PS, one PL)**, USB OTG, dual USB-UART (PS + PL), an onboard USB-to-JTAG debugger, microSD + bootable QSPI flash, and 27 PL-bank 3.3 V GPIO pins for connecting other modules. Its RF front end is FMCOMMS3-based with an added RF amplifier, plus a u-blox M8T GPS module and a 40 MHz VCXO.
 
 ## Board bring-up quirks worth knowing up front
 

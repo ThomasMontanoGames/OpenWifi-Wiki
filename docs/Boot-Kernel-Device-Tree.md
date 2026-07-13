@@ -19,7 +19,7 @@ BOOT partition
 The sequence: the SoC's boot ROM loads **BOOT.BIN**, whose **FSBL** (First Stage Boot Loader) initializes DDR and clocks, programs the **FPGA bitstream**, and hands off to **U-Boot**, which loads the **kernel** and the **device tree** and starts Linux. Linux then reads the device tree to discover the FPGA's AXI peripherals (including openwifi's cores) and binds drivers to them.
 
 <figure>
-<svg viewBox="0 0 940 420" role="img" aria-label="The openwifi boot chain: the SoC boot ROM loads BOOT.BIN, whose stages run in order — FSBL (init DDR and clocks), then the FPGA bitstream (programs the PL), then U-Boot. U-Boot loads the Linux kernel (uImage / Image), which boots into a running Linux, and also loads the device tree blob (devicetree.dtb), which is not code but a hardware description that the running kernel reads. From the device tree the driver binds to the sdr,* FPGA nodes." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
+<svg viewBox="0 0 940 420" role="img" aria-label="The openwifi boot chain: the SoC boot ROM loads BOOT.BIN, whose stages run in order: FSBL (init DDR and clocks), then the FPGA bitstream (programs the PL), then U-Boot. U-Boot loads the Linux kernel (uImage / Image), which boots into a running Linux, and also loads the device tree blob (devicetree.dtb), which is not code but a hardware description that the running kernel reads. From the device tree the driver binds to the sdr,* FPGA nodes." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
   <defs>
     <marker id="boot-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.6"/>
@@ -85,7 +85,7 @@ The sequence: the SoC's boot ROM loads **BOOT.BIN**, whose **FSBL** (First Stage
   <text x="470" y="382" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0d9488">Driver binds to the sdr,* FPGA nodes</text>
   <text x="470" y="398" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">discovered from the device tree</text>
 </svg>
-<figcaption><em>The boot chain. On 64-bit ZynqMP (ZCU102) the <code>BOOT.BIN</code> stage list grows — PMUFW before the bitstream, ATF (BL31) after it — as detailed just below.</em></figcaption>
+<figcaption><em>The boot chain. On 64-bit ZynqMP (ZCU102) the <code>BOOT.BIN</code> stage list grows, adding PMUFW before the bitstream and ATF (BL31) after it, as detailed just below.</em></figcaption>
 </figure>
 
 ### 32-bit vs 64-bit boot

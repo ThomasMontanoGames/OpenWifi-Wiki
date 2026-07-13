@@ -176,7 +176,7 @@ Connect a phone or laptop to the **"openwifi"** SSID; you should get a `192.168.
 
 - The demo defaults to **channel 44 (5 GHz)**. For a 2.4 GHz-only client, edit `hostapd-openwifi.conf` on the board and re-run `fosdem.sh`.
 - The Xilinx **Viterbi decoder halts after ~2 hours** (evaluation license); reload the FPGA or power-cycle to recover.
-- The **adrv9361z7035 has very low 5 GHz TX power**: keep nodes close on that board.
+- The **ADRV9361-Z7035 has very low 5 GHz TX power**: keep nodes close on that board.
 
 You now have the same result as a prebuilt card, but built from scratch. See [Getting Started → Start the access point](Getting-Started.md#4-start-the-access-point) for more on the bring-up, and [Research Features](Research-Features.md#csi-channel-state-information) to start capturing CSI.
 

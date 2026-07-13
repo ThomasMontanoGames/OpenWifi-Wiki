@@ -82,7 +82,7 @@ There is not one "openwifi repo"; there are four, each with a distinct job, a di
 
 | Repository | What it holds | When you touch it |
 |---|---|---|
-| **[openwifi](https://github.com/open-sdr/openwifi)** | The Linux kernel driver, `sdrctl` and other user-space tools, capture/demo scripts, SD-card boot files (kernel patches, device trees, u-boot), and **all the documentation** | Rebuilding the driver, changing runtime behavior, writing scripts, flashing/booting a board, reading app notes |
+| **[openwifi](https://github.com/open-sdr/openwifi)** | The Linux kernel driver, `sdrctl` and other user-space tools, capture/demo scripts, SD-card boot files (kernel patches, device trees, U-Boot), and **all the documentation** | Rebuilding the driver, changing runtime behavior, writing scripts, flashing/booting a board, reading app notes |
 | **[openwifi-hw](https://github.com/open-sdr/openwifi-hw)** | The **FPGA design**: openwifi's custom IP cores (`xpu`, `openofdm_tx`, `tx_intf`, `rx_intf`, `side_ch`, and the `openofdm_rx` submodule) plus a Vivado project per supported board | Modifying the PHY or real-time MAC, adding a board, rebuilding the bitstream |
 | **[openwifi-hw-img](https://github.com/open-sdr/openwifi-hw-img)** | **Pre-built FPGA bitstreams** for each board (`.xsa`, bitstream, ILA `.ltx`, init files under `boards/<board_name>/sdk/`), plus the CLA/doc PDFs | You want a working bitstream *without* installing Vivado or waiting hours for synthesis |
 | **[openofdm](https://github.com/open-sdr/openofdm)** | The 802.11 **OFDM receiver** that `openofdm_rx` is based on. openwifi's improvements live on the `dot11zynq` branch (and `dot11zynq_hls` for the HLS variant). Originally by [jhshi](https://github.com/jhshi/openofdm) | Deep receiver work (synchronization, channel estimation, Viterbi decode); usually you just let the build script fetch it |
@@ -132,7 +132,7 @@ A quick index from "I need to change X" to "open this repo/directory."
 ### …CSI / IQ capture (the research features)
 Three places cooperate: `openwifi-hw/ip/side_ch/` (the FPGA capture engine), `openwifi/driver/side_ch/` (the `side_ch.ko` kernel module), and `openwifi/user_space/side_ch_ctl_src/` (the `side_ch_ctl` tool plus the Python/MATLAB display scripts). See [Research Features](Research-Features.md).
 
-### …how a board boots (kernel, device tree, u-boot, BOOT.BIN)
+### …how a board boots (kernel, device tree, U-Boot, BOOT.BIN)
 `openwifi/kernel_boot/`: per-board boot artifacts under `boards/<board_name>/`, kernel patches, and the device-tree overlay machinery (`construct_device_tree.sh`, `openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso`). See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md).
 
 ### …adding or porting a board
@@ -158,7 +158,7 @@ openwifi/
 │   ├── side_ch_ctl_src/    # side_ch_ctl + Python/MATLAB CSI/IQ display scripts
 │   ├── inject_80211/       # packet injection + analyze_80211
 │   └── arbitrary_iq_gen/   # generate arbitrary TX IQ waveforms
-├── kernel_boot/       # SD-card boot files: per-board device trees, u-boot, kernel patches/config
+├── kernel_boot/       # SD-card boot files: per-board device trees, U-Boot, kernel patches/config
 │   └── boards/             # one directory per board_name
 ├── doc/               # architecture reference, app notes, known issues, publications, videos
 │   ├── app_notes/          # CSI, IQ, fuzzer, radar, injection, 802.11n, HLS, etc.
