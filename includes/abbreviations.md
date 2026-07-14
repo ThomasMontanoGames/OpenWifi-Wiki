@@ -46,6 +46,7 @@
 *[GI]: Guard Interval: the cyclic-prefix gap between OFDM symbols that absorbs multipath.
 *[HLS]: High-Level Synthesis: generating FPGA logic from C++ (via Vitis HLS).
 *[hostapd]: The standard Linux daemon that turns a Wi-Fi interface into an access point.
+*[HE]: High Efficiency: the 802.11ax (Wi-Fi 6) feature set (not in the open-source release).
 *[HT]: High Throughput: the 802.11n feature set.
 *[HT-SIG]: The 802.11n signal field in the preamble.
 *[IBSS]: Independent Basic Service Set: 802.11 ad-hoc mode (peer-to-peer, no AP).
@@ -88,11 +89,13 @@
 *[sysfs]: The Linux virtual filesystem exposing kernel/driver variables as files.
 *[TSF]: Timing Synchronization Function: the 802.11 64-bit hardware timer.
 *[TSN]: Time-Sensitive Networking: deterministic, scheduled networking.
+*[TWT]: Target Wake Time: the 802.11ax scheduled power-saving mechanism.
 *[UART]: Universal Asynchronous Receiver/Transmitter: the serial console.
 *[U-Boot]: The bootloader that loads the Linux kernel on the board.
 *[UHD]: USRP Hardware Driver: Ettus/NI's SDR driver framework (unrelated to openwifi's Wi-Fi operation).
 *[VCXO]: Voltage-Controlled Crystal Oscillator: a tunable reference clock on some boards.
 *[VDMA]: Video DMA: a Xilinx AXI DMA variant openwifi doesn't use (but one kernel patch works around it).
+*[VHT]: Very High Throughput: the 802.11ac (Wi-Fi 5) feature set (not implemented by openwifi).
 *[Viterbi]: The decoder for the convolutional FEC on receive (its eval license halts RX after ~2 hours).
 *[Vivado]: Xilinx's FPGA design tool (openwifi targets Vivado 2022.2).
 *[Vitis]: Xilinx's software/HLS design tool, used alongside Vivado.

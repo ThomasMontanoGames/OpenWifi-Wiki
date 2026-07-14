@@ -4,7 +4,7 @@ This page is a **datasheet-style reference** for openwifi: the numbers you need 
 
 Every figure carries a **footnote** pointing to its source so you can check it. Two conventions to note:
 
-- **The repository is authoritative.** Where a number comes from openwifi's own code, docs, or release notes, the footnote links to it. If a build script or upstream README states something different from this page, trust the upstream repo and please fix this page.
+- **The repository is authoritative.** Where a number comes from openwifi's own code, docs, or release notes, the footnote links to it. If a build script or a repo README states something different from this page, trust the repo and please fix this page.
 - **Standard-derived values are marked** with the `[802.11]`[^std] footnote. These follow from the IEEE 802.11 standard and the PHY parameters openwifi implements (e.g. 20 MHz OFDM), not from an openwifi-specific measurement.
 
 !!! warning "Configuration matters"
@@ -87,7 +87,7 @@ openwifi's real-time "low MAC" (the `xpu` core) runs the DCF/CSMA-CA state machi
 
 ## Measured performance
 
-These are the project's published bring-up numbers, measured on **FMCOMMS2 at 2.4 GHz, over cable and over the air**.[^readme] Your results depend on board, RF path, and configuration.
+These are openwifi's published bring-up numbers, measured on **FMCOMMS2 at 2.4 GHz, over cable and over the air**.[^readme] Your results depend on board, RF path, and configuration.
 
 | Metric | Value | Conditions |
 |---|---|---|

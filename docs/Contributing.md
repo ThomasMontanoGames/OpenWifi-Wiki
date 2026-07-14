@@ -55,4 +55,4 @@ openwifi is dual-licensed: **AGPLv3** for the open-source release, with commerci
 
 ## Contributing to this wiki
 
-This wiki is a **companion** to the upstream docs, not a replacement; the repositories are always the source of truth. If the wiki and a repo disagree, trust the repo, and fixing the wiki to match is itself a welcome contribution. The wiki lives in its own repository and is edited via pull request there; the pages are plain Markdown built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), and `mkdocs build --strict` must pass (it fails on any broken internal link).
+This wiki rewrites and reorganizes the documentation in the openwifi repositories. It is not (yet) the project's official documentation, and the repositories are always the source of truth. If the wiki and a repo disagree, trust the repo, and fixing the wiki to match is itself a welcome contribution. The wiki lives in its own repository and is edited via pull request there. The pages are plain Markdown built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), and `mkdocs build --strict` must pass (it fails on any broken internal link).

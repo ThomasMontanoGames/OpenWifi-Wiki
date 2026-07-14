@@ -1,16 +1,17 @@
 site_name: openwifi Wiki
-site_description: A reorganized, plain-language guide to openwifi, a free and open-source, Linux mac80211-compatible, full-stack IEEE 802.11 implementation on SDR hardware.
+site_description: Documentation for openwifi, the free and open-source, Linux mac80211-compatible, full-stack IEEE 802.11 implementation on SDR hardware.
 site_url: https://thomasmontanogames.github.io/OpenWifi-Wiki/
 repo_url: https://github.com/ThomasMontanoGames/OpenWifi-Wiki
 repo_name: ThomasMontanoGames/OpenWifi-Wiki
 edit_uri: edit/master/docs/
 
 # Shown in the footer on every page. Keep this line evergreen; the date of
-# the last upstream reconciliation lives on the Repositories page, in the
-# "Versions this wiki targets" section — bump it there when reconciling.
+# the last reconciliation with the openwifi repos lives on the Repositories
+# page, in the "Versions this wiki targets" section — bump it there when
+# reconciling.
 copyright: >
-  A community companion wiki —
-  the <a href="https://github.com/open-sdr/openwifi">openwifi repositories</a> remain authoritative.
+  Documentation for the <a href="https://github.com/open-sdr/openwifi">openwifi</a> project.
+  The repositories and code are the source of truth.
 
 theme:
   name: material
@@ -126,6 +127,7 @@ nav:
       - Specifications: Specifications.md
   - Using openwifi:
       - Operating Modes: Operating-Modes.md
+      - Wi-Fi 4 & Wi-Fi 6 Features: Wi-Fi-4-and-Wi-Fi-6.md
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
   - Developing:
       - Software Development Workflow: Software-Development-Workflow.md

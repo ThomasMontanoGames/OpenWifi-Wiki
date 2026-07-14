@@ -100,7 +100,7 @@ The two you will clone and work with day to day are **openwifi** and **openwifi-
 
 ## Versions this wiki targets
 
-openwifi pins several toolchains and upstream projects, and they intentionally **don't all share a version number**. A 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or upstream README states a version different from the table below, **trust the upstream repo**: treat this as a snapshot from the last reconciliation with upstream (**11 July 2026**), and bumping it when upstream moves is a welcome contribution.
+openwifi pins several toolchains and upstream projects, and they intentionally **don't all share a version number**. A 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or a repo README states a version different from the table below, **trust the repo**. Treat this table as a snapshot from the last reconciliation with the repos (**11 July 2026**), and bumping it when they move is a welcome contribution.
 
 | Component | Target version | Set / pinned in | Notes |
 |---|---|---|---|
@@ -142,7 +142,7 @@ Both repos: `openwifi-hw/boards/<board_name>/` (Vivado project) and `openwifi/ke
 [`openwifi-hw-img`](https://github.com/open-sdr/openwifi-hw-img), `boards/<board_name>/sdk/`.
 
 ### …the authoritative docs / app notes
-`openwifi/doc/` and `openwifi/doc/app_notes/`. This wiki is a reorganized companion to those files; when the wiki and the repo disagree, trust the repo (and please fix the wiki).
+`openwifi/doc/` and `openwifi/doc/app_notes/`. The wiki pages reorganize that material thematically. When the wiki and the repo disagree, trust the repo, and please fix the wiki.
 
 ## Repository directory maps
 

@@ -174,7 +174,7 @@ OFDM
 :   Orthogonal Frequency-Division Multiplexing: the multi-subcarrier modulation used by 802.11a/g/n. openwifi's PHY is OFDM-only (hence no 802.11b compatibility).
 
 OFDMA
-:   Orthogonal Frequency-Division Multiple Access: the 802.11ax (Wi-Fi 6) feature that assigns subcarrier groups to different users at once. Not in the open-source release; explored in openwifi research (see [FAQ & Resources](FAQ-and-Resources.md#selected-publications)).
+:   Orthogonal Frequency-Division Multiple Access: the 802.11ax (Wi-Fi 6) feature that assigns subcarrier groups to different users at once. Not in the open-source release; explored in openwifi research. See [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md#wi-fi-6-80211ax).
 
 openofdm
 :   The open-source 802.11 OFDM receiver project openwifi's `openofdm_rx` core is based on (openwifi's fork lives on the `dot11zynq` branch).

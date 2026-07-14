@@ -269,7 +269,7 @@ On the **MAC** side, 802.11n added frame aggregation. There are two flavors: **A
 
 ![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png){ width="650" }
 
-openwifi supports **A-MPDU aggregation experimentally** (`./wgd.sh 1`, which sets `test_mode` bit 0); A-MSDU is not supported. Background and the full derivation are in the [802.11n app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md).
+openwifi supports **A-MPDU aggregation experimentally** (`./wgd.sh 1`, which sets `test_mode` bit 0); A-MSDU is not supported. Background and the full derivation are in the [802.11n app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md). For how to enable and verify these features in practice, and where Wi-Fi 6 stands, see [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md).
 
 ## Where the source lives
 

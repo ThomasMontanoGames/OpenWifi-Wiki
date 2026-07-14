@@ -1,12 +1,12 @@
 # openwifi Wiki (rebuilt)
 
-A reorganized, public-facing wiki for the [openwifi](https://github.com/open-sdr/openwifi) and [openwifi-hw](https://github.com/open-sdr/openwifi-hw) projects, written for onboarding new contributors. It consolidates the two repositories' READMEs, the project document, the application notes, the image-build and boot/device-tree details, the FPGA IP-core and per-board hardware notes, a glossary, and the known-issues list into a set of cross-linked pages, with instructions rewritten for clarity.
+Documentation for the [openwifi](https://github.com/open-sdr/openwifi) and [openwifi-hw](https://github.com/open-sdr/openwifi-hw) projects, written for onboarding new contributors. It consolidates the two repositories' READMEs, the project document, the application notes, the image-build and boot/device-tree details, the FPGA IP-core and per-board hardware notes, a glossary, and the known-issues list into a set of cross-linked pages, with instructions rewritten for clarity.
 
 Built with [MkDocs](https://www.mkdocs.org/) + [Material](https://squidfunk.github.io/mkdocs-material/) and published to GitHub Pages on every push to `master`.
 
 ## Structure
 
-Pages live in `docs/`. Their grouping into sections and their order are defined in [`mkdocs.yml`](mkdocs.yml), which is the single source of truth for the page list; the [live site](https://thomasmontanogames.github.io/OpenWifi-Wiki/) shows the same structure rendered. Broadly, the pages progress from orientation (what openwifi is, the repositories, getting started, architecture, boards), through everyday use and the `sdrctl` reference, into development (build workflow, boot/kernel/device tree, the FPGA design), research features, an index of the upstream application notes, and help and troubleshooting.
+Pages live in `docs/`. Their grouping into sections and their order are defined in [`mkdocs.yml`](mkdocs.yml), which is the single source of truth for the page list; the [live site](https://thomasmontanogames.github.io/OpenWifi-Wiki/) shows the same structure rendered. Broadly, the pages progress from orientation (what openwifi is, the repositories, getting started, architecture, boards), through everyday use and the `sdrctl` reference, into development (build workflow, boot/kernel/device tree, the FPGA design), research features, an index of the application notes, and help and troubleshooting.
 
 The theme and custom styling live in `mkdocs.yml` and [`docs/assets/stylesheets/extra.css`](docs/assets/stylesheets/extra.css).
 

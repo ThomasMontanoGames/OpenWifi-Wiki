@@ -8,7 +8,7 @@ It's a full-stack Wi-Fi *design* that runs on FPGA-based SDR hardware, not (yet)
 
 ### Which 802.11 standards does it support?
 
-802.11a/g and 802.11n (Wi-Fi 4) at 20 MHz in the open-source release. 802.11ax and other advanced features are commercial (see [openwifi.tech](https://openwifi.tech)).
+802.11a/g and 802.11n (Wi-Fi 4) at 20 MHz in the open-source release. 802.11ax and other advanced features are commercial (see [openwifi.tech](https://openwifi.tech)). A feature-by-feature breakdown, including why there's no Wi-Fi 5, is on [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md).
 
 ### Does it do MIMO or 40 MHz?
 
@@ -36,7 +36,7 @@ Yes. The imec [w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials
 
 ### Will there be an openwifi ASIC (e.g. on SkyWater sky130)?
 
-It's frequently requested and the team is supportive, but not actively working on it; their focus is maturing the FPGA IP to match commercial chips. A Wi-Fi chip is deceptively complex (cheap only because of enormous volume).
+It's frequently requested, and the team is supportive but not actively working on it. The current focus is maturing the FPGA IP to match commercial chips. A Wi-Fi chip is deceptively complex (cheap only because of enormous volume).
 
 Anyone doing a serious ASIC analysis would need to port many vendor IP cores (FFT, Viterbi, FIFO, RAM/ROM, FIR, AXI DMA/lite, dividers, multipliers) plus handle two hard parts: the AD9361 RF interface (the AD9361 is an expensive 70 MHz–6 GHz SDR front end, not a cheap dedicated Wi-Fi radio) and the AXI-bus coupling to the processor (great for latency, but platform-specific). The team welcomes a larger organization leading such an effort. Full reasoning: the [ASIC considerations note](https://github.com/open-sdr/openwifi/blob/master/doc/asic/skywater-130-pdk-and-asic-considerations.md).
 

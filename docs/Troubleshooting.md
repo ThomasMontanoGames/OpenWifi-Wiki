@@ -95,7 +95,7 @@ A different failure from the `0xFF` case above. `0x00` means the AD9361 / FMCOMM
 
 ### ZCU102 kernel panic (RTC / capacitor & current load)
 
-Tracked upstream: [#366](https://github.com/open-sdr/openwifi/issues/366) and [#457](https://github.com/open-sdr/openwifi/issues/457).
+Tracked in issues [#366](https://github.com/open-sdr/openwifi/issues/366) and [#457](https://github.com/open-sdr/openwifi/issues/457).
 
 ## Storage and long-run stability
 
