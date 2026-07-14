@@ -155,6 +155,17 @@
   margin: 1.6rem auto;
   max-width: 100%;
 }
+/* Align figures to the same measure as bare images. A top-level `> p`
+   (which wraps a bare image) is capped at 48rem and left-hugging, so its
+   image centers within that band. Material otherwise makes figures
+   `width: fit-content` and centers them across the full breakout column,
+   landing the image on a different axis. Pin the figure to the prose
+   measure, left-aligned, so a figure image and a bare image line up. */
+.md-typeset > figure {
+  max-width: 48rem;
+  width: 100%;
+  margin-inline: 0;
+}
 /* Content raster images sit on a white matte so transparent line-art
    diagrams (e.g. the CSI-fuzzer figures) stay readable in dark mode. Opaque
    screenshots are unaffected; the matte only shows through transparency.
