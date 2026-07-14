@@ -236,6 +236,9 @@ SPI
 SPL
 :   Secondary Program Loader: U-Boot's first-stage loader. On some 64-bit boards it mis-configures certain DDR modules, so the Xilinx FSBL is used instead. See [Troubleshooting](Troubleshooting.md#no-uart-output-on-zcu102-under-openwrt).
 
+STA
+:   Station: the 802.11 standard's term for any device on the link. A client and an access point are both STAs; "STA" is often used specifically for the non-AP client. openwifi runs as either, over `sdr0`. See [Operating Modes](Operating-Modes.md).
+
 sysfs
 :   The Linux virtual filesystem exposing kernel/driver variables as files. openwifi exposes its statistics and some controls through sysfs. See [sdrctl](sdrctl-and-Runtime-Control.md#statistics-via-sysfs).
 

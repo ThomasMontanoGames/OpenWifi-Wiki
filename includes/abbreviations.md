@@ -87,6 +87,7 @@
 *[SoM]: System on Module: a small board carrying the SoC, RAM, and support circuitry.
 *[SPI]: Serial Peripheral Interface: openwifi drives the AD9361's TX chain over an FPGA-generated SPI link.
 *[SPL]: Secondary Program Loader: U-Boot's first-stage loader.
+*[STA]: Station: any 802.11 device (a client, or an AP), the standard's term for a participant on the link.
 *[STF]: Short Training Field: preamble symbols used for packet detection and synchronization.
 *[sysfs]: The Linux virtual filesystem exposing kernel/driver variables as files.
 *[TSF]: Timing Synchronization Function: the 802.11 64-bit hardware timer.

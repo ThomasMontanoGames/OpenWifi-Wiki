@@ -16,6 +16,52 @@ This section is for people who know RF and digital modulation but haven't worked
 
 **From OFDM to OFDMA.** Everything up to and including Wi-Fi 5 uses OFDM as a single-user scheme: whoever wins contention gets every subcarrier in the channel for the duration of the frame, so stations share the medium in time only. OFDMA, introduced by Wi-Fi 6, shares it in frequency as well. The subcarriers of one channel are grouped into **resource units (RUs)**, and the access point assigns RUs to different stations within the same transmission. In a 20 MHz channel an RU spans 26, 52, 106, or 242 tones, which allows anything from one full-channel user down to nine users in parallel, each on a slice about 2 MHz wide.[^std] Downlink OFDMA is one long frame carrying data for several receivers at once. Uplink OFDMA is the demanding direction: the AP invites specific stations with a trigger frame, and their transmissions must arrive at the AP aligned, so every station has to pre-correct its timing and carrier frequency tightly enough to stay orthogonal with its neighbors in the same FFT. The goal is not peak speed. A short packet no longer pays a full contention cycle for a 20 MHz channel it barely fills, which turns a crowded channel from a lottery into something schedulable.
 
+<figure>
+<svg viewBox="0 0 920 320" role="img" aria-label="OFDM versus OFDMA. With OFDM each transmission fills the whole 20 MHz channel and stations alternate in time, separated by contention. With OFDMA one transmission is split into resource units so several stations share the channel at once, and a single station can still take the whole channel." style="width:100%;height:auto;max-width:1080px;font-family:inherit;font-size:13px">
+  <defs>
+    <marker id="ofdma-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.55"/>
+    </marker>
+  </defs>
+
+  <!-- left panel: OFDM -->
+  <text x="247" y="24" text-anchor="middle" font-weight="700" fill="currentColor">OFDM (through Wi-Fi 5)</text>
+  <line x1="55" y1="270" x2="55" y2="42" stroke="currentColor" stroke-opacity="0.55" marker-end="url(#ofdma-arrow)"/>
+  <line x1="55" y1="270" x2="440" y2="270" stroke="currentColor" stroke-opacity="0.55" marker-end="url(#ofdma-arrow)"/>
+  <text x="24" y="160" transform="rotate(-90 24 160)" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75">frequency (20 MHz)</text>
+  <text x="247" y="292" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75">time</text>
+
+  <rect x="70" y="55" width="95" height="205" rx="4" fill="#4f5bd5" fill-opacity="0.82"/>
+  <text x="117" y="162" text-anchor="middle" font-weight="600" fill="#ffffff">STA A</text>
+  <text x="182" y="160" transform="rotate(-90 182 160)" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.6">contention</text>
+  <rect x="200" y="55" width="115" height="205" rx="4" fill="#0d9488" fill-opacity="0.82"/>
+  <text x="257" y="162" text-anchor="middle" font-weight="600" fill="#ffffff">STA B</text>
+  <text x="332" y="160" transform="rotate(-90 332 160)" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.6">contention</text>
+  <rect x="350" y="55" width="85" height="205" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="392" y="162" text-anchor="middle" font-weight="600" fill="#ffffff">STA C</text>
+
+  <!-- right panel: OFDMA -->
+  <text x="722" y="24" text-anchor="middle" font-weight="700" fill="currentColor">OFDMA (Wi-Fi 6)</text>
+  <line x1="535" y1="270" x2="535" y2="42" stroke="currentColor" stroke-opacity="0.55" marker-end="url(#ofdma-arrow)"/>
+  <line x1="535" y1="270" x2="905" y2="270" stroke="currentColor" stroke-opacity="0.55" marker-end="url(#ofdma-arrow)"/>
+  <text x="722" y="292" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.75">time</text>
+
+  <rect x="550" y="55" width="160" height="88" rx="4" fill="#4f5bd5" fill-opacity="0.82"/>
+  <text x="630" y="103" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">STA A · 106-tone RU</text>
+  <rect x="550" y="146" width="160" height="21" rx="3" fill="currentColor" fill-opacity="0.16"/>
+  <text x="630" y="161" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">26</text>
+  <rect x="550" y="170" width="160" height="43" rx="4" fill="#0d9488" fill-opacity="0.82"/>
+  <text x="630" y="196" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">STA B · 52-tone RU</text>
+  <rect x="550" y="216" width="160" height="44" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="630" y="242" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">STA C · 52-tone RU</text>
+
+  <rect x="740" y="55" width="150" height="205" rx="4" fill="#7c3aed" fill-opacity="0.82"/>
+  <text x="815" y="152" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">STA D · 242-tone RU</text>
+  <text x="815" y="170" text-anchor="middle" font-size="10.5" fill="#ffffff" fill-opacity="0.85">(whole channel)</text>
+</svg>
+<figcaption>Left: through Wi-Fi 5, every transmission occupies the whole channel and stations take turns through contention. Right: Wi-Fi 6 OFDMA assigns resource units to several stations within one transmission, and a single station can still get the full channel.</figcaption>
+</figure>
+
 **Features are negotiated, not just implemented.** Stations advertise what they support in capability fields inside management frames (beacons, probe responses, association frames). A feature is only used on a link when *both* ends advertise it. Keep this in mind throughout the Wi-Fi 4 section: some things exist in openwifi's FPGA but sit idle until you tell the driver to advertise them, short guard interval being the main example.
 
 ## Where openwifi sits in the Wi-Fi timeline
@@ -76,6 +122,11 @@ By default Linux's `minstrel_ht` rate control walks this table automatically bas
 
 Aggregation is the single biggest practical win. At tens of Mbps the fixed per-frame cost (preamble, SIFS, ACK, backoff) starts to dominate, and A-MPDU packs many MPDUs into one transmission so that cost is paid once. Acknowledgement is amortized the same way: the receiver answers the whole aggregate with a single block ACK that flags any subframes needing retransmission, instead of one ACK per frame.[^std] openwifi's headline iperf numbers were measured with aggregation on.[^readme]
 
+<figure markdown>
+![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png){ width="650" }
+<figcaption>A-MPDU keeps a header and CRC per subframe, so one corrupted subframe costs one retransmission, not the whole aggregate. Figure from the openwifi 802.11n app note.</figcaption>
+</figure>
+
 It's off by default. Enable it when loading the driver:
 
 ```bash
@@ -91,6 +142,11 @@ The `1` becomes the `test_mode` module parameter of `sdr.ko`. With bit 0 set, th
 ### Short guard interval
 
 The guard interval is the cyclic prefix between OFDM symbols. It exists to absorb multipath: as long as all significant echoes arrive within the GI, they cause no inter-symbol interference. 802.11n's short GI halves it from 800 to 400 ns, trading multipath margin for about 11% more throughput.[^std] That trade is usually safe on short, clean links (a lab bench, a cabled setup) and riskier in reflective environments.
+
+<figure markdown>
+![800 ns normal vs 400 ns short guard interval](assets/img/guard-interval.png){ width="650" }
+<figcaption>The same OFDM symbols with the normal 800 ns and the short 400 ns guard interval. Figure from the openwifi 802.11n app note.</figcaption>
+</figure>
 
 openwifi's PHY handles 400 ns short-GI frames in both directions, and short GI is what lifts MCS 7 from 65 to 72.2 Mbps. But there's a subtlety in the driver: it only *advertises* short-GI support to peers when `test_mode` **bit 1** is set. The code comment says short GI "seems to bring unnecessary stability issue", so by default a negotiated link runs with the normal 800 ns GI and tops out at 65 Mbps.[^sdrc]
 
@@ -176,6 +232,57 @@ What the rows mean in practice:
 - **1024-QAM and LDPC roughly double the single-stream ceiling**, but only at SNRs a clean short link can deliver. The efficiency features matter in more situations than the speed ones.
 - **OFDMA changes the access model**, not just the rate (see [the primer](#a-short-80211-primer) for how RUs and trigger frames work). Scheduled uplink access enables the latency control that pure CSMA/CA can't give, and it's the feature openwifi's Wi-Fi 6 research centers on.
 - **TWT and BSS coloring** target dense deployments: battery devices that wake on a schedule instead of contending, and neighboring networks that overlap without freezing each other.
+
+<figure>
+<svg viewBox="0 0 920 312" role="img" aria-label="The resource unit splits of a 20 MHz channel: one 242-tone RU for a single station, two 106-tone RUs with a 26-tone RU in the middle, four 52-tone RUs with a 26-tone center, or nine 26-tone RUs of roughly 2 MHz each." style="width:100%;height:auto;max-width:1080px;font-family:inherit;font-size:13px">
+  <text x="460" y="20" text-anchor="middle" font-weight="700" fill="currentColor">One 20 MHz channel, four ways to slice it</text>
+
+  <text x="15" y="47" font-size="11.5" fill="currentColor" fill-opacity="0.75">One station takes the whole channel:</text>
+  <rect x="15" y="53" width="880" height="38" rx="4" fill="#4f5bd5" fill-opacity="0.82"/>
+  <text x="455" y="77" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">242-tone RU</text>
+
+  <text x="15" y="113" font-size="11.5" fill="currentColor" fill-opacity="0.75">Two stations (the middle 26-tone RU can serve a third):</text>
+  <rect x="15" y="119" width="388" height="38" rx="4" fill="#0d9488" fill-opacity="0.82"/>
+  <text x="209" y="143" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">106-tone RU</text>
+  <rect x="408" y="119" width="94" height="38" rx="4" fill="currentColor" fill-opacity="0.16"/>
+  <text x="455" y="143" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.8">26</text>
+  <rect x="507" y="119" width="388" height="38" rx="4" fill="#0d9488" fill-opacity="0.82"/>
+  <text x="701" y="143" text-anchor="middle" font-size="12" font-weight="600" fill="#ffffff">106-tone RU</text>
+
+  <text x="15" y="179" font-size="11.5" fill="currentColor" fill-opacity="0.75">Four stations (plus the 26-tone center):</text>
+  <rect x="15" y="185" width="191" height="38" rx="4" fill="#7c3aed" fill-opacity="0.82"/>
+  <text x="110" y="209" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">52-tone RU</text>
+  <rect x="211" y="185" width="191" height="38" rx="4" fill="#7c3aed" fill-opacity="0.82"/>
+  <text x="306" y="209" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">52-tone RU</text>
+  <rect x="407" y="185" width="96" height="38" rx="4" fill="currentColor" fill-opacity="0.16"/>
+  <text x="455" y="209" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.8">26</text>
+  <rect x="508" y="185" width="191" height="38" rx="4" fill="#7c3aed" fill-opacity="0.82"/>
+  <text x="603" y="209" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">52-tone RU</text>
+  <rect x="704" y="185" width="191" height="38" rx="4" fill="#7c3aed" fill-opacity="0.82"/>
+  <text x="799" y="209" text-anchor="middle" font-size="11.5" font-weight="600" fill="#ffffff">52-tone RU</text>
+
+  <text x="15" y="245" font-size="11.5" fill="currentColor" fill-opacity="0.75">Nine stations, each on roughly 2 MHz:</text>
+  <rect x="15" y="251" width="93" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="61" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+  <rect x="113" y="251" width="93" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="159" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+  <rect x="211" y="251" width="93" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="257" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+  <rect x="309" y="251" width="93" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="355" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+  <rect x="407" y="251" width="93" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="453" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+  <rect x="505" y="251" width="93" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="551" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+  <rect x="603" y="251" width="93" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="649" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+  <rect x="701" y="251" width="93" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="747" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+  <rect x="799" y="251" width="96" height="38" rx="4" fill="#c2740a" fill-opacity="0.82"/>
+  <text x="847" y="275" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">26</text>
+</svg>
+<figcaption>The defined resource-unit splits of a 20 MHz channel. Sizes can be mixed within one transmission (say, one 106-tone RU plus two 52-tone RUs), the usable tone count differs slightly between splits because of null tones, and the AP can redraw the layout for every transmission.</figcaption>
+</figure>
 
 One hardware note: Wi-Fi 6E's new spectrum (5.925 to 7.125 GHz) is mostly out of reach, because the AD9361 front end tops out at 6 GHz.
 
