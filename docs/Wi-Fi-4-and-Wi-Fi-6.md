@@ -14,6 +14,8 @@ This section is for people who know RF and digital modulation but haven't worked
 
 **One shared channel, half duplex, no scheduler.** Every station transmits and receives on the same frequency and never both at once. Access is contention based (CSMA/CA): listen until the channel is idle, wait a random backoff, transmit, then wait for the receiver's acknowledgement. The ACK must start within a fixed short gap (SIFS, 10 or 16 µs depending on band), which is exactly the kind of deadline a software MAC can't meet and why openwifi runs this logic in the FPGA. The practical consequence for this page: every frame pays a fixed cost of preamble, backoff, and ACK, so real throughput lands well below the PHY rate, and features that spread that cost over more data (aggregation) often buy more than a faster PHY rate does.
 
+**From OFDM to OFDMA.** Everything up to and including Wi-Fi 5 uses OFDM as a single-user scheme: whoever wins contention gets every subcarrier in the channel for the duration of the frame, so stations share the medium in time only. OFDMA, introduced by Wi-Fi 6, shares it in frequency as well. The subcarriers of one channel are grouped into **resource units (RUs)**, and the access point assigns RUs to different stations within the same transmission. In a 20 MHz channel an RU spans 26, 52, 106, or 242 tones, which allows anything from one full-channel user down to nine users in parallel, each on a slice about 2 MHz wide.[^std] Downlink OFDMA is one long frame carrying data for several receivers at once. Uplink OFDMA is the demanding direction: the AP invites specific stations with a trigger frame, and their transmissions must arrive at the AP aligned, so every station has to pre-correct its timing and carrier frequency tightly enough to stay orthogonal with its neighbors in the same FFT. The goal is not peak speed. A short packet no longer pays a full contention cycle for a 20 MHz channel it barely fills, which turns a crowded channel from a lottery into something schedulable.
+
 **Features are negotiated, not just implemented.** Stations advertise what they support in capability fields inside management frames (beacons, probe responses, association frames). A feature is only used on a link when *both* ends advertise it. Keep this in mind throughout the Wi-Fi 4 section: some things exist in openwifi's FPGA but sit idle until you tell the driver to advertise them, short guard interval being the main example.
 
 ## Where openwifi sits in the Wi-Fi timeline
@@ -153,11 +155,27 @@ Traces of the plan are visible in the open driver: the rate-override register ma
 
 ### What Wi-Fi 6 would add on this hardware
 
-Unlike Wi-Fi 5, most of Wi-Fi 6's headline features remain meaningful at 20 MHz with one antenna, which is what makes it interesting for this platform:[^std]
+The generation names state the intent. 802.11n is *high throughput*, 802.11ax is *high efficiency*. Wi-Fi 4 made a single link faster. Wi-Fi 6 mostly makes a busy channel more useful: many stations, small packets, and latency-sensitive traffic instead of one fast file transfer. And unlike Wi-Fi 5, its features don't depend on wide channels or many antennas, so they remain meaningful on this hardware. At 20 MHz with a single stream, the two generations compare like this:[^std]
 
-- **OFDMA.** The 20 MHz channel is subdivided into resource units assigned to different users in the same transmission. This is the feature the openwifi team's Wi-Fi 6 research centers on, since it enables scheduled, low-latency access instead of pure contention.
-- **Denser numerology and 1024-QAM.** 802.11ax uses 12.8 µs symbols with 4x closer subcarrier spacing and adds MCS 10/11. A single stream at 20 MHz reaches about 143 Mbps, roughly double openwifi's 11n ceiling. Error correction also changes: the higher rates require LDPC codes, where openwifi's 11n PHY uses punctured convolutional coding throughout.
-- **Target Wake Time (TWT)** for scheduled power saving, and **BSS coloring** for spatial reuse between overlapping networks.
+| | Wi-Fi 4 (802.11n) | Wi-Fi 6 (802.11ax) |
+|---|---|---|
+| Subcarrier spacing | 312.5 kHz | 78.125 kHz |
+| OFDM symbol | 3.2 µs + 0.4/0.8 µs GI | 12.8 µs + 0.8/1.6/3.2 µs GI |
+| Data subcarriers (20 MHz) | 52 | 234 |
+| Top modulation | 64-QAM (MCS 7) | 1024-QAM (MCS 11) |
+| FEC | Punctured convolutional (BCC) | LDPC at the higher rates |
+| Max PHY rate | 72.2 Mbps (short GI) | 143.4 Mbps (0.8 µs GI) |
+| Channel sharing | Time only (CSMA/CA) | Time and frequency (OFDMA resource units) |
+| Multi-user | None at one stream | Downlink and uplink OFDMA (plus MU-MIMO with more antennas) |
+| Power saving | Legacy power save | Target Wake Time (TWT): sleep on a negotiated schedule |
+| Overlapping networks | Defer to any detected frame | BSS coloring: ignore sufficiently weak frames from other networks |
+
+What the rows mean in practice:
+
+- **The denser numerology is the enabler.** Subcarriers sit 4x closer and symbols run 4x longer within the same 20 MHz. That's what makes the channel divisible into RUs (a 26-tone RU still has enough subcarriers to be useful), and the longer guard intervals tolerate outdoor delay spreads that would break an 800 ns GI.
+- **1024-QAM and LDPC roughly double the single-stream ceiling**, but only at SNRs a clean short link can deliver. The efficiency features matter in more situations than the speed ones.
+- **OFDMA changes the access model**, not just the rate (see [the primer](#a-short-80211-primer) for how RUs and trigger frames work). Scheduled uplink access enables the latency control that pure CSMA/CA can't give, and it's the feature openwifi's Wi-Fi 6 research centers on.
+- **TWT and BSS coloring** target dense deployments: battery devices that wake on a schedule instead of contending, and neighboring networks that overlap without freezing each other.
 
 One hardware note: Wi-Fi 6E's new spectrum (5.925 to 7.125 GHz) is mostly out of reach, because the AD9361 front end tops out at 6 GHz.
 

@@ -206,6 +206,9 @@ RSSI
 RTS/CTS
 :   Request To Send / Clear To Send: the 802.11 handshake that reserves the channel (via the NAV) before a data frame, mitigating hidden-node collisions. openwifi's `xpu` generates and honors it in hardware, gated by the packet-length threshold (`set_rts_threshold`).
 
+RU (Resource Unit)
+:   A group of OFDMA subcarriers (26, 52, 106, or 242 tones in a 20 MHz channel) assigned to one station, so several stations can share a single 802.11ax transmission. Not in the open-source release. See [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md#a-short-80211-primer).
+
 SDR
 :   Software-Defined Radio: a radio whose signal processing is done in software/logic rather than fixed hardware. openwifi is a full-stack Wi-Fi design on SDR hardware.
 

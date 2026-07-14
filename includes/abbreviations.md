@@ -9,6 +9,7 @@
 *[AIFS]: Arbitration Interframe Space: the per-access-category idle time before backoff in EDCA/QoS CSMA/CA.
 *[ATF]: ARM Trusted Firmware: the BL31 secure-monitor boot stage required on 64-bit ZynqMP boards.
 *[AXI]: Advanced eXtensible Interface: the ARM on-chip bus openwifi cores use for registers and sample data.
+*[BCC]: Binary Convolutional Coding: the standard's name for the punctured convolutional FEC 802.11a/g/n uses.
 *[BRAM]: Block RAM: the FPGA's on-chip memory, used for the TX buffer and capture FIFO.
 *[BSSID]: Basic Service Set Identifier: the MAC address identifying a Wi-Fi network (the AP in infrastructure mode).
 *[CCA]: Clear Channel Assessment: the "is the channel busy?" check in CSMA/CA (configurable via sdrctl).
@@ -76,6 +77,7 @@
 *[PPS]: Pulse Per Second: a once-a-second timing signal (typically from GPS).
 *[RSSI]: Received Signal Strength Indicator: an estimate of received power (per-packet in openwifi).
 *[RTS/CTS]: Request To Send / Clear To Send: the 802.11 handshake that reserves the channel via the NAV.
+*[RU]: Resource Unit: a group of OFDMA subcarriers assigned to one station in 802.11ax (not in the open-source release).
 *[SDR]: Software-Defined Radio: signal processing done in software/logic rather than fixed hardware.
 *[side_ch]: openwifi's FPGA capture engine, tapping IQ and demodulator results independently of the packet path.
 *[SIFS]: Short Interframe Space: the brief gap before an ACK (10 us at 2.4 GHz, 16 us at 5 GHz).
