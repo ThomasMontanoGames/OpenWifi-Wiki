@@ -107,6 +107,9 @@ FRU
 FSBL
 :   First Stage Boot Loader. The initial boot stage built from the hardware description; on some boards it (rather than U-Boot SPL) is needed to initialize DDR correctly.
 
+FSM
+:   Finite State Machine: sequential logic that steps through a fixed set of states, the standard way control logic is built in an FPGA. The wiki uses the term for blocks like the side channel's capture FSM (what its register 0 bit 2 resets) and the CSMA/CA logic in `xpu`. See [side_ch_ctl](side_ch_ctl-and-the-Side-Channel.md#register-reference).
+
 Full duplex
 :   Here, the ability to receive while transmitting. openwifi's receiver can hear its own transmission, which enables the [CSI radar](Research-Features.md#csi-radar-full-duplex-self-sensing) and [loopback](Research-Features.md#self-loopback-testing) features.
 

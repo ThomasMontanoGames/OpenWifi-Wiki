@@ -271,20 +271,30 @@ Registers 30 and 31 read together give you a per-peer PER: 31 counts the good on
 
 ## Common problems
 
-**"side info count" stays at 0.** Nothing is matching or triggering. In CSI mode, reset the filter with `wh1h0001` to capture every packet and confirm the channel is busy. In IQ mode, also check register 8: a trigger like "AGC gain crosses a threshold" may simply never happen.
+### "side info count" stays at 0
 
-**Captures arrive but the plots are garbage.** `num_eq` (CSI) or `iq_len` (IQ) is out of step somewhere. The value has to match in three places: the `insmod` parameter, the Python script's argument, and the `num_eq`/`iq_len` variable in the MATLAB script.
+Nothing is matching or triggering. In CSI mode, reset the filter with `wh1h0001` to capture every packet and confirm the channel is busy. In IQ mode, also check register 8: a trigger like "AGC gain crosses a threshold" may simply never happen.
 
-**A reloaded module still carries the last session's settings.** Reloading `side_ch.ko` does *not* return the core to a clean state. `dev_probe()` writes only registers 0, 1, 3, 4, 8, 11, and 12 (registers 3, 11, and 12 only in IQ mode), so registers 5, 6, 7, 9, 10, and 19 keep whatever you last put there. The reset it pulses through register 0 drives the capture FSM, not the register file, which clears only when the FPGA is reconfigured. Two ways this bites:
+### Captures arrive but the plots are garbage
+
+`num_eq` (CSI) or `iq_len` (IQ) is out of step somewhere. The value has to match in three places: the `insmod` parameter, the Python script's argument, and the `num_eq`/`iq_len` variable in the MATLAB script.
+
+### A reloaded module still carries the last session's settings
+
+Reloading `side_ch.ko` does *not* return the core to a clean state. `dev_probe()` writes only registers 0, 1, 3, 4, 8, 11, and 12 (registers 3, 11, and 12 only in IQ mode), so registers 5, 6, 7, 9, 10, and 19 keep whatever you last put there. The reset it pulses through register 0 drives the capture FSM, not the register file, which clears only when the FPGA is reconfigured. Two ways this bites:
 
 - A leftover `wh5h4` from a loopback test still taps `tx_intf` after the reload, so the IQ quick start silently captures your own transmit instead of the air. Register 5 needs no enabling bit, so nothing else hides the mistake.
 - Going from IQ mode back to CSI mode by reloading with no `iq_len_init` leaves register 3 bit 0 **still set**, because the driver only writes that register when `iq_len_init > 0`. The FPGA stays in IQ mode while the driver frames for CSI. (Also flagged under [Unverified](#unverified-a-suspected-upstream-bug).)
 
 Write the stale registers back by hand (`wh5d0`, `wh3d0`), or reload the bitstream with `./wgd.sh` for a guaranteed clean slate.
 
-**Nothing reaches the PC.** The stream is UDP to port 4000 at 192.168.10.1 unless you passed `-s`. Run the display script on the PC itself, not over ssh, and check that the board can reach that address.
+### Nothing reaches the PC
 
-**IQ capture is truncated or empty on a Zynq-7020 board.** The FIFO is half-size there. Confirm with `rh22`, keep `iq_len_init` ≤ 4095, and set `wh11d4094`.
+The stream is UDP to port 4000 at 192.168.10.1 unless you passed `-s`. Run the display script on the PC itself, not over ssh, and check that the board can reach that address.
+
+### IQ capture is truncated or empty on a Zynq-7020 board
+
+The FIFO is half-size there. Confirm with `rh22`, keep `iq_len_init` ≤ 4095, and set `wh11d4094`.
 
 ---
 

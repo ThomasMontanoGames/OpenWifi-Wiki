@@ -43,6 +43,7 @@
 *[FPGA]: Field-Programmable Gate Array: the reconfigurable logic where openwifi's PHY and real-time MAC live.
 *[FRU]: Field-Replaceable Unit: identification data in an FMCOMMS board's EEPROM.
 *[FSBL]: First Stage Boot Loader: the initial boot stage built from the hardware description.
+*[FSM]: Finite State Machine: sequential logic that steps through a fixed set of states (e.g. the side channel's capture FSM).
 *[GEM]: Gigabit Ethernet MAC: the Zynq PS-side Ethernet controller.
 *[GI]: Guard Interval: the cyclic-prefix gap between OFDM symbols that absorbs multipath.
 *[HLS]: High-Level Synthesis: generating FPGA logic from C++ (via Vitis HLS).
