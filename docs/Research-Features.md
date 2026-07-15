@@ -26,6 +26,8 @@ gcc -o side_ch_ctl side_ch_ctl.c
 - `./side_ch_ctl rhX`: read register X
 - `./side_ch_ctl g` or `gN`: start capturing; `g` polls every 100 ms, `gN` every N ms
 
+That's enough for the recipes on this page. For the rest of the tool, the module parameters, the full `side_ch` register map, all 32 trigger conditions, and the gotchas, see [side_ch_ctl and the Side Channel](side_ch_ctl-and-the-Side-Channel.md).
+
 Everything below works not only in monitor mode but also alongside live AP/client/ad-hoc operation; bring the link up first, then start the side channel.
 
 ---
@@ -159,10 +161,12 @@ Capture raw baseband **IQ samples** with a wide set of trigger conditions, plus 
 ./wgd.sh
 ./monitor_ch.sh sdr0 11
 insmod side_ch.ko iq_len_init=8187      # small FPGA (Zynq-7020): use <4096, e.g. 4095
-./side_ch_ctl wh3h01                    # enable IQ capture, set IQ data source
+./side_ch_ctl wh3h01                    # switch the core to IQ mode
 ./side_ch_ctl wh11d4094                 # only needed on small-FPGA (Zynq-7020) boards
 ./side_ch_ctl g
 ```
+
+That captures IQ received off the air, which is register 5's default. Register 3 selects the *mode*, not where the IQ is tapped from. To capture your own transmit instead, set the source in register 5 (see [the register map](side_ch_ctl-and-the-Side-Channel.md#configuration)).
 
 Rising "side info count" means triggers are firing. Then on the PC:
 

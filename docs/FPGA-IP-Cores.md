@@ -179,9 +179,9 @@ openwifi's signature research core. `side_ch` taps into the receiver's I/Q datap
 
 Its inputs (read directly from `side_ch.v` / `side_ch_control.v`) tell the story: TX-side taps (`openofdm_tx_iq0/iq1`, `tx_intf_iq0/iq1`), raw ADC-rate I/Q (`sample0_in`/`sample1_in`), demodulator status (`demod_is_ongoing`, `long/short_preamble_detected`, `ht_unsupport`, `pkt_rate`, `pkt_len`), and, critically, **`csi`/`csi_valid`** and **`equalizer`/`equalizer_valid`**, the per-subcarrier channel estimate and equalizer coefficients from the OFDM receiver. Everything is timestamped against the shared 64-bit TSF (so captures line up with packets) and tagged with RSSI.
 
-`side_ch_control.v` (36 KB) is the capture/trigger FSM implementing the [30+ trigger conditions](Research-Features.md#trigger-conditions-register-8). A `MAX_NUM_DMA_SYMBOL` parameter sizes the internal FIFO: 8192 normally, halved to 4096 on small FPGAs via the `SIDE_CH_LESS_BRAM` macro, which is why Zynq-7020 boards cap capture length lower.
+`side_ch_control.v` (36 KB) is the capture/trigger FSM implementing the [32 trigger conditions](side_ch_ctl-and-the-Side-Channel.md#trigger-reference-register-8). A `MAX_NUM_DMA_SYMBOL` parameter sizes the internal FIFO: 8192 normally, halved to 4096 on small FPGAs via the `SIDE_CH_LESS_BRAM` macro, which is why Zynq-7020 boards cap capture length lower.
 
-`side_ch` is the odd core out of the build in one way: it is **not** part of the main `sdr.ko` driver. It has its own kernel module `side_ch.ko` (built by `openwifi/driver/side_ch/make_driver.sh`) and its own user-space tool `side_ch_ctl`, because you load and unload it on demand rather than always running it. See [Research Features](Research-Features.md) for the full workflow and the `side_ch_ctl` command grammar.
+`side_ch` is the odd core out of the build in one way: it is **not** part of the main `sdr.ko` driver. It has its own kernel module `side_ch.ko` (built by `openwifi/driver/side_ch/make_driver.sh`) and its own user-space tool `side_ch_ctl`, because you load and unload it on demand rather than always running it. See [Research Features](Research-Features.md) for the full workflow, and [side_ch_ctl and the Side Channel](side_ch_ctl-and-the-Side-Channel.md) for the command grammar and the register map.
 
 ---
 

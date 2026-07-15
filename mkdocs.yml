@@ -135,12 +135,12 @@ nav:
       - Building SD Images: Building-SD-Images.md
       - FPGA Development: FPGA-Development.md
       - FPGA IP Cores: FPGA-IP-Cores.md
-  # Research is a single-page section: the short tab label ("Research") comes
-  # from the section name, while the sidebar entry derives its full title
-  # ("CSI, IQ Capture and Research Features") from the page's H1 — so the key
+  # The short tab label ("Research") comes from the section name, while the
+  # sidebar entries derive their full titles from each page's H1 — so the key
   # "CSI/IQ" wording stays visible without a hand-maintained nav label.
   - Research:
       - Research-Features.md
+      - side_ch_ctl-and-the-Side-Channel.md
   - App Notes: Application-Notes.md
   - Help & Support:
       - Troubleshooting: Troubleshooting.md
