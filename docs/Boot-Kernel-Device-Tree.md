@@ -155,7 +155,7 @@ Three ingredients go in:
 The script compiles each overlay with `dtc`, preprocesses and compiles the stock `.dts`, then fuses them with `fdtoverlay`:
 
 <figure>
-<svg viewBox="0 0 940 240" role="img" aria-label="How construct_device_tree.sh builds a board device tree: the stock_board.dts is compiled with cpp and dtc into default_devicetree.dtb; the shared openwifi overlay and the per-board overlay are each compiled with dtc into .dtbo files; fdtoverlay then fuses all three into the board's devicetree.dtb, plus a decompiled full_devicetree.dts for a sanity check." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
+<svg viewBox="0 0 940 240" role="img" aria-label="How construct_device_tree.sh builds a board device tree: the stock_board.dts is compiled with cpp and dtc into default_devicetree.dtb; the shared openwifi overlay and the per-board overlay are each compiled with dtc into .dtbo files; fdtoverlay then fuses all three into the board's devicetree.dtb, plus a decompiled full_devicetree.dts for inspection." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
   <defs>
     <marker id="dt-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.6"/>
@@ -210,9 +210,9 @@ The script compiles each overlay with `dtc`, preprocesses and compiles the stock
   <rect x="712" y="92" width="176" height="56" rx="12" fill="#0d9488" fill-opacity="0.06" stroke="#0d9488" stroke-opacity="0.55" stroke-width="1.5"/>
   <text x="800" y="116" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">devicetree.dtb</text>
   <text x="800" y="132" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">the board's final tree</text>
-  <text x="800" y="172" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.65">+ full_devicetree.dts (decompiled sanity check)</text>
+  <text x="800" y="172" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.65">+ full_devicetree.dts (decompiled for inspection)</text>
 </svg>
-<figcaption><em><code>construct_device_tree.sh</code> compiles the stock board tree (<code>cpp</code> + <code>dtc</code>) and the two openwifi overlays (<code>dtc</code>), then <code>fdtoverlay</code> fuses all three into the board's final <code>devicetree.dtb</code> (and decompiles a <code>full_devicetree.dts</code> for a sanity check).</em></figcaption>
+<figcaption><em><code>construct_device_tree.sh</code> compiles the stock board tree (<code>cpp</code> + <code>dtc</code>) and the two openwifi overlays (<code>dtc</code>), then <code>fdtoverlay</code> fuses all three into the board's final <code>devicetree.dtb</code> (and decompiles a <code>full_devicetree.dts</code> so you can inspect the merged result).</em></figcaption>
 </figure>
 
 !!! info "Why it's built this way"

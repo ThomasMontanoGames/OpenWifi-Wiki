@@ -19,7 +19,7 @@ cd openwifi
 cat /proc/interrupts        # run a few times; "sdr,tx_itrpt1" count should keep growing
 ```
 
-The growing TX-interrupt count is the AP transmitting its periodic beacon. Under the hood this is stock `hostapd`; edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
+The growing TX-interrupt count is the AP transmitting its periodic beacon. The script runs stock `hostapd`; edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
 
 ## Client (station)
 
@@ -161,7 +161,7 @@ analyze_80211 trace.pcap
 openwifi is **OFDM-only** and therefore not backward-compatible with 802.11b. This matters at connection setup, since 2.4 GHz devices often fall back to 11b rates for beacons and management frames. The fix is to suppress 11b rates on both ends:
 
 - **On the openwifi AP:** the provided `hostapd-openwifi.conf` already suppresses 11b rates (`supported_rates` / `basic_rates`).
-- **On a commercial client:** stock `wpa_supplicant` can't suppress 11b rates in 2.4 GHz out of the box. Build the patched version openwifi provides:
+- **On a commercial client:** unmodified `wpa_supplicant` can't suppress 11b rates in 2.4 GHz. Build the patched version openwifi provides:
 
   ```bash
   sudo apt-get install libssl1.0-dev

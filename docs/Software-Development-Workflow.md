@@ -1,6 +1,6 @@
 # Software Development Workflow
 
-This page covers the software side of hacking on openwifi: rebuilding the driver, updating a running board without rebooting, rebuilding `sdrctl`, and building a full SD-card image from scratch. FPGA rebuilds are on the [FPGA Development](FPGA-Development.md) page.
+This page covers the software side of openwifi development: rebuilding the driver, updating a running board without rebooting, rebuilding `sdrctl`, and building a full SD-card image from scratch. FPGA rebuilds are on the [FPGA Development](FPGA-Development.md) page.
 
 A recurring theme: the prebuilt SD image may lag the repo, so **copy the latest `user_space/` files onto the board** before doing serious work, and rebuild the driver against the matching kernel.
 

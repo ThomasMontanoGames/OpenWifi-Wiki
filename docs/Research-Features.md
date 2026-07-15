@@ -26,7 +26,7 @@ gcc -o side_ch_ctl side_ch_ctl.c
 - `./side_ch_ctl rhX`: read register X
 - `./side_ch_ctl g` or `gN`: start capturing; `g` polls every 100 ms, `gN` every N ms
 
-That's enough for the recipes on this page. For the rest of the tool, the module parameters, the full `side_ch` register map, all 32 trigger conditions, and the gotchas, see [side_ch_ctl and the Side Channel](side_ch_ctl-and-the-Side-Channel.md).
+That's enough for the recipes on this page. For the rest of the tool, the module parameters, the full `side_ch` register map, all 32 trigger conditions, and the common pitfalls, see [side_ch_ctl and the Side Channel](side_ch_ctl-and-the-Side-Channel.md).
 
 Everything below works not only in monitor mode but also alongside live AP/client/ad-hoc operation; bring the link up first, then start the side channel.
 
@@ -254,7 +254,7 @@ This technique is precise enough to have caught real bugs: the plot below shows 
 
 ## Self-loopback testing
 
-Full duplex also enables self-loopback tests of packets, CSI, and IQ, either over the air (TX/RX antennas close together) or entirely inside the FPGA. This is a good sanity check for the transmitter and receiver without a second node.
+Full duplex also enables self-loopback tests of packets, CSI, and IQ, either over the air (TX/RX antennas close together) or entirely inside the FPGA. This is a good way to verify the transmitter and receiver without a second node.
 
 ![Self-loopback principle](assets/img/openwifi-loopback-principle.jpg)
 
