@@ -2,7 +2,43 @@
 
 This page covers the software side of openwifi development: rebuilding the driver, updating a running board without rebooting, rebuilding `sdrctl`, and building a full SD-card image from scratch. FPGA rebuilds are on the [FPGA Development](FPGA-Development.md) page.
 
-A recurring theme: the prebuilt SD image may lag the repo, so **copy the latest `user_space/` files onto the board** before doing serious work, and rebuild the driver against the matching kernel.
+The prebuilt SD image may be older than the current repo, so **copy the latest `user_space/` files onto the board** before doing serious work, and rebuild the driver against the matching kernel.
+
+If you are in the middle of editing code and just want the steps, start with the [quick reference](#quick-reference-from-code-change-to-running-board) below and follow its links for detail.
+
+## Quick reference: from code change to running board
+
+Keep this section open while you work. Find the row that matches what you changed. Each row links to the full instructions. The commands assume the usual setup: sources on your PC, the board reachable at `192.168.10.122`, and the [environment variables](#environment-setup) set.
+
+| You changed | Rebuild & deploy | Take effect |
+| --- | --- | --- |
+| **Driver C code** (`driver/`, including `driver/side_ch/`) | On the PC: `cd driver && ./make_all.sh $XILINX_DIR $ARCH_BIT`, then `scp` the `.ko` files to the board's `openwifi/` directory | `./wgd.sh` on the board, no reboot needed ([details](#rebuilding-the-driver)) |
+| **`sdrctl` source** (`user_space/sdrctl_src/`) | `scp` the source to the board, then compile **on the board** with `make` | The new binary replaces `openwifi/sdrctl` immediately ([details](#rebuilding-sdrctl)) |
+| **`side_ch_ctl` source** (`user_space/side_ch_ctl_src/`) | `scp` the source to the board, then **on the board**: `gcc -o side_ch_ctl side_ch_ctl.c` | Run it. If you also changed `side_ch.ko`, reload that like any other driver module ([details](side_ch_ctl-and-the-Side-Channel.md#building)) |
+| **`inject_80211` / `analyze_80211`** (`user_space/inject_80211/`) | `scp` the source to the board, then **on the board**: `make` | Run it ([usage](Operating-Modes.md#packet-injection-and-fuzzing)) |
+| **Helper scripts** (`user_space/*.sh`, `*.py`) | Nothing to compile. Copy them to the board with `scp`. The Python display scripts (`side_info_display.py`, `iq_capture.py`, and others) run on the PC instead | Run them |
+| **FPGA Verilog / IP cores** | On the PC: rebuild the bitstream ([FPGA Development](FPGA-Development.md)), then `boot_bin_gen.sh` and `scp system_top.bit.bin` to the board | `./wgd.sh`, no reboot needed ([details](#updating-the-fpga-image-on-a-running-board)) |
+| **Kernel config or device tree** | On the PC ([Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md)), then copy the results into the `BOOT` partition ([bulk helpers](#bulk-update-helpers)) | Power-cycle the board |
+
+### The driver iteration loop
+
+The most common cycle is changing driver code and testing it on the board. Once set up, each round takes less than a minute.
+
+**One-time setup** (per PC / per kernel version):
+
+1. Set the [environment variables](#environment-setup) and install the build packages.
+2. Prepare the kernel source the driver builds against: `cd openwifi/user_space && ./prepare_kernel.sh $XILINX_DIR $ARCH_BIT`.
+
+**Each round:**
+
+1. Edit the driver code on the PC.
+2. Compile: `cd openwifi/driver && ./make_all.sh $XILINX_DIR $ARCH_BIT` (add extra args for [conditional-compile macros](#conditional-compilation)).
+3. Copy to the board: ``scp `find ./ -name \*.ko` root@192.168.10.122:openwifi/``.
+4. On the board: `./wgd.sh` reloads the modules live. Make sure `system_top.bit.bin` is **not** in the directory unless you also want the FPGA image reloaded ([details](#reloading-driver-and-fpga-without-rebooting)).
+5. Check it loaded: `dmesg | tail -20` should show the driver initializing without symbol/version errors (if it does show them, see [the note on kernel mismatch](#rebuilding-the-driver)), and `ip a` should list `sdr0`.
+6. Reloading recreates `sdr0` from scratch, so restart whatever mode you were in: AP (`hostapd` / `fosdem.sh`), client (`wpa_supplicant`), or your monitor-mode setup ([Operating Modes](Operating-Modes.md)).
+
+For print-style debugging, add `printk` calls in the driver and watch them live on the board with `dmesg -w` in a second ssh session.
 
 ## Environment setup
 
@@ -12,7 +48,7 @@ Most host-side build steps expect these environment variables (use absolute path
 export XILINX_DIR=/opt/Xilinx                 # dir containing Vitis/, Vivado/, etc.
 export OPENWIFI_HW_IMG_DIR=/path/to/openwifi-hw-img
 export BOARD_NAME=zed_fmcs2                    # your board
-export ARCH_BIT=32                             # 32 for Zynq-7000; 64 for Zynq UltraScale+ (e.g. ZCU102)
+export ARCH_BIT=32                             # 32 for Zynq-7000, 64 for Zynq UltraScale+ (e.g. ZCU102)
 ```
 
 For driver builds you also need Vivado/Vitis installed (the driver is cross-compiled with the kernel toolchain) and a few packages:
@@ -58,21 +94,6 @@ For the exact toolchain, kernel, and image versions these builds expect, see [Ve
 
 Passing extra arguments to `make_all.sh` turns them into `#define` macros in `pre_def.h`, so you can gate driver code blocks per build. Combined with the FPGA's equivalent Verilog-macro mechanism, this is how you produce feature variants. See [dynamic reloading](#reloading-driver-and-fpga-without-rebooting) for a clean way to keep several variants side by side.
 
-## Rebuilding sdrctl
-
-`sdrctl` is compiled **on the board**:
-
-```bash
-# from host, push the source:
-cd openwifi/user_space/sdrctl_src
-scp `find ./ -name \*` root@192.168.10.122:openwifi/sdrctl_src/
-```
-
-```bash
-# on the board:
-cd ~/openwifi/sdrctl_src/ && make clean && make && cp sdrctl ../ && cd ..
-```
-
 ## Updating the FPGA image on a running board
 
 If you just want to swap the FPGA bitstream (built elsewhere, or taken from `openwifi-hw-img`) without a full rebuild:
@@ -89,7 +110,7 @@ Once `system_top.bit.bin` is in the board's `openwifi/` directory, `wgd.sh` will
 
 This is the workflow that makes iteration fast. `wgd.sh` can reload the driver and/or FPGA live and switch between different builds with no reboot and no power cycle. Keep your on-board files current with `user_space/` to use it.
 
-**Driver only.** Ensure `system_top.bit.bin` is *not* in the directory; `wgd.sh` then loads just the `.ko` files.
+**Driver only.** Ensure `system_top.bit.bin` is *not* in the directory. `wgd.sh` then loads just the `.ko` files.
 
 **Driver + FPGA.** Generate the reloadable bitstream and put it beside the driver files:
 
@@ -113,24 +134,45 @@ Then run `./wgd.sh` on the board as usual.
 ./wgd.sh ./drv_and_fpga_myvariant.tar.gz
 ```
 
-This makes it trivial to keep, ship, and switch between variants. To build a variant, either work on a separate branch, or use conditional-compile arguments (driver `make_all.sh` extra args; FPGA Verilog macros) and rename the package to record which options are on. Note: `drv_and_fpga_package_gen.sh` calls `make_all.sh` without extra args by default, so if you rely on conditional-compile flags, add them there too.
+This makes it easy to keep, share, and switch between variants. To build a variant, either work on a separate branch, or use conditional-compile arguments (driver `make_all.sh` extra args, FPGA Verilog macros) and rename the package to record which options are on. Note: `drv_and_fpga_package_gen.sh` calls `make_all.sh` without extra args by default, so if you rely on conditional-compile flags, add them there too.
 
-**Full `wgd.sh` usage** (also via `./wgd.sh -h`): a numeric first argument sets `test_mode`; `remote` downloads then loads (optionally into a target dir); a directory name loads from that directory; a `.tar.gz` is unpacked and loaded. A trailing argument sets `test_mode`.
+**Full `wgd.sh` usage** (also shown by `./wgd.sh -h`):
+
+- a numeric first argument sets `test_mode`
+- `remote` downloads the files and then loads them (optionally into a target directory)
+- a directory name loads from that directory
+- a `.tar.gz` file is unpacked and loaded
+- a trailing argument sets `test_mode`
 
 ### test_mode
 
 `insmod sdr.ko test_mode=<value>` (or passing the value to `wgd.sh`/`fosdem.sh`) toggles experimental features via the `test_mode` global in `sdr.c`. Currently **bit0 = A-MPDU aggregation on/off** (default off). That's why `./wgd.sh 1` gives you aggregation.
 
+## Rebuilding sdrctl
+
+`sdrctl` is compiled **on the board**:
+
+```bash
+# from host, push the source:
+cd openwifi/user_space/sdrctl_src
+scp `find ./ -name \*` root@192.168.10.122:openwifi/sdrctl_src/
+```
+
+```bash
+# on the board:
+cd ~/openwifi/sdrctl_src/ && make clean && make && cp sdrctl ../ && cd ..
+```
+
 ## Bulk update helpers
 
 For larger updates (kernel, modules, device tree, rootfs) there are paired host/board scripts:
 
-- **Kernel + modules + device tree:** host-side `prepare_kernel.sh`, `boot_bin_gen.sh`, `transfer_kernel_image_module_to_board.sh`; board-side `populate_kernel_image_module_reboot.sh` (run it again after the first reboot if the kernel *version* changed, so symlinks point at the new version).
-- **Driver + user space:** host-side `make_all.sh` + `transfer_driver_userspace_to_board.sh`; board-side `populate_driver_userspace.sh`.
-- **Over FTP:** stand up an anonymous FTP server on the PC rooted at your `openwifi` directory, then on the board `./sdcard_boot_update.sh $BOARD_NAME` (pulls `uImage`, `BOOT.BIN`, `devicetree.dtb` into the boot partition, then power-cycle) and `./wgd.sh remote` (pulls driver files and brings up `sdr0`).
+- **Kernel + modules + device tree:** on the host, `prepare_kernel.sh`, `boot_bin_gen.sh`, and `transfer_kernel_image_module_to_board.sh`. On the board, `populate_kernel_image_module_reboot.sh` (run it again after the first reboot if the kernel *version* changed, so symlinks point at the new version).
+- **Driver + user space:** on the host, `make_all.sh` and `transfer_driver_userspace_to_board.sh`. On the board, `populate_driver_userspace.sh`.
+- **Over FTP:** set up an anonymous FTP server on the PC rooted at your `openwifi` directory, then on the board `./sdcard_boot_update.sh $BOARD_NAME` (pulls `uImage`, `BOOT.BIN`, `devicetree.dtb` into the boot partition, then power-cycle) and `./wgd.sh remote` (pulls driver files and brings up `sdr0`).
 - **rootfs as a disk:** on the PC, *File manager → Connect to Server → `sftp://root@192.168.10.122/root`* (password `openwifi`).
 - Refreshing the ADI rootfs tools is also worthwhile: on the board, clone `linux_image_ADI-scripts`, `apt update`, then run `adi_update_tools.sh` (see the [ADI Kuiper update guide](https://wiki.analog.com/resources/tools-software/linux-software/kuiper-linux/update)).
 
 ## Building a full SD image from scratch
 
-Two base operating systems are supported, **ADI Kuiper** (Debian/Ubuntu-like) and **OpenWrt** (router-style with LuCI). The full step-by-step for both (flashing the base image, the rootfs edits, `update_sdcard.sh`, and the OpenWrt Docker build) is on the dedicated [Building SD Images](Building-SD-Images.md) page. Kuiper builds want Vivado 2022.2 (with Vitis) and the `flex bison libssl-dev device-tree-compiler u-boot-tools` packages; the OpenWrt build needs only Docker.
+Two base operating systems are supported, **ADI Kuiper** (Debian/Ubuntu-like) and **OpenWrt** (router-style with LuCI). The full step-by-step for both (flashing the base image, the rootfs edits, `update_sdcard.sh`, and the OpenWrt Docker build) is on the dedicated [Building SD Images](Building-SD-Images.md) page. Kuiper builds need Vivado 2022.2 (with Vitis) and the `flex bison libssl-dev device-tree-compiler u-boot-tools` packages. The OpenWrt build only needs Docker.
