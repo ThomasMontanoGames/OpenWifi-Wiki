@@ -136,8 +136,8 @@ nav:
       - Wi-Fi 4 & Wi-Fi 6 Features: Wi-Fi-4-and-Wi-Fi-6.md
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
   - Developing:
-      - Building SD Images: Building-SD-Images.md
       - Software Development Workflow: Software-Development-Workflow.md
+      - Building SD Images: Building-SD-Images.md
       - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
       - The Linux Driver: Driver-Architecture.md      
       - FPGA Development: FPGA-Development.md
