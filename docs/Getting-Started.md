@@ -12,7 +12,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 - An Ethernet cable between the board and your PC.
 - Optionally a USB-UART cable for a serial console, which is invaluable when networking doesn't come up.
 
-**Supported boards.** The most common ones are below; the full matrix, per-board hardware notes, and the GPIO/LED debug map are on the [Supported Boards](Supported-Boards.md) page.
+**Supported boards.** The most common ones are below. The full matrix, per-board hardware notes, and the GPIO/LED debug map are on the [Supported Boards](Supported-Boards.md) page.
 
 | `board_name` | Hardware | Vivado license needed to rebuild FPGA? |
 |---|---|---|
@@ -27,13 +27,13 @@ This page takes you from an empty SD card to a working openwifi access point tha
 | `neptunesdr`, `LibreSDR` | Low-cost Zynq-7020 + AD9361 boards (community-supported, unofficial) | No |
 
 !!! info "The `board_name` string matters"
-    It selects which FPGA image and boot files you use throughout the project (the same string names the board in all the [repos](Repositories.md)). The "Vivado license" column above only matters if you rebuild the FPGA yourself; the prebuilt image works regardless.
+    It selects which FPGA image and boot files you use throughout the project (the same string names the board in all the [repos](Repositories.md)). The "Vivado license" column above only matters if you rebuild the FPGA yourself. The prebuilt image works regardless.
 
 !!! tip "No hardware?"
     If you have no board at all, the imec **[w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html)** offers remote access to openwifi-ready boards.
 
 !!! note "ZedBoard-class boards (Zynq-7020) have tighter limits"
-    Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi, and others; see [Supported Boards](Supported-Boards.md#the-board-matrix) for the full list) have less FPGA memory, so a few features (notably IQ capture buffer length) have reduced limits. The relevant pages call this out.
+    Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi, and the other boards listed in [Supported Boards](Supported-Boards.md#the-board-matrix)) have less FPGA memory, so a few features (notably IQ capture buffer length) have reduced limits. The relevant pages call this out.
 
 ## 2. Flash the SD card
 
@@ -68,7 +68,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 4. One-time setup on a fresh board:
 
    ```bash
-   raspi-config --expand-rootfs   # only if your SD card is larger than 16 GB; reboot after
+   raspi-config --expand-rootfs   # only if your SD card is larger than 16 GB (reboot after)
    ./openwifi/setup_once.sh       # then reboot
    ```
 
@@ -78,18 +78,18 @@ On the board:
 
 ```bash
 cd openwifi
-./wgd.sh        # loads the FPGA image (if present) and the openwifi driver; creates NIC "sdr0"
+./wgd.sh        # loads the FPGA image (if present) and the openwifi driver, creates NIC "sdr0"
 ./fosdem.sh     # starts hostapd (SSID "openwifi") plus a DHCP server and a demo webserver
 ```
 
 Useful variants: `./wgd.sh 1` enables experimental A-MPDU aggregation (higher 11n throughput), and `./fosdem-11ag.sh` forces legacy 11a/g mode.
 
-Now look for the **"openwifi"** SSID on your phone or laptop and connect. You should receive an IP in the 192.168.13.0/24 range; browse to `192.168.13.1` to see the on-board demo page.
+Now look for the **"openwifi"** SSID on your phone or laptop and connect. You should receive an IP in the 192.168.13.0/24 range. Browse to `192.168.13.1` to see the on-board demo page.
 
 Two things to know:
 
 - The default configuration uses **channel 44 (5 GHz)**. If your client device is 2.4 GHz-only, edit `hostapd-openwifi.conf` on the board (channel/band) and re-run `fosdem.sh`.
-- The FPGA uses an **evaluation license of the Xilinx Viterbi decoder, which halts after roughly two hours** of operation. Symptoms: reception dies; `./sdrctl dev sdr0 get reg rx 20` returns the same value forever. The fix is simply to reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle the board.
+- The FPGA uses an **evaluation license of the Xilinx Viterbi decoder, which halts after roughly two hours** of operation. Symptoms: reception dies, and `./sdrctl dev sdr0 get reg rx 20` returns the same value forever. The fix is simply to reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle the board.
 
 Also note: the ADRV9361-Z7035 has very low TX power in the 5 GHz band, so keep devices close when using that board on 5 GHz.
 

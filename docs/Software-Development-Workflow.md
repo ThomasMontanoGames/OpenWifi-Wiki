@@ -146,7 +146,7 @@ This makes it easy to keep, share, and switch between variants. To build a varia
 
 ### test_mode
 
-`insmod sdr.ko test_mode=<value>` (or passing the value to `wgd.sh`/`fosdem.sh`) toggles experimental features via the `test_mode` global in `sdr.c`. Currently **bit0 = A-MPDU aggregation on/off** (default off). That's why `./wgd.sh 1` gives you aggregation.
+`insmod sdr.ko test_mode=<value>` (or passing the value to `wgd.sh`/`fosdem.sh`) toggles experimental features via the `test_mode` global in `sdr.c`. Two bits are in use: **bit0 = A-MPDU aggregation on/off** (default off), which is why `./wgd.sh 1` gives you aggregation, and **bit1 = advertise short guard interval**, which only the driver source documents. See [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md#short-guard-interval) for both in practice.
 
 ## Rebuilding sdrctl
 

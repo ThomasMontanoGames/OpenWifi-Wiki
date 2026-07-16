@@ -56,6 +56,12 @@ theme:
     - content.tooltips
     - toc.follow
 
+# Make `mkdocs build --strict` fail on links to missing anchors, not just
+# missing pages (the default only validates the page half of a link).
+validation:
+  links:
+    anchors: warn
+
 extra_css:
   - assets/stylesheets/extra.css
 
@@ -130,10 +136,10 @@ nav:
       - Wi-Fi 4 & Wi-Fi 6 Features: Wi-Fi-4-and-Wi-Fi-6.md
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
   - Developing:
-      - Software Development Workflow: Software-Development-Workflow.md
-      - The Linux Driver: Driver-Architecture.md
-      - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
       - Building SD Images: Building-SD-Images.md
+      - Software Development Workflow: Software-Development-Workflow.md
+      - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
+      - The Linux Driver: Driver-Architecture.md      
       - FPGA Development: FPGA-Development.md
       - FPGA IP Cores: FPGA-IP-Cores.md
   # The short tab label ("Research") comes from the section name, while the

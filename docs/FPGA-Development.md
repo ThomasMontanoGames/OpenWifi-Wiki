@@ -7,16 +7,16 @@ openwifi's FPGA design is built **on top of the [Analog Devices HDL reference de
 ## Prerequisites
 
 - **Vivado 2022.2 with Vitis** installed (you need `.../Vitis`, *not* `Vitis_HLS`). If Vitis is missing, add it via *Xilinx Design Tools → Add Design Tools for Devices 2022.2*.
-- The **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado. (This eval license is why a running board's decoder halts after ~2 hours; see [Troubleshooting](Troubleshooting.md).)
+- The **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado. (This eval license is why a running board's decoder halts after ~2 hours, see [Troubleshooting](Troubleshooting.md).)
 - Ubuntu 18/20/22 LTS (others may work).
-- Required packages, e.g. `sudo apt install libtinfo5`. On Ubuntu 24 LTS the default `libtinfo6` won't do; install `libtinfo5` manually:
+- Required packages, e.g. `sudo apt install libtinfo5`. On Ubuntu 24 LTS the default `libtinfo6` won't do, so install `libtinfo5` manually:
 
   ```bash
   wget http://be.archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.1-1ubuntu1.18.04.1_amd64.deb
   sudo dpkg -i ./libtinfo5_6.1-1ubuntu1.18.04.1_amd64.deb
   ```
 
-Set `export XILINX_DIR=/opt/Xilinx` and `export BOARD_NAME=<your board>` first. (Note: the *software* side of openwifi historically referenced Vivado 2021.1; the current openwifi-hw build targets 2022.2. Match the version the repo README states at the time you build.) For the full toolchain/branch matrix, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
+Set `export XILINX_DIR=/opt/Xilinx` and `export BOARD_NAME=<your board>` first. (Note: the *software* side of openwifi historically referenced Vivado 2021.1, while the current openwifi-hw build targets 2022.2. Match the version the repo README states at the time you build.) For the full toolchain/branch matrix, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
 
 ## Building the bitstream
 
@@ -58,7 +58,7 @@ Run these from the `openwifi-hw` repo root unless noted.
    # then: File → Export → Export Hardware → Include bitstream → Finish
    ```
 
-   (The previous `create_ip_repo.sh` step invokes this automatically; the manual steps are for when you're iterating in the GUI.)
+   (The previous `create_ip_repo.sh` step invokes this automatically. The manual steps are for when you're iterating in the GUI.)
 
 6. **Stash the outputs** where the software build can find them:
 
@@ -88,9 +88,9 @@ Most cores ship a top-level testbench (`*_tb.v`), which is the fastest way to de
 
 1. Create the IP's Vivado project (as above): `./create_vivado_proj.sh $XILINX_DIR openofdm_rx.tcl`.
 2. In Vivado: *Sources → Simulation Sources → sim_1 → dot11_tb*.
-3. *SIMULATION → Run Simulation → Run Behavioral Simulation.* The first run is slow because sub-IP cores compile once; later runs are fast.
+3. *SIMULATION → Run Simulation → Run Behavioral Simulation.* The first run is slow because sub-IP cores compile once. Later runs are fast.
 4. Press **Run All (F3)** to run to completion.
-5. The testbench uses `$fopen`/`$fscanf`/`$fwrite` to read test vectors and dump variables for later checking; read `*_tb.v` to see the flow. Simulation-specific settings live in `openofdm_rx_pre_def.v`.
+5. The testbench uses `$fopen`/`$fscanf`/`$fwrite` to read test vectors and dump variables for later checking. Read `*_tb.v` to see the flow. Simulation-specific settings live in `openofdm_rx_pre_def.v`.
 6. After editing design files, use **Relaunch Simulation**. Drag any signal from *SIMULATION → Scope* (e.g. `dot11_tb → dot11_inst → ofdm_decoder_inst → viterbi_inst`) into the waveform view and relaunch to inspect it.
 
 ## Conditional compilation with Verilog macros
@@ -115,7 +115,7 @@ Pair these FPGA macros with the driver's conditional-compile arguments (see [Sof
 
 ## Changing the baseband clock
 
-The default baseband clock is 100 MHz, set by `NUM_CLK_PER_US` at the top of `openwifi.tcl`. Available options depend on the board: 240/100 MHz on ZCU102; 100/200 MHz on ZC706 and ADRV9361-Z7035; 100 MHz elsewhere. Change the value and re-run `openwifi.tcl` to regenerate the project.
+The default baseband clock is 100 MHz, set by `NUM_CLK_PER_US` at the top of `openwifi.tcl`. Available options depend on the board: 240/100 MHz on ZCU102, 100/200 MHz on ZC706 and ADRV9361-Z7035, and 100 MHz elsewhere. Change the value and re-run `openwifi.tcl` to regenerate the project.
 
 ## High-Level Synthesis (HLS) modules
 
@@ -128,9 +128,9 @@ cd ip/openofdm_rx
 git checkout dot11zynq_hls
 ```
 
-Continue the build; before generating the bitstream, select `openofdm_rx` under *IP Status* and click *Upgrade Selected*.
+Continue the build. Before generating the bitstream, select `openofdm_rx` under *IP Status* and click *Upgrade Selected*.
 
-**To modify the HLS code:** run `./get_ip_openofdm_rx.sh`, check out `dot11zynq_hls`, then in Vitis HLS create a project importing the source files (except `*_test.cpp`) from the [`ch_gain_cal`](https://github.com/open-sdr/openofdm/tree/dot11zynq_hls/hls/ch_gain_cal) or [`equalizer`](https://github.com/open-sdr/openofdm/tree/dot11zynq_hls/hls/equalizer) folder, choosing that module as top level and its `*_test.cpp` as testbench, and selecting the FPGA part for your board. After C-sim and co-sim pass, *Export RTL* produces a ZIP whose `hdl/verilog` folder replaces the corresponding folder under `openwifi-hw/ip/openofdm_rx/hls/.../hdl/verilog/`. Update `openofdm_rx.tcl` to include the new files ([example](https://github.com/open-sdr/openofdm/blob/dot11zynq_hls/openofdm_rx.tcl#L268)); if you changed the top-level function arguments, wire them up in [`dot11.v`](https://github.com/open-sdr/openofdm/blob/dot11zynq_hls/verilog/dot11.v). Then resume the normal build from "generate ip_repo." Background: the [FCCM 2023 poster](https://arxiv.org/abs/2305.13351).
+**To modify the HLS code:** run `./get_ip_openofdm_rx.sh`, check out `dot11zynq_hls`, then in Vitis HLS create a project importing the source files (except `*_test.cpp`) from the [`ch_gain_cal`](https://github.com/open-sdr/openofdm/tree/dot11zynq_hls/hls/ch_gain_cal) or [`equalizer`](https://github.com/open-sdr/openofdm/tree/dot11zynq_hls/hls/equalizer) folder, choosing that module as top level and its `*_test.cpp` as testbench, and selecting the FPGA part for your board. After C-sim and co-sim pass, *Export RTL* produces a ZIP whose `hdl/verilog` folder replaces the corresponding folder under `openwifi-hw/ip/openofdm_rx/hls/.../hdl/verilog/`. Update `openofdm_rx.tcl` to include the new files ([example](https://github.com/open-sdr/openofdm/blob/dot11zynq_hls/openofdm_rx.tcl#L268)). If you changed the top-level function arguments, wire them up in [`dot11.v`](https://github.com/open-sdr/openofdm/blob/dot11zynq_hls/verilog/dot11.v). Then resume the normal build from "generate ip_repo." Background: the [FCCM 2023 poster](https://arxiv.org/abs/2305.13351).
 
 ## Migrating to a new Vivado / ADI release
 
@@ -158,4 +158,4 @@ openwifi's baseline is tag `2022_R2` of the ADI HDL reference designs (the `adi-
 
 ## Debugging on hardware
 
-Use the Xilinx **ILA** (Integrated Logic Analyzer) to watch internal FPGA signals in real time, which is invaluable for understanding the low-MAC and interface state machines in `xpu`, `tx_intf`, and `rx_intf`. Enable the debug macros (see conditional compilation above) to insert ILA cores; the prebuilt `.ltx` in openwifi-hw-img matches the shipped bitstreams. Background and an example are in [openwifi-hw issue #39](https://github.com/open-sdr/openwifi-hw/issues/39). See also the [GPIO/LED map](https://github.com/open-sdr/openwifi-hw/blob/master/gpio_led.md), which routes signals like `tx_bb_is_ongoing`, `tx_rf_is_ongoing`, `fcs_ok`, and `demod_is_ongoing` to board LEDs and PMOD pins for scope/logic-analyzer probing.
+Use the Xilinx **ILA** (Integrated Logic Analyzer) to watch internal FPGA signals in real time, which is invaluable for understanding the low-MAC and interface state machines in `xpu`, `tx_intf`, and `rx_intf`. Enable the debug macros (see conditional compilation above) to insert ILA cores. The prebuilt `.ltx` in openwifi-hw-img matches the shipped bitstreams. Background and an example are in [openwifi-hw issue #39](https://github.com/open-sdr/openwifi-hw/issues/39). See also the [GPIO/LED map](https://github.com/open-sdr/openwifi-hw/blob/master/gpio_led.md), which routes signals like `tx_bb_is_ongoing`, `tx_rf_is_ongoing`, `fcs_ok`, and `demod_is_ongoing` to board LEDs and PMOD pins for scope/logic-analyzer probing.

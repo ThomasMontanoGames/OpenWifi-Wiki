@@ -61,7 +61,7 @@ The sequence: the SoC's boot ROM loads **BOOT.BIN**, whose **FSBL** (First Stage
   <text x="470" y="224" text-anchor="middle" font-size="11.5" fill="currentColor">Linux kernel</text>
   <text x="470" y="240" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">uImage / Image</text>
 
-  <!-- device tree: data, not code — dashed box off to the side -->
+  <!-- device tree: data, not code (dashed box off to the side) -->
   <rect x="605" y="204" width="190" height="48" rx="10" fill="currentColor" fill-opacity="0.03" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3" stroke-dasharray="5 4"/>
   <text x="700" y="224" text-anchor="middle" font-size="11.5" fill="currentColor">devicetree.dtb</text>
   <text x="700" y="240" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">hardware description (data)</text>
@@ -103,11 +103,11 @@ The two SoC families build BOOT.BIN differently, which is why ZCU102 is "the odd
 - **`build_boot_bin.sh`** takes `system_top.<hdf|xsa>` and `u-boot.elf`, uses Xilinx `xsct` to build the FSBL from the hardware description, and `bootgen` to pack FSBL + bitstream + U-Boot into `BOOT.BIN`.
 - **`build_zynqmp_boot_bin.sh`** additionally builds/collects the **PMU firmware** and the **ARM Trusted Firmware BL31** stage (it can `download` and build ATF, matched to your Vitis version), then packs them with per-stage attributes (`a53-0`, `el-3`/`trustzone`, `el-2`, `pl`) into a ZynqMP `BOOT.BIN`.
 
-Both scripts are invoked for you by the higher-level image/build helpers; you rarely call them directly.
+Both scripts are invoked for you by the higher-level image/build helpers. You rarely call them directly.
 
 ## The kernel
 
-openwifi runs the **Analog Devices Linux kernel** (a fork of the Xilinx kernel with AD9361 support), currently branch **`2026_R1` (Linux v6.12)**. The driver builds against this kernel; the AD9361 is driven by ADI's in-tree IIO driver, which openwifi patches lightly.
+openwifi runs the **Analog Devices Linux kernel** (a fork of the Xilinx kernel with AD9361 support), currently branch **`2026_R1` (Linux v6.12)**. The driver builds against this kernel. The AD9361 is driven by ADI's in-tree IIO driver, which openwifi patches lightly.
 
 `user_space/prepare_kernel.sh $XILINX_DIR <32|64>` does the whole thing:
 
@@ -124,7 +124,7 @@ Four small patches (in `kernel_boot/`, documented in `kernel_patch_readme.md`) a
 
 | Patch | What it does |
 |---|---|
-| `ad9361_v6_12.patch` | Exports AD9361 functions the openwifi driver calls (`ad9361_set_tx_atten`, `ad9361_get_tx_atten`, `ad9361_do_calib_run`) and parses a new AGC device-tree property. This is the current patch for kernel 6.12; `ad9361.patch` is the older equivalent. |
+| `ad9361_v6_12.patch` | Exports AD9361 functions the openwifi driver calls (`ad9361_set_tx_atten`, `ad9361_get_tx_atten`, `ad9361_do_calib_run`) and parses a new AGC device-tree property. This is the current patch for kernel 6.12, and `ad9361.patch` is the older equivalent. |
 | `ad9361_private.patch` | Adds the `f_agc_dig_sat_ovrg_en` field to `struct gain_control` that the AGC change above needs. |
 | `ad9361_conv.patch` | Removes the 61.44 MHz LVDS-interface self-timing calibration point, which is unreliable on some low-end/marginal hardware. |
 | `axi_hdmi_crtc.patch` | Comments out one VDMA call to avoid an AXI-HDMI build error that appears once Xilinx AXI DMA is enabled. |
@@ -135,7 +135,7 @@ Four small patches (in `kernel_boot/`, documented in `kernel_patch_readme.md`) a
 
 ## The device tree
 
-This is the heart of a board port. The **device tree** is a data structure describing the hardware (every peripheral, its register address, its interrupts, its clocks) that Linux reads at boot to know what exists. openwifi's driver is a Linux **platform driver** that binds to a device-tree node with `compatible = "sdr,sdr"`; it learns the AXI addresses and interrupts of every FPGA core *from the device tree*. If the device tree doesn't match the FPGA build, the driver won't find the hardware (or will bind to the wrong addresses).
+This is the heart of a board port. The **device tree** is a data structure describing the hardware (every peripheral, its register address, its interrupts, its clocks) that Linux reads at boot to know what exists. openwifi's driver is a Linux **platform driver** that binds to a device-tree node with `compatible = "sdr,sdr"`, and it learns the AXI addresses and interrupts of every FPGA core *from the device tree*. If the device tree doesn't match the FPGA build, the driver won't find the hardware (or will bind to the wrong addresses).
 
 ### How openwifi builds a board's device tree
 
@@ -225,12 +225,12 @@ The script compiles each overlay with `dtc`, preprocesses and compiles the stock
 
 The shared `openwifi_32_ad9361.dtso` inserts (as device-tree fragments):
 
-- A **24 MHz fixed clock**, enables the FPGA fabric clocks (`fclk-enable = <0xf>` on `&clkc`; the kernel's `zynq-7000.dtsi` otherwise gates them off), and sets the default `interrupt-parent` to `&intc` (the Zynq-7000 interrupt controller).
+- A **24 MHz fixed clock**, enables the FPGA fabric clocks (`fclk-enable = <0xf>` on `&clkc`, which the kernel's `zynq-7000.dtsi` otherwise gates off), and sets the default `interrupt-parent` to `&intc` (the Zynq-7000 interrupt controller).
 - An **`fpga-axi@0` simple-bus** holding all the AXI peripherals, including openwifi's cores. This is the address map the driver relies on:
 
     | Node | Address | `compatible` | Interrupts |
     |---|---|---|---|
-    | `sdr` | (no reg; the driver's bind node) | `sdr,sdr` | 29, 30, 33, 34 |
+    | `sdr` | (no reg, the driver's bind node) | `sdr,sdr` | 29, 30, 33, 34 |
     | `tx_intf` | `0x83c00000` | `sdr,tx_intf` | 34 |
     | `openofdm_tx` | `0x83c10000` | `sdr,openofdm_tx` | none |
     | `rx_intf` | `0x83c20000` | `sdr,rx_intf` | 29, 30 |
@@ -242,7 +242,7 @@ The shared `openwifi_32_ad9361.dtso` inserts (as device-tree fragments):
     | `cf-ad9361-lpc` | `0x79020000` | `adi,axi-ad9361` | none |
     | `cf-ad9361-dds-core-lpc` | `0x79024000` | `adi,axi-ad9361-dds` | none |
 
-    The `sdr` node ties the driver to the DMA engines (`dmas = <&rx_dma 1 &tx_dma 0>`) and interrupts; `side_ch` has its own DMA pair. An `i2c@41600000` bus (power monitor, ADC, EEPROM) is also declared.
+    The `sdr` node ties the driver to the DMA engines (`dmas = <&rx_dma 1 &tx_dma 0>`) and interrupts. `side_ch` has its own DMA pair. An `i2c@41600000` bus (power monitor, ADC, EEPROM) is also declared.
 
 - An **`ad9361-phy@0` SPI device** on `spi0` (`spi@e0006000`), `compatible = "adi,ad9361"`, carrying the long list of `adi,*` RF/AGC tuning properties (LVDS mode, RX/TX bandwidths, synthesizer frequencies, gain-control tables, control GPIOs).
 

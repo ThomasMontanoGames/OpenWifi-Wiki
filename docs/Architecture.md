@@ -1,6 +1,6 @@
 # Architecture Overview
 
-This page explains how openwifi is put together. Read it before you start modifying code. Almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA. (For *where* each part lives in the source tree, see [The Repositories](Repositories.md); for the driver internals, see [The Linux Driver](Driver-Architecture.md); for the FPGA cores in depth, see [FPGA IP Cores](FPGA-IP-Cores.md).)
+This page explains how openwifi is put together. Read it before you start modifying code. Almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA. (For *where* each part lives in the source tree, see [The Repositories](Repositories.md), for the driver internals [The Linux Driver](Driver-Architecture.md), and for the FPGA cores in depth [FPGA IP Cores](FPGA-IP-Cores.md).)
 
 ![openwifi software and FPGA module composition](assets/img/openwifi-detail.jpg)
 
@@ -93,7 +93,7 @@ Because it registers a normal Linux network interface (`sdr0`), every tool that 
     <text fill="currentColor"><tspan x="380" y="737">AD9361 RF front end</tspan><tspan x="380" dy="17">70 MHz–6 GHz</tspan></text>
   </g>
 </svg>
-<figcaption>The SoftMAC split. <span style="color:#0d9488;font-weight:700">Teal</span> = software on the Linux/ARM cores (PS): the upper MAC and everything above it. <span style="color:#6366f1;font-weight:700">Indigo</span> = the openwifi-hw design in FPGA fabric (PL) you can read and rebuild: the low MAC (<code>xpu</code>) and the PHY. The processor reaches every FPGA core over the AXI bus; the AD9361 RF front end is the external analog radio.</figcaption>
+<figcaption>The SoftMAC split. <span style="color:#0d9488;font-weight:700">Teal</span> = software on the Linux/ARM cores (PS): the upper MAC and everything above it. <span style="color:#6366f1;font-weight:700">Indigo</span> = the openwifi-hw design in FPGA fabric (PL) you can read and rebuild: the low MAC (<code>xpu</code>) and the PHY. The processor reaches every FPGA core over the AXI bus. The AD9361 RF front end is the external analog radio.</figcaption>
 </figure>
 
 ## How the driver talks to Linux: the mac80211 API
@@ -184,7 +184,7 @@ Before the step-by-step walkthroughs, here is the whole packet path in one pictu
   <text x="219" y="209" text-anchor="middle" font-size="12" font-weight="700" fill="#4f5bd5">rx interrupt</text>
   <text x="219" y="224" text-anchor="middle" font-size="8.5" fill="currentColor" fill-opacity="0.7">openwifi_rx_interrupt</text>
 </svg>
-<figcaption><em>The packet path. <strong>Top (teal) is transmit:</strong> the driver's <code>openwifi_tx()</code> hands a frame through <code>tx_intf</code>'s four TX queues and <code>openofdm_tx</code> to the AD9361; the <code>xpu</code> core releases it when CSMA/CA allows, then raises <code>openwifi_tx_interrupt</code> with the result. <strong>Bottom (indigo) is receive:</strong> <code>openofdm_rx</code> decodes, <code>rx_intf</code> attaches TSF/RSSI/MCS/FCS metadata and DMAs the frame up, and <code>openwifi_rx_interrupt</code> hands it to Linux.</em></figcaption>
+<figcaption><em>The packet path. <strong>Top (teal) is transmit:</strong> the driver's <code>openwifi_tx()</code> hands a frame through <code>tx_intf</code>'s four TX queues and <code>openofdm_tx</code> to the AD9361. The <code>xpu</code> core releases it when CSMA/CA allows, then raises <code>openwifi_tx_interrupt</code> with the result. <strong>Bottom (indigo) is receive:</strong> <code>openofdm_rx</code> decodes, <code>rx_intf</code> attaches TSF/RSSI/MCS/FCS metadata and DMAs the frame up, and <code>openwifi_rx_interrupt</code> hands it to Linux.</em></figcaption>
 </figure>
 
 ## The receive path, step by step
@@ -192,7 +192,7 @@ Before the step-by-step walkthroughs, here is the whole packet path in one pictu
 1. A signal arrives at the AD9361 and is delivered to the FPGA as IQ samples.
 2. `openofdm_rx` detects, synchronizes, and decodes it. Whether the FCS/CRC passes or fails, the packet is offered up if the current frame-filtering rules allow it (in monitor mode, everything is allowed, even bad-CRC frames and control frames like ACKs).
 3. `rx_intf` writes the packet plus metadata into a DMA buffer and raises an interrupt.
-4. The driver's `openwifi_rx_interrupt()` runs: it pulls the raw buffer, parses out the inserted metadata (TSF timestamp, raw RSSI which is then corrected to dBm per band/channel, length, MCS, FCS-valid flag), and hands the packet and its metadata to Linux via `ieee80211_rx_irqsafe()`.
+4. The driver's `openwifi_rx_interrupt()` runs: it pulls the raw buffer, parses out the inserted metadata (TSF timestamp, raw RSSI that it corrects to dBm per band/channel, length, MCS, FCS-valid flag), and hands the packet and its metadata to Linux via `ieee80211_rx_irqsafe()`.
 
 The [exact 16-byte metadata layout](Driver-Architecture.md#the-receive-path-inside-the-driver) is on the driver page, including the detail that the FCS-OK bit is carried in the last byte of the frame rather than in the header.
 
@@ -208,7 +208,7 @@ The ring sizes, the index cross-checking, and the queue-mapping hook are covered
 
 ## The TSF timestamp
 
-The 64-bit TSF (Timing Synchronization Function) timer is defined by the 802.11 standard and implemented in the FPGA. When a packet's PHY header is received, the FPGA samples the TSF value and attaches it to the packet's DMA buffer; the driver forwards it to Linux, which is why you see a consistent TSF timestamp in Wireshark/tcpdump. That same TSF value is the key that lets you line up side-channel data (CSI, IQ) with specific packets, since they share one time base. (See [this discussion](https://github.com/open-sdr/openwifi/discussions/344) for the matching recipe.)
+The 64-bit TSF (Timing Synchronization Function) timer is defined by the 802.11 standard and implemented in the FPGA. When a packet's PHY header is received, the FPGA samples the TSF value and attaches it to the packet's DMA buffer. The driver forwards it to Linux, which is why you see a consistent TSF timestamp in Wireshark/tcpdump. That same TSF value is the key that lets you line up side-channel data (CSI, IQ) with specific packets, since they share one time base. (See [this discussion](https://github.com/open-sdr/openwifi/discussions/344) for the matching recipe.)
 
 ## RF and baseband: the frequency/clock design
 
@@ -255,7 +255,7 @@ On the **MAC** side, 802.11n added frame aggregation. There are two flavors: **A
 
 ![A-MPDU vs A-MSDU aggregation](assets/img/mpdu-aggr.png){ width="650" }
 
-openwifi supports **A-MPDU aggregation experimentally** (`./wgd.sh 1`, which sets `test_mode` bit 0); A-MSDU is not supported. Background and the full derivation are in the [802.11n app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md). For how to enable and verify these features in practice, and where Wi-Fi 6 stands, see [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md).
+openwifi supports **A-MPDU aggregation experimentally** (`./wgd.sh 1`, which sets `test_mode` bit 0). A-MSDU is not supported. Background and the full derivation are in the [802.11n app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md). For how to enable and verify these features in practice, and where Wi-Fi 6 stands, see [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md).
 
 ## Where the source lives
 

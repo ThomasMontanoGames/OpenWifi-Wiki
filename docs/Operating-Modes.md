@@ -16,10 +16,10 @@ The `fosdem.sh` demo already does this: it runs `hostapd` with `hostapd-openwifi
 cd openwifi
 ./fosdem.sh
 # Confirm beacons are going out:
-cat /proc/interrupts        # run a few times; "sdr,tx_itrpt1" count should keep growing
+cat /proc/interrupts        # run a few times: "sdr,tx_itrpt1" count should keep growing
 ```
 
-The growing TX-interrupt count is the AP transmitting its periodic beacon. The script runs stock `hostapd`; edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
+The growing TX-interrupt count is the AP transmitting its periodic beacon. The script runs stock `hostapd`. Edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
 
 ## Client (station)
 

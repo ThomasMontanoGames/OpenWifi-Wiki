@@ -6,13 +6,13 @@ A-MPDU
 :   Aggregated MAC Protocol Data Unit. An 802.11n frame-aggregation method that packs several MPDUs (each with its own header/CRC) into one transmission, so a single error costs only one retransmission. openwifi supports this experimentally (`./wgd.sh 1`). See [Architecture](Architecture.md#what-openwifi-implements-of-80211agn).
 
 A-MSDU
-:   Aggregated MAC Service Data Unit. The other 802.11n aggregation method; more efficient on the wire, but one bit error invalidates the whole aggregate. **Not** supported by openwifi.
+:   Aggregated MAC Service Data Unit. The other 802.11n aggregation method, more efficient on the wire, but one bit error invalidates the whole aggregate. **Not** supported by openwifi.
 
 AD9361
 :   The Analog Devices RF transceiver chip openwifi uses as its radio front end. A general-purpose SDR transceiver tunable from 70 MHz to 6 GHz (the AD9364 is the single-channel variant). Driven by the standard Linux IIO driver.
 
 ADC / DAC
-:   Analog-to-Digital / Digital-to-Analog Converter. The AD9361's data converters between the analog RF signal and the FPGA's digital IQ samples; `rx_intf` handles the ADC side, `tx_intf` the DAC side.
+:   Analog-to-Digital / Digital-to-Analog Converter. The AD9361's data converters between the analog RF signal and the FPGA's digital IQ samples. `rx_intf` handles the ADC side, `tx_intf` the DAC side.
 
 ADI
 :   Analog Devices, Inc. Vendor of the AD9361 and of the [HDL reference design](https://github.com/analogdevicesinc/hdl) that openwifi's FPGA design is built on top of.
@@ -24,7 +24,7 @@ AIFS
 :   Arbitration Interframe Space: the per-access-category idle time a station waits before backoff in the QoS (EDCA) variant of CSMA/CA. Set per TX queue by Linux through the `conf_tx` callback. See [Architecture](Architecture.md#how-the-driver-talks-to-linux-the-mac80211-api).
 
 ATF (BL31)
-:   ARM Trusted Firmware. On 64-bit ZynqMP boards (ZCU102) the "BL31" secure-monitor stage is required in the boot chain; it is not needed on 32-bit Zynq-7000 boards.
+:   ARM Trusted Firmware. On 64-bit ZynqMP boards (ZCU102) the "BL31" secure-monitor stage is required in the boot chain. It is not needed on 32-bit Zynq-7000 boards.
 
 AXI
 :   Advanced eXtensible Interface, the ARM on-chip bus. openwifi's FPGA cores expose control registers over **AXI4-Lite** and move sample data over **AXI-Stream** (DMA). The tight AXI coupling to the processor is what gives openwifi low latency but makes the design platform-specific.
@@ -45,7 +45,7 @@ CDD
 :   Cyclic Delay Diversity: transmitting a 1-sample-delayed copy of the signal on a second antenna to add artificial multipath and improve robustness. openwifi supports a simple CDD via `tx_intf` register 16.
 
 cfg80211 / mac80211
-:   The two layers of the Linux kernel wireless stack. `cfg80211` is the configuration API; `mac80211` is the SoftMAC layer that openwifi's driver plugs into. See [Architecture](Architecture.md#how-the-driver-talks-to-linux-the-mac80211-api).
+:   The two layers of the Linux kernel wireless stack. `cfg80211` is the configuration API, and `mac80211` is the SoftMAC layer that openwifi's driver plugs into. See [Architecture](Architecture.md#how-the-driver-talks-to-linux-the-mac80211-api).
 
 CSI
 :   Channel State Information: the per-subcarrier channel response the receiver estimates. openwifi can stream CSI (plus frequency offset and equalizer output) to a PC. The project also puns it as "Chip State Information." See [Research Features](Research-Features.md#csi-channel-state-information).
@@ -81,7 +81,7 @@ EVM
 :   Error Vector Magnitude: a measure of modulation accuracy (lower is better). openwifi reaches roughly −38 dB EVM in its best configuration.
 
 FCS
-:   Frame Check Sequence: the CRC appended to an 802.11 frame. The FPGA reports FCS pass/fail per received packet; monitor mode passes even bad-FCS frames up.
+:   Frame Check Sequence: the CRC appended to an 802.11 frame. The FPGA reports FCS pass/fail per received packet, and monitor mode passes even bad-FCS frames up.
 
 FDD
 :   Frequency Division Duplex. openwifi drives the AD9361 in FDD mode but with identical TX and RX frequencies, gating the TX chain on/off around each packet to avoid self-interference.
@@ -90,7 +90,7 @@ FEC
 :   Forward Error Correction: the convolutional coding (with puncturing) used by 802.11 OFDM, decoded on receive by a Viterbi decoder.
 
 FFT / IFFT
-:   (Inverse) Fast Fourier Transform: the core OFDM operation. `openofdm_tx` uses an IFFT to build the time-domain signal from the subcarriers; the receiver uses an FFT to recover them.
+:   (Inverse) Fast Fourier Transform: the core OFDM operation. `openofdm_tx` uses an IFFT to build the time-domain signal from the subcarriers, and the receiver uses an FFT to recover them.
 
 FMC
 :   FPGA Mezzanine Card: a standard connector/daughter-card form factor. The AD9361-carrying FMCOMMS2/3/4 cards are FMC modules that plug into the Xilinx dev boards.
@@ -102,10 +102,10 @@ FPGA
 :   Field-Programmable Gate Array: the reconfigurable logic fabric (inside the Zynq SoC) where openwifi's PHY and real-time MAC live.
 
 FRU
-:   Field-Replaceable Unit: here, the identification data in an FMCOMMS board's EEPROM. A wrong or empty FRU EEPROM can crash the host (notably ZCU102); reprogram it with `fru_tools`. See [Troubleshooting](Troubleshooting.md#fmcomms-board-causes-a-linux-crash-badempty-eeprom).
+:   Field-Replaceable Unit: here, the identification data in an FMCOMMS board's EEPROM. A wrong or empty FRU EEPROM can crash the host (notably ZCU102). Reprogram it with `fru_tools`. See [Troubleshooting](Troubleshooting.md#fmcomms-board-causes-a-linux-crash-badempty-eeprom).
 
 FSBL
-:   First Stage Boot Loader. The initial boot stage built from the hardware description; on some boards it (rather than U-Boot SPL) is needed to initialize DDR correctly.
+:   First Stage Boot Loader. The initial boot stage built from the hardware description. On some boards it (rather than U-Boot SPL) is needed to initialize DDR correctly.
 
 FSM
 :   Finite State Machine: sequential logic that steps through a fixed set of states, the standard way control logic is built in an FPGA. The wiki uses the term for blocks like the side channel's capture FSM (what its register 0 bit 2 resets) and the CSMA/CA logic in `xpu`. See [side_ch_ctl](side_ch_ctl-and-the-Side-Channel.md#register-reference).
@@ -117,7 +117,7 @@ GEM
 :   Gigabit Ethernet MAC: the Zynq PS-side Ethernet controller. Some boards (ANTSDR-E200 / E310 v2) move Ethernet to the PL side instead, to free the processor at high sample rates. See [Supported Boards](Supported-Boards.md#antsdr-e200-microphase).
 
 Guard interval (GI)
-:   The cyclic-prefix gap between OFDM symbols that absorbs multipath. 802.11n adds a **short GI** (400 ns vs 800 ns) for higher throughput; openwifi supports it.
+:   The cyclic-prefix gap between OFDM symbols that absorbs multipath. 802.11n adds a **short GI** (400 ns vs 800 ns) for higher throughput, and openwifi supports it.
 
 HLS
 :   High-Level Synthesis: generating FPGA logic from C++ (via Vitis HLS). openwifi's channel-estimation and equalizer stages are available as HLS modules. See [FPGA Development](FPGA-Development.md#high-level-synthesis-hls-modules).
@@ -141,7 +141,7 @@ IQ samples
 :   In-phase/Quadrature samples: the complex representation of a baseband signal. openwifi can capture raw IQ (with rich triggering) via the side channel.
 
 Kuiper (ADI Kuiper)
-:   Analog Devices' Debian/Ubuntu-based Linux distribution for its SDR platforms; the classic openwifi runtime environment (the alternative is OpenWrt). See [Building SD Images](Building-SD-Images.md).
+:   Analog Devices' Debian/Ubuntu-based Linux distribution for its SDR platforms, and the classic openwifi runtime environment (the alternative is OpenWrt). See [Building SD Images](Building-SD-Images.md).
 
 LBT
 :   Listen Before Talk: the regulatory term for carrier sensing before transmitting. In openwifi the LBT/CCA threshold is a `sdrctl`-tunable register.
@@ -153,7 +153,7 @@ LuCI
 :   The web configuration UI of OpenWrt. openwifi's OpenWrt images expose the radio through LuCI's Network → Wireless page. See [Building SD Images](Building-SD-Images.md#openwrt).
 
 MAC (low / upper)
-:   Medium Access Control. openwifi splits it: the **upper MAC** (association, management) runs in Linux `mac80211`; the **low MAC** (real-time CSMA/CA, ACK, timers) runs in the FPGA `xpu` core.
+:   Medium Access Control. openwifi splits it: the **upper MAC** (association, management) runs in Linux `mac80211`, and the **low MAC** (real-time CSMA/CA, ACK, timers) runs in the FPGA `xpu` core.
 
 MCS
 :   Modulation and Coding Scheme: an index selecting modulation + code rate (and thus data rate). openwifi supports MCS 0–7 (single stream).
@@ -177,7 +177,7 @@ OFDM
 :   Orthogonal Frequency-Division Multiplexing: the multi-subcarrier modulation used by 802.11a/g/n. openwifi's PHY is OFDM-only (hence no 802.11b compatibility).
 
 OFDMA
-:   Orthogonal Frequency-Division Multiple Access: the 802.11ax (Wi-Fi 6) feature that assigns subcarrier groups to different users at once. Not in the open-source release; explored in openwifi research. See [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md#wi-fi-6-80211ax).
+:   Orthogonal Frequency-Division Multiple Access: the 802.11ax (Wi-Fi 6) feature that assigns subcarrier groups to different users at once. Not in the open-source release, but explored in openwifi research. See [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md#wi-fi-6-80211ax).
 
 openofdm
 :   The open-source 802.11 OFDM receiver project openwifi's `openofdm_rx` core is based on (openwifi's fork lives on the `dot11zynq` branch).
@@ -192,7 +192,7 @@ PHY
 :   The physical layer: modulation, coding, and RF. In openwifi the PHY is the `openofdm_tx`/`openofdm_rx` cores plus the AD9361.
 
 PL / PS
-:   Programmable Logic / Processing System: the two halves of a Xilinx Zynq SoC. The FPGA fabric is the PL; the ARM cores are the PS. Some boards move Ethernet to the PL side for bandwidth.
+:   Programmable Logic / Processing System: the two halves of a Xilinx Zynq SoC. The FPGA fabric is the PL, and the ARM cores are the PS. Some boards move Ethernet to the PL side for bandwidth.
 
 PMUFW
 :   Platform Management Unit Firmware: a ZynqMP-specific boot component (ZCU102), built alongside the FSBL and ATF.
@@ -221,14 +221,14 @@ Side channel (`side_ch`)
 SIFS
 :   Short Interframe Space: the brief gap before an ACK, 10 µs in 2.4 GHz (802.11g) and 16 µs in 5 GHz (802.11a). Meeting SIFS timing is why the low MAC has to be in hardware.
 
-SoftMAC
-:   A Wi-Fi design where the upper MAC runs in host software (Linux `mac80211`) rather than on the chip. openwifi is a SoftMAC design, which is why standard Linux tools work over `sdr0`.
-
 SoC
 :   System on Chip. openwifi runs on Xilinx Zynq / Zynq UltraScale+ SoCs, which combine ARM cores (PS) with FPGA fabric (PL).
 
 SODIMM
 :   Small Outline DIMM: the pluggable DRAM module used on some boards (e.g. ZCU102). Certain modules fail with the U-Boot SPL DDR bring-up. See [Troubleshooting](Troubleshooting.md#no-uart-output-on-zcu102-under-openwrt).
+
+SoftMAC
+:   A Wi-Fi design where the upper MAC runs in host software (Linux `mac80211`) rather than on the chip. openwifi is a SoftMAC design, which is why standard Linux tools work over `sdr0`.
 
 SoM
 :   System on Module: a small board carrying the SoC, RAM, and support circuitry, mounted on a larger carrier. The ADRV9364-Z7020 and ADRV9361-Z7035 are SoMs on the ADRV1CRR carrier.
@@ -240,7 +240,7 @@ SPL
 :   Secondary Program Loader: U-Boot's first-stage loader. On some 64-bit boards it mis-configures certain DDR modules, so the Xilinx FSBL is used instead. See [Troubleshooting](Troubleshooting.md#no-uart-output-on-zcu102-under-openwrt).
 
 STA
-:   Station: the 802.11 standard's term for any device on the link. A client and an access point are both STAs; "STA" is often used specifically for the non-AP client. openwifi runs as either, over `sdr0`. See [Operating Modes](Operating-Modes.md).
+:   Station: the 802.11 standard's term for any device on the link. A client and an access point are both STAs, but "STA" is often used specifically for the non-AP client. openwifi runs as either, over `sdr0`. See [Operating Modes](Operating-Modes.md).
 
 sysfs
 :   The Linux virtual filesystem exposing kernel/driver variables as files. openwifi exposes its statistics and some controls through sysfs. See [sdrctl](sdrctl-and-Runtime-Control.md#statistics-via-sysfs).
@@ -258,7 +258,7 @@ U-Boot
 :   The bootloader that loads the Linux kernel on the board. Part of `BOOT.BIN` alongside the FSBL and FPGA bitstream.
 
 UHD
-:   USRP Hardware Driver: Ettus/NI's SDR driver framework. Some MicroPhase boards can run as UHD devices via a separate project; unrelated to openwifi's Wi-Fi operation, but it explains their PL-side Ethernet design.
+:   USRP Hardware Driver: Ettus/NI's SDR driver framework. Some MicroPhase boards can run as UHD devices via a separate project. That is unrelated to openwifi's Wi-Fi operation, but it explains their PL-side Ethernet design.
 
 VCXO
 :   Voltage-Controlled Crystal Oscillator: a tunable reference clock. Some boards (E310 v2, SDRPi) add one, with an external reference, for a more stable clock (useful for time-sync/TSN).
@@ -267,10 +267,10 @@ VDMA
 :   Video DMA: a Xilinx AXI DMA variant for video streams. openwifi doesn't use it, but one kernel patch comments out a VDMA/AXI-HDMI call that otherwise breaks the build once Xilinx AXI DMA is enabled. See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#the-kernel-patches).
 
 Viterbi decoder
-:   The algorithm/IP that decodes the convolutional FEC on receive. openwifi uses a Xilinx Viterbi decoder IP; its **evaluation license** is why a running board's receiver halts after ~2 hours. See [Troubleshooting](Troubleshooting.md#reception-dies-after-2-hours).
+:   The algorithm/IP that decodes the convolutional FEC on receive. openwifi uses a Xilinx Viterbi decoder IP, whose **evaluation license** is why a running board's receiver halts after ~2 hours. See [Troubleshooting](Troubleshooting.md#reception-dies-after-2-hours).
 
 Vivado / Vitis
-:   Xilinx's FPGA design tools. openwifi's FPGA build targets **Vivado 2022.2 with Vitis**. Some boards need a paid Vivado license to rebuild the FPGA; the prebuilt images need none.
+:   Xilinx's FPGA design tools. openwifi's FPGA build targets **Vivado 2022.2 with Vitis**. Some boards need a paid Vivado license to rebuild the FPGA, but the prebuilt images need none.
 
 wpa_supplicant
 :   The standard Linux user-space client for joining Wi-Fi networks. openwifi runs stock `wpa_supplicant` over `sdr0` in client mode.
@@ -279,4 +279,4 @@ wpa_supplicant
 :   openwifi's real-time MAC core (its largest FPGA IP block): CSMA/CA, TSF timer, hardware ACK generation/reception, packet filtering, RSSI/CCA, and TX-queue gating. See [FPGA IP Cores](FPGA-IP-Cores.md#xpu-the-real-time-mac).
 
 Zynq / Zynq UltraScale+ (MPSoC)
-:   Xilinx SoC families. **Zynq-7000** is 32-bit (most openwifi boards); **Zynq UltraScale+ / MPSoC** is 64-bit (ZCU102), with a different boot chain.
+:   Xilinx SoC families. **Zynq-7000** is 32-bit (most openwifi boards). **Zynq UltraScale+ / MPSoC** is 64-bit (ZCU102), with a different boot chain.

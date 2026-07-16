@@ -21,11 +21,11 @@ Unlike a commercial Wi-Fi chip, every layer of openwifi is open and modifiable: 
 
 - **802.11a/g/n operation** at 20 MHz bandwidth, with the RF front end tunable anywhere from 70 MHz to 6 GHz (2 MHz mode for 802.11ah-style sub-GHz work and 10 MHz for 802.11p vehicular experiments are also possible).
 - **All the usual roles**: Access Point, client (station), ad-hoc, and monitor mode, all driven by the standard Linux tools.
-- **A real-time low MAC in FPGA**: DCF/CSMA-CA meeting 802.11 SIFS timing (10 µs in 2.4 GHz, 16 µs in 5 GHz), hardware ACK generation, retransmission, RTS/CTS, and NAV, all configurable or defeatable for experiments.
+- **A real-time low MAC in FPGA**: DCF (CSMA/CA) meeting 802.11 SIFS timing (10 µs in 2.4 GHz, 16 µs in 5 GHz), hardware ACK generation, retransmission, RTS/CTS, and NAV, all configurable or defeatable for experiments.
 - **Research features** a commercial chip won't give you: per-packet CSI extraction, raw IQ capture with dozens of trigger conditions, packet injection and fuzzing, a CSI fuzzer for privacy research, full-duplex self-reception ("Wi-Fi as radar"), and time-sliced FPGA transmit queues for network slicing.
 - **Solid performance** in its best configuration (802.11n with A-MPDU aggregation): roughly 40–50 Mbps TCP and ~50 Mbps UDP in iperf, EVM around −38 dB, and receiver sensitivity around −92 dBm at MCS0 / −73 dBm at MCS7 (measured with FMCOMMS2 at 2.4 GHz).
 
-Note: MIMO and 40 MHz bandwidth are *not* supported in the open-source release; 802.11ax and other advanced features are part of the commercial offering at [openwifi.tech](https://openwifi.tech).
+Note: MIMO and 40 MHz bandwidth are *not* supported in the open-source release. 802.11ax and other advanced features are part of the commercial offering at [openwifi.tech](https://openwifi.tech).
 
 ## The repositories
 
@@ -36,11 +36,11 @@ The project is split across four repositories, because the driver and the FPGA d
 | [openwifi](https://github.com/open-sdr/openwifi) | Linux kernel driver, user-space tools (`sdrctl`, capture scripts, demo scripts), SD-card boot files, documentation |
 | [openwifi-hw](https://github.com/open-sdr/openwifi-hw) | FPGA design: the openwifi [IP cores](FPGA-IP-Cores.md) plus board-level Vivado projects |
 | [openwifi-hw-img](https://github.com/open-sdr/openwifi-hw-img) | Pre-built FPGA bitstreams per board, so you can skip hours of synthesis |
-| [openofdm](https://github.com/open-sdr/openofdm) (`dot11zynq` branch; forked from [jhshi/openofdm](https://github.com/jhshi/openofdm)) | The 802.11 OFDM receiver that openwifi's `openofdm_rx` IP is based on |
+| [openofdm](https://github.com/open-sdr/openofdm) (`dot11zynq` branch, forked from [jhshi/openofdm](https://github.com/jhshi/openofdm)) | The 802.11 OFDM receiver that openwifi's `openofdm_rx` IP is based on |
 
 ## Where to go next
 
-**New to the project?** Follow these five in order; they take you from "what is this" to bringing up your own board.
+**New to the project?** Follow these five in order. They take you from "what is this" to bringing up your own board.
 
 <div class="grid cards" markdown>
 
@@ -86,7 +86,7 @@ The project is split across four repositories, because the driver and the FPGA d
 
 </div>
 
-**Explore by area.** Each card jumps into a part of the project; the sidebar lists every page within that area.
+**Explore by area.** Each card jumps into a part of the project. The sidebar lists every page within that area.
 
 <div class="grid cards" markdown>
 

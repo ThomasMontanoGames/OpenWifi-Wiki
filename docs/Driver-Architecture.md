@@ -8,7 +8,7 @@ This is the material you want when you are about to modify the driver, when you 
 
 The most common early surprise is that openwifi is not a single kernel module. `sdr.ko` is the main driver, and it depends on five small per-core modules that each wrap register access to one FPGA core. This is why [`wgd.sh`](Software-Development-Workflow.md) inserts a list of modules rather than just one, and why load order matters.
 
-Each per-core module binds to its own device-tree node through its own `compatible` string, exports an API struct, and does nothing else interesting. Apart from `sdr.ko`, every module is a thin wrapper around register access to one core, so the last column below lists what those registers control. `sdr.ko` calls into those structs.
+Each per-core module binds to its own device-tree node through its own `compatible` string and exports an API struct that `sdr.ko` calls into. Apart from `sdr.ko` itself, every module is a thin wrapper around register access to one core, so the last column below lists what those registers control.
 
 The naming is regular enough to be worth stating once instead of tabulating. A module named `X.ko` is built from `driver/X/X.c`, binds to the device-tree node `compatible = "sdr,X"`, and drives the FPGA core in `openwifi-hw/ip/X/src/X.v`. Only the table's Source column departs from that, and only twice: `sdr.c` sits at the top of `driver/` rather than in its own subdirectory, and the OFDM receiver's top module is `dot11.v` inside the [openofdm submodule](FPGA-IP-Cores.md#openofdm_rx-the-ofdm-receiver) rather than `openofdm_rx.v`.
 
@@ -27,7 +27,7 @@ The top-level `driver/Makefile` builds all six in one line:
 obj-m += sdr.o openofdm_rx/openofdm_rx.o openofdm_tx/openofdm_tx.o tx_intf/tx_intf.o rx_intf/rx_intf.o xpu/xpu.o
 ```
 
-**`side_ch.ko` is deliberately not in that list.** It has its own `make_driver.sh` and is built and loaded separately, because you load it on demand for research capture rather than always running it. See [FPGA IP Cores](FPGA-IP-Cores.md#side_ch-the-csi--iq-capture-side-channel) and [Research Features](Research-Features.md).
+**`side_ch.ko` is deliberately not in that list.** It has its own `make_driver.sh` and is built and loaded separately, because you load it on demand for research capture rather than always running it. See [FPGA IP Cores](FPGA-IP-Cores.md#side_ch-the-csi-iq-capture-side-channel) and [Research Features](Research-Features.md).
 
 !!! note "`driver/xilinx_dma/` is a historical leftover"
     You will find an `xilinx_dma` directory in the driver tree. Its own README says openwifi no longer maintains a modified Xilinx DMA driver and that the stock in-kernel one is used instead. Do not treat it as a live component.
@@ -45,7 +45,7 @@ openwifi is a Linux **platform driver**, not PCI or USB. There is no bus to enum
 5. **Request the DMA channels** by name: `rx_dma_s2mm` and `tx_dma_mm2s`.
 6. **Request the interrupts.** The RX packet interrupt is device-tree interrupt index **1** (`sdr,rx_pkt_intr`) and the TX interrupt is index **3** (`sdr,tx_itrpt`), both registered `IRQF_SHARED`.
 
-The driver also takes two module parameters worth knowing: `test_mode` (bit 0 enables A-MPDU aggregation, which is what `./wgd.sh 1` sets) and `init_tx_att` (TX attenuation in millidB, so 3000 means 3 dB).
+The driver also takes two module parameters worth knowing: `test_mode` (bit 0 enables A-MPDU aggregation, which is what `./wgd.sh 1` sets, and bit 1 advertises short guard interval, see [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md#short-guard-interval)) and `init_tx_att` (TX attenuation in millidB, so 3000 means 3 dB).
 
 ## The mac80211 callback surface
 
