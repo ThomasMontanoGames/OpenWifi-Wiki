@@ -131,6 +131,7 @@ nav:
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
   - Developing:
       - Software Development Workflow: Software-Development-Workflow.md
+      - The Linux Driver: Driver-Architecture.md
       - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
       - Building SD Images: Building-SD-Images.md
       - FPGA Development: FPGA-Development.md

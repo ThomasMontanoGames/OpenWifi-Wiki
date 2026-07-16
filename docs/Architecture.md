@@ -1,6 +1,6 @@
 # Architecture Overview
 
-This page explains how openwifi is put together. Read it before you start modifying code. Almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA. (For *where* each part lives in the source tree, see [The Repositories](Repositories.md); for the FPGA cores in depth, see [FPGA IP Cores](FPGA-IP-Cores.md).)
+This page explains how openwifi is put together. Read it before you start modifying code. Almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA. (For *where* each part lives in the source tree, see [The Repositories](Repositories.md); for the driver internals, see [The Linux Driver](Driver-Architecture.md); for the FPGA cores in depth, see [FPGA IP Cores](FPGA-IP-Cores.md).)
 
 ![openwifi software and FPGA module composition](assets/img/openwifi-detail.jpg)
 
@@ -98,31 +98,13 @@ Because it registers a normal Linux network interface (`sdr0`), every tool that 
 
 ## How the driver talks to Linux: the mac80211 API
 
-The Linux `mac80211` subsystem defines a set of callbacks (`ieee80211_ops`) that every SoftMAC driver implements. That shared contract is why one kernel can drive Wi-Fi chips from dozens of vendors. openwifi's `sdr.c` implements the relevant subset. The most important callbacks:
-
-| Callback | When Linux calls it |
-|---|---|
-| `tx` | There's a packet to transmit |
-| `start` / `stop` | The NIC is brought up / down (`ifconfig sdr0 up/down`) |
-| `add_interface` / `remove_interface` | A virtual interface is created / deleted |
-| `config` | Channel / frequency change (e.g. during a scan) |
-| `bss_info_changed` | BSS parameters change (BSSID, TX power, beacon interval…) |
-| `conf_tx` | TX parameters change (AIFS, CW_MIN, CW_MAX, TXOP) |
-| `configure_filter` | Frame-filtering rules change |
-| `set_antenna` / `get_antenna` | Select / read the TX/RX antenna |
-| `get_tsf` / `set_tsf` / `reset_tsf` | Read / write / reset the 64-bit TSF hardware timer |
-| `set_rts_threshold` | Change the packet length that triggers RTS/CTS |
-| `ampdu_action` | A-MPDU (aggregation) operations |
-| `testmode_cmd` | Handles `sdrctl` commands (see [sdrctl](sdrctl-and-Runtime-Control.md)) |
+The Linux `mac80211` subsystem defines a set of callbacks (`ieee80211_ops`) that every SoftMAC driver implements. That shared contract is why one kernel can drive Wi-Fi chips from dozens of vendors. openwifi's `sdr.c` implements the relevant subset: `tx` to send a frame, `start` / `stop` when the NIC goes up or down, `config` on a channel change, `get_tsf` / `set_tsf` for the hardware timer, `testmode_cmd` for [sdrctl](sdrctl-and-Runtime-Control.md), and around a dozen more. The [full callback table is on the driver page](Driver-Architecture.md#the-mac80211-callback-surface).
 
 When Linux invokes one of these, `sdr.c` does the work by driving the FPGA. It leans on per-block helper "sub-drivers" (`tx_intf_api`, `rx_intf_api`, `openofdm_tx_api`, `openofdm_rx_api`, and `xpu_api`), each of which wraps register access to one FPGA module. These are compiled as separate kernel modules (`tx_intf.ko`, `rx_intf.ko`, …) that `sdr.ko` binds to at load time, which is why `wgd.sh` inserts all of them.
 
-A few implementation facts worth knowing:
+Two facts shape everything else. openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`, and the device tree is what tells Linux the AXI addresses and interrupts of every FPGA block, which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise. And the AD9361 RF chip is driven by the standard Analog Devices IIO driver rather than by openwifi: the driver finds it on the SPI bus at probe time and calls into it (`ad9361_set_tx_atten`, `ad9361_do_calib_run`), which is why some patches to the ADI kernel are needed (see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver)).
 
-- openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`. The device tree is what tells Linux the AXI addresses and interrupts of every FPGA block, which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise.
-- At probe time (`openwifi_dev_probe()`) the driver reads the device-tree `model` string to detect the **hardware type** (`ZYNQ_AD9361`, `ZYNQMP_AD9361`, `RFSOC4X2`) and whether it's a **small or large FPGA**. That last distinction is how features like capture-buffer length adapt per board automatically.
-- The AD9361 RF chip is itself driven by the standard Analog Devices IIO driver; openwifi finds it on the SPI bus and calls into it (e.g. `ad9361_set_tx_atten`, `ad9361_do_calib_run`). This is also why some patches to the ADI kernel are needed (see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver)).
-- TX uses a 64-entry DMA ring of buffer descriptors; RX uses a cyclic DMA buffer. The driver keeps write/read indices so the running `openwifi_tx()`, the FPGA, and the interrupt handler can cross-check each other.
+For the probe sequence, board auto-detection, the TX rings and RX cyclic buffer, the received-packet metadata format, and the register category encoding, see [The Linux Driver](Driver-Architecture.md).
 
 ## The FPGA modules
 
@@ -212,13 +194,17 @@ Before the step-by-step walkthroughs, here is the whole packet path in one pictu
 3. `rx_intf` writes the packet plus metadata into a DMA buffer and raises an interrupt.
 4. The driver's `openwifi_rx_interrupt()` runs: it pulls the raw buffer, parses out the inserted metadata (TSF timestamp, raw RSSI which is then corrected to dBm per band/channel, length, MCS, FCS-valid flag), and hands the packet and its metadata to Linux via `ieee80211_rx_irqsafe()`.
 
+The [exact 16-byte metadata layout](Driver-Architecture.md#the-receive-path-inside-the-driver) is on the driver page, including the detail that the FCS-OK bit is carried in the last byte of the frame rather than in the header.
+
 ## The transmit path, step by step
 
 1. Linux `mac80211` calls `openwifi_tx()` with a frame to send.
-2. The driver reads what it needs from the 802.11 header and mac80211 metadata: length and MCS; unicast vs broadcast; whether an ACK is required and the maximum number of retransmissions the FPGA may attempt; which TX queue / time slice to use; whether RTS/CTS or CTS-to-self protection applies; whether the driver should insert a sequence number.
-3. It maintains an internal write index (`ring->bd_wr_idx`) so that the active `openwifi_tx()`, the FPGA, and the later interrupt handler can cross-check each other.
-4. It writes the per-packet FPGA configuration (so the FPGA generates the right PHY header, etc.) and fires a DMA transfer into one of the four FPGA TX queues. The packet may not go out immediately; the FPGA sends it when the channel and the CSMA state machine allow.
+2. The driver reads what it needs from the 802.11 header and mac80211 metadata: length and MCS, unicast vs broadcast, whether an ACK is required and the maximum number of retransmissions the FPGA may attempt, which TX queue / time slice to use, whether RTS/CTS or CTS-to-self protection applies, and whether the driver should insert a sequence number.
+3. It picks one of four TX rings (by Linux priority, or by destination MAC when time slicing is active) and writes the frame into a buffer descriptor.
+4. It writes the per-packet FPGA configuration (so the FPGA generates the right PHY header, etc.) and fires a DMA transfer into one of the four FPGA TX queues. The packet may not go out immediately: the FPGA sends it when the channel and the CSMA state machine allow.
 5. When the FPGA finishes sending, it raises an interrupt. `openwifi_tx_interrupt()` reads back the result (success or failure, meaning whether an ACK was received, and how many retransmissions happened) and reports it to Linux via `ieee80211_tx_status_irqsafe()`.
+
+The ring sizes, the index cross-checking, and the queue-mapping hook are covered on [The Linux Driver](Driver-Architecture.md#the-transmit-path-inside-the-driver).
 
 ## The TSF timestamp
 
@@ -276,7 +262,8 @@ openwifi supports **A-MPDU aggregation experimentally** (`./wgd.sh 1`, which set
 | Component | Location |
 |---|---|
 | Driver (main) | `openwifi/driver/sdr.c`, `sdr.h` |
-| Per-block driver APIs | `openwifi/driver/{tx_intf,rx_intf,openofdm_tx,openofdm_rx,xpu,side_ch}/` |
+| Per-block driver APIs | `openwifi/driver/{tx_intf,rx_intf,openofdm_tx,openofdm_rx,xpu}/` |
+| Side channel (separate module) | `openwifi/driver/side_ch/` |
 | Register addresses | `openwifi/driver/hw_def.h` |
 | sdrctl ↔ driver glue | `openwifi/driver/sdrctl_intf.c` |
 | sysfs interface | `openwifi/driver/sysfs_intf.c` |
@@ -290,4 +277,6 @@ A useful convention: a driver file and its FPGA counterpart usually share a name
 ## Two communication channels between driver and user space
 
 1. **`sdrctl`**: an `nl80211` testmode command, routed through the standard `nl80211 → cfg80211 → mac80211` path and handled by `openwifi_testmode_cmd()` in `sdrctl_intf.c`. Best for issuing commands and reading/writing registers.
-2. **sysfs**: driver variables exposed as virtual files (via `sysfs_intf.c`). Best for statistics and for scripts. On the ZCU102 these files live under `/sys/devices/platform/fpga-axi@0/fpga-axi@0:sdr`; on other boards under `/sys/devices/soc0/fpga-axi@0/fpga-axi@0:sdr`.
+2. **sysfs**: driver variables exposed as virtual files (via `sysfs_intf.c`). Best for statistics and for scripts. On the ZCU102 these files live under `/sys/devices/platform/fpga-axi@0/fpga-axi@0:sdr`, on other boards under `/sys/devices/soc0/fpga-axi@0/fpga-axi@0:sdr`.
+
+Both are described in detail on [The Linux Driver](Driver-Architecture.md#two-channels-to-user-space), including how the register category is packed into the upper 16 bits of the address and which categories never reach the FPGA.
