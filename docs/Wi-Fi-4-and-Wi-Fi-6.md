@@ -118,6 +118,105 @@ Each step up the table packs more bits per subcarrier or trims coding redundancy
 
 By default Linux's `minstrel_ht` rate control walks this table automatically based on link quality. You only need to intervene for experiments (see [forcing an MCS](#forcing-an-mcs-by-hand)).
 
+### What a frame looks like on the air
+
+Everything above (MCS, guard interval, aggregation) is a property of one **PPDU**: the complete PHY frame openwifi's FPGA puts on the air. A PPDU is a PHY *preamble* followed by a *Data field*, and it never travels alone: the transmitter first wins the channel through DIFS-plus-backoff contention, and after a fixed SIFS gap the receiver answers. The figure below walks down through those three levels.
+
+The key thing to read off it is where the fixed overhead the primer warned about actually lives. Every generation keeps the same **legacy preamble** (L-STF, L-LTF, L-SIG, ~20 µs) so that any nearby 802.11a/g device can still detect the frame and defer; 802.11n then adds ~8 µs of HT training and 802.11ax ~16 µs of HE training on top. That preamble, the SIFS, and the acknowledgement are paid once per PPDU no matter how much data rides inside it, which is exactly why packing many MPDUs into one Data field as an A-MPDU (bottom row) is such a large win.
+
+<figure>
+<svg viewBox="0 0 920 462" role="img" aria-label="Three levels of an openwifi transmission. Top: channel access, where a PPDU is preceded by DIFS and backoff and followed after a SIFS gap by a Block ACK. Middle: the PPDU field structure for 802.11a/g, 802.11n and 802.11ax, all sharing the same legacy preamble (L-STF, L-LTF, L-SIG) and then adding HT or HE training fields before the Data field. Bottom: the Data field is an A-MPDU of several MPDU subframes, each made of an MPDU delimiter, MAC header, frame body and FCS, acknowledged together by one Block ACK." style="width:100%;height:auto;max-width:1080px;font-family:inherit;font-size:13px">
+  <defs>
+    <marker id="ppdu-zoom" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.5"/>
+    </marker>
+  </defs>
+
+  <!-- ===== Level 1: channel access ===== -->
+  <text x="460" y="18" text-anchor="middle" font-weight="700" fill="currentColor">A single openwifi transmission, end to end</text>
+  <text x="460" y="35" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7">channel access → PPDU → acknowledgement (segment widths are illustrative, not to scale)</text>
+
+  <rect x="15" y="48" width="150" height="40" rx="4" fill="currentColor" fill-opacity="0.13"/>
+  <text x="90" y="66" text-anchor="middle" font-size="11.5" fill="currentColor">DIFS +</text>
+  <text x="90" y="80" text-anchor="middle" font-size="11.5" fill="currentColor">backoff</text>
+  <rect x="172" y="48" width="545" height="40" rx="4" fill="#4f5bd5" fill-opacity="0.82"/>
+  <text x="444" y="72" text-anchor="middle" font-weight="600" fill="#ffffff">PPDU  (preamble + Data field)</text>
+  <rect x="724" y="48" width="44" height="40" rx="4" fill="currentColor" fill-opacity="0.13"/>
+  <text x="746" y="72" text-anchor="middle" font-size="10.5" fill="currentColor">SIFS</text>
+  <rect x="775" y="48" width="130" height="40" rx="4" fill="#7c3aed" fill-opacity="0.82"/>
+  <text x="840" y="72" text-anchor="middle" font-weight="600" fill="#ffffff">Block ACK</text>
+
+  <!-- zoom connectors level 1 -> level 2 -->
+  <line x1="172" y1="88" x2="75" y2="149" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#ppdu-zoom)"/>
+  <line x1="717" y1="88" x2="905" y2="149" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#ppdu-zoom)"/>
+
+  <!-- ===== Level 2: PPDU field structure ===== -->
+  <text x="460" y="130" text-anchor="middle" font-weight="700" fill="currentColor">PPDU structure — the legacy preamble stays, each generation adds training</text>
+
+  <!-- shared-legacy-preamble highlight (drawn behind the bars) -->
+  <rect x="73" y="151" width="182" height="107" rx="4" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.35" stroke-dasharray="4 3"/>
+  <text x="164" y="272" text-anchor="middle" font-size="9.5" fill="currentColor" fill-opacity="0.7">shared legacy preamble (~20 µs)</text>
+
+  <!-- left tags -->
+  <text x="66" y="173" text-anchor="end" font-size="11" font-weight="700" fill="currentColor">11a/g</text>
+  <text x="66" y="209" text-anchor="end" font-size="11" font-weight="700" fill="currentColor">11n</text>
+  <text x="66" y="245" text-anchor="end" font-size="11" font-weight="700" fill="currentColor">11ax</text>
+
+  <!-- Legacy (11a/g) bar -->
+  <rect x="75"  y="155" width="68"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="109" y="173" text-anchor="middle" font-size="9.5" fill="#ffffff">L-STF</text>
+  <rect x="145" y="155" width="66"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="178" y="173" text-anchor="middle" font-size="9.5" fill="#ffffff">L-LTF</text>
+  <rect x="213" y="155" width="40"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="233" y="173" text-anchor="middle" font-size="9.5" fill="#ffffff">L-SIG</text>
+  <rect x="255" y="155" width="650" height="28" rx="3" fill="#c2740a" fill-opacity="0.82"/><text x="580" y="173" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">Data field</text>
+
+  <!-- HT (11n) bar -->
+  <rect x="75"  y="191" width="68"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="109" y="209" text-anchor="middle" font-size="9.5" fill="#ffffff">L-STF</text>
+  <rect x="145" y="191" width="66"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="178" y="209" text-anchor="middle" font-size="9.5" fill="#ffffff">L-LTF</text>
+  <rect x="213" y="191" width="40"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="233" y="209" text-anchor="middle" font-size="9.5" fill="#ffffff">L-SIG</text>
+  <rect x="255" y="191" width="66"  height="28" rx="3" fill="#0d9488" fill-opacity="0.85"/><text x="288" y="209" text-anchor="middle" font-size="9" fill="#ffffff">HT-SIG</text>
+  <rect x="323" y="191" width="40"  height="28" rx="3" fill="#0d9488" fill-opacity="0.85"/><text x="343" y="209" text-anchor="middle" font-size="8.5" fill="#ffffff">HT-STF</text>
+  <rect x="365" y="191" width="40"  height="28" rx="3" fill="#0d9488" fill-opacity="0.85"/><text x="385" y="209" text-anchor="middle" font-size="8.5" fill="#ffffff">HT-LTF</text>
+  <rect x="407" y="191" width="498" height="28" rx="3" fill="#c2740a" fill-opacity="0.82"/><text x="656" y="209" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">Data field</text>
+
+  <!-- HE (11ax) bar -->
+  <rect x="75"  y="227" width="68"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="109" y="245" text-anchor="middle" font-size="9.5" fill="#ffffff">L-STF</text>
+  <rect x="145" y="227" width="66"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="178" y="245" text-anchor="middle" font-size="9.5" fill="#ffffff">L-LTF</text>
+  <rect x="213" y="227" width="40"  height="28" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="233" y="245" text-anchor="middle" font-size="9.5" fill="#ffffff">L-SIG</text>
+  <rect x="255" y="227" width="40"  height="28" rx="3" fill="#7c3aed" fill-opacity="0.85"/><text x="275" y="245" text-anchor="middle" font-size="8.5" fill="#ffffff">RL-SIG</text>
+  <rect x="297" y="227" width="66"  height="28" rx="3" fill="#7c3aed" fill-opacity="0.85"/><text x="330" y="245" text-anchor="middle" font-size="8.5" fill="#ffffff">HE-SIG-A</text>
+  <rect x="365" y="227" width="40"  height="28" rx="3" fill="#7c3aed" fill-opacity="0.85"/><text x="385" y="245" text-anchor="middle" font-size="8.5" fill="#ffffff">HE-STF</text>
+  <rect x="407" y="227" width="52"  height="28" rx="3" fill="#7c3aed" fill-opacity="0.85"/><text x="433" y="245" text-anchor="middle" font-size="8.5" fill="#ffffff">HE-LTF</text>
+  <rect x="461" y="227" width="444" height="28" rx="3" fill="#c2740a" fill-opacity="0.82"/><text x="683" y="245" text-anchor="middle" font-size="11" font-weight="600" fill="#ffffff">Data field</text>
+
+  <!-- zoom connectors level 2 -> level 3 (from the Data field) -->
+  <line x1="461" y1="255" x2="75" y2="328" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#ppdu-zoom)"/>
+  <line x1="905" y1="255" x2="905" y2="328" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#ppdu-zoom)"/>
+
+  <!-- ===== Level 3: A-MPDU inside the Data field ===== -->
+  <text x="460" y="304" text-anchor="middle" font-weight="700" fill="currentColor">Inside the Data field — an A-MPDU of many MPDU subframes</text>
+
+  <rect x="75"  y="330" width="193" height="34" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="171" y="351" text-anchor="middle" font-size="10.5" font-weight="600" fill="#ffffff">MPDU 1</text>
+  <rect x="270" y="330" width="193" height="34" rx="3" fill="#0d9488" fill-opacity="0.85"/><text x="366" y="351" text-anchor="middle" font-size="10.5" font-weight="600" fill="#ffffff">MPDU 2</text>
+  <rect x="465" y="330" width="193" height="34" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="561" y="351" text-anchor="middle" font-size="10.5" font-weight="600" fill="#ffffff">MPDU 3</text>
+  <rect x="660" y="330" width="193" height="34" rx="3" fill="#0d9488" fill-opacity="0.85"/><text x="756" y="351" text-anchor="middle" font-size="10.5" font-weight="600" fill="#ffffff">MPDU 4</text>
+  <rect x="855" y="330" width="50"  height="34" rx="3" fill="currentColor" fill-opacity="0.13"/><text x="880" y="352" text-anchor="middle" font-size="13" fill="currentColor" fill-opacity="0.7">⋯</text>
+
+  <!-- zoom connectors: one MPDU -> its fields -->
+  <line x1="270" y1="364" x2="75" y2="403" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#ppdu-zoom)"/>
+  <line x1="463" y1="364" x2="905" y2="403" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#ppdu-zoom)"/>
+
+  <rect x="75"  y="405" width="75"  height="30" rx="3" fill="currentColor" fill-opacity="0.16"/><text x="112" y="424" text-anchor="middle" font-size="8.5" fill="currentColor">MPDU delim.</text>
+  <rect x="152" y="405" width="168" height="30" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="236" y="424" text-anchor="middle" font-size="10" fill="#ffffff">MAC header</text>
+  <rect x="322" y="405" width="498" height="30" rx="3" fill="#c2740a" fill-opacity="0.82"/><text x="571" y="424" text-anchor="middle" font-size="10.5" font-weight="600" fill="#ffffff">Frame body (LLC / IP / payload)</text>
+  <rect x="822" y="405" width="83"  height="30" rx="3" fill="#7c3aed" fill-opacity="0.82"/><text x="863" y="424" text-anchor="middle" font-size="10" fill="#ffffff">FCS</text>
+
+  <text x="112" y="449" text-anchor="middle" font-size="8.5" fill="currentColor" fill-opacity="0.7">4 B</text>
+  <text x="236" y="449" text-anchor="middle" font-size="8.5" fill="currentColor" fill-opacity="0.7">≈ 30 B</text>
+  <text x="571" y="449" text-anchor="middle" font-size="8.5" fill="currentColor" fill-opacity="0.7">variable length</text>
+  <text x="863" y="449" text-anchor="middle" font-size="8.5" fill="currentColor" fill-opacity="0.7">4 B</text>
+</svg>
+<figcaption>The same transmission at three zoom levels. <strong>Top:</strong> the PPDU wins the channel after DIFS + backoff and is acknowledged one SIFS later. <strong>Middle:</strong> all three generations openwifi cares about share the legacy preamble (L-STF/L-LTF/L-SIG) for backward compatibility, then 802.11n adds HT training and 802.11ax adds RL-SIG/HE-SIG-A/HE training before the Data field — openwifi's open release implements the 11a/g and 11n rows. <strong>Bottom:</strong> with A-MPDU on, that Data field holds many MPDU subframes (each a delimiter + MAC header + frame body + FCS) under one preamble, and a single Block ACK acknowledges them all — one corrupted subframe costs one retransmission, not the whole aggregate.</figcaption>
+</figure>
+
 ### Turning on A-MPDU aggregation
 
 Aggregation is the single biggest practical win. At tens of Mbps the fixed per-frame cost (preamble, SIFS, ACK, backoff) starts to dominate, and A-MPDU packs many MPDUs into one transmission so that cost is paid once. Acknowledgement is amortized the same way: the receiver answers the whole aggregate with a single block ACK that flags any subframes needing retransmission, instead of one ACK per frame.[^std] openwifi's headline iperf numbers were measured with aggregation on.[^readme]
