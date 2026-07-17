@@ -144,7 +144,7 @@ Seen during `create_ip_repo.sh`. Apply [Xilinx article 76960](https://support.xi
 
 ### Ubuntu 24: FPGA tools need `libtinfo5`
 
-The default is `libtinfo6`. Install `libtinfo5` manually (see [FPGA Development prerequisites](FPGA-Development.md#prerequisites)).
+The default is `libtinfo6`. Install `libtinfo5` manually (see [Environment Setup](Development-Environment-Setup.md#host-os-and-packages)).
 
 ## OpenWrt-specific
 

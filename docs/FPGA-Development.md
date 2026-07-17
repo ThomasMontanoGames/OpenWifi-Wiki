@@ -6,17 +6,11 @@ The design is built **on top of the [Analog Devices HDL reference designs](https
 
 ## Prerequisites
 
-- **Vivado 2022.2 with Vitis** installed (you need `.../Vitis`, *not* `Vitis_HLS`). If Vitis is missing, add it via *Xilinx Design Tools → Add Design Tools for Devices 2022.2*.
+First set up the shared host toolchain: see [Environment Setup](Development-Environment-Setup.md) (Vivado 2022.2 with Vitis, Ubuntu packages such as `libtinfo5`, and the `XILINX_DIR` and `BOARD_NAME` environment variables). FPGA builds additionally need:
+
 - The **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado. (This eval license is why a running board's decoder halts after ~2 hours, see [Troubleshooting](Troubleshooting.md).)
-- Ubuntu 18/20/22 LTS (others may work).
-- Required packages, e.g. `sudo apt install libtinfo5`. On Ubuntu 24 LTS the default `libtinfo6` won't do, so install `libtinfo5` manually:
 
-  ```bash
-  wget http://be.archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.1-1ubuntu1.18.04.1_amd64.deb
-  sudo dpkg -i ./libtinfo5_6.1-1ubuntu1.18.04.1_amd64.deb
-  ```
-
-Set `export XILINX_DIR=/opt/Xilinx` and `export BOARD_NAME=<your board>` first. (Note: the *software* side of openwifi historically referenced Vivado 2021.1, while the current openwifi-hw build targets 2022.2. Match the version the repo README states at the time you build.) For the full toolchain/branch matrix, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
+Set `export XILINX_DIR=/opt/Xilinx` and `export BOARD_NAME=<your board>` before building. If the software and FPGA repos disagree on the Vivado version, match the one the repo README states at the time you build (see [Environment Setup](Development-Environment-Setup.md#xilinx-toolchain-vivado-vitis)).
 
 ## Building the bitstream
 

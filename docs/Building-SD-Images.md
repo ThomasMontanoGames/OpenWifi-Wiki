@@ -33,7 +33,7 @@ This page is the step-by-step for building from scratch. It assumes you understa
     sudo apt install flex bison libssl-dev device-tree-compiler u-boot-tools -y
     ```
 
-- The usual environment variables (`XILINX_DIR`, `OPENWIFI_HW_IMG_DIR`, `BOARD_NAME`) set as in [Software Development Workflow](Software-Development-Workflow.md#environment-setup).
+- The usual environment variables (`XILINX_DIR`, `OPENWIFI_HW_IMG_DIR`, `BOARD_NAME`) set as in [Environment Setup](Development-Environment-Setup.md#environment-variables).
 
 ### 1. Flash the ADI Kuiper base image
 

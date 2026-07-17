@@ -8,19 +8,13 @@ If you are in the middle of editing code and just want the steps, start with the
 
 ## Environment setup
 
-Most host-side build steps expect these environment variables (use absolute paths):
+Set up the shared host toolchain first: see [Environment Setup](Development-Environment-Setup.md) for the Vivado/Vitis install and the Ubuntu build packages. The software builds use all four variables:
 
 ```bash
 export XILINX_DIR=/opt/Xilinx                 # dir containing Vitis/, Vivado/, etc.
 export OPENWIFI_HW_IMG_DIR=/path/to/openwifi-hw-img
 export BOARD_NAME=zed_fmcs2                    # your board
 export ARCH_BIT=32                             # 32 for Zynq-7000, 64 for Zynq UltraScale+ (e.g. ZCU102)
-```
-
-For driver builds you also need Vivado/Vitis installed (the driver is cross-compiled with the kernel toolchain) and a few packages:
-
-```bash
-sudo apt install flex bison libssl-dev device-tree-compiler u-boot-tools -y
 ```
 
 Throughout, **`ARCH_BIT`** is `32` for Zynq-7000 boards and `64` for Zynq UltraScale+ boards (e.g. the ZCU102).

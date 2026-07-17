@@ -15,7 +15,7 @@ The forms are linked from each repository's `CONTRIBUTING.md` (for example, [ope
 
 - **Clone the repos you'll work in** (see [The Repositories](Repositories.md) for what lives where): [openwifi](https://github.com/open-sdr/openwifi) for the driver/software, [openwifi-hw](https://github.com/open-sdr/openwifi-hw) for the FPGA. Prebuilt bitstreams are in [openwifi-hw-img](https://github.com/open-sdr/openwifi-hw-img).
 - **Tools:** **Vivado 2022.2 with Vitis** for FPGA and kernel builds, plus host packages `flex bison libssl-dev device-tree-compiler u-boot-tools`. Some boards need a paid Vivado license to rebuild the FPGA, while Zynq-7020 boards use the free tier (see [Supported Boards](Supported-Boards.md)).
-- **Environment variables** most build scripts expect: `XILINX_DIR`, `OPENWIFI_HW_IMG_DIR`, `BOARD_NAME` (see [Software Development Workflow → Environment setup](Software-Development-Workflow.md#environment-setup)).
+- **Environment variables** most build scripts expect: `XILINX_DIR`, `OPENWIFI_HW_IMG_DIR`, `BOARD_NAME` (see [Environment Setup → Environment variables](Development-Environment-Setup.md#environment-variables)).
 - **Build guides:** [Software Development Workflow](Software-Development-Workflow.md) (driver + live reload), [FPGA Development](FPGA-Development.md) (bitstream, IP cores, simulation), [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md), and [Building SD Images](Building-SD-Images.md).
 - **No hardware?** The imec [w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html) offers remote access to openwifi boards.
 
