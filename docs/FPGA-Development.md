@@ -152,7 +152,7 @@ The primary reference is Xilinx UG994 (*Designing IP Subsystems Using IP Integra
 openwifi's baseline is tag `2022_R2` of the ADI HDL reference designs (the `adi-hdl` submodule pin). The porting mindset is: **diff openwifi against the matching ADI reference design, then replicate those changes on your target board.**
 
 1. Open the ADI reference design for your platform (e.g. `hdl/projects/fmcomms2/zc706`) and the corresponding openwifi board design (`openwifi-hw/boards/zc706_fmcs2`) side by side.
-2. Use *Open Block Design* and compare both the **diagram** and the **Address Editor**; that's where openwifi's additions show up.
+2. Use *Open Block Design* and compare both the **diagram** and the **Address Editor**. That's where openwifi's additions show up.
 3. The addresses and interrupts of every FPGA block hooked to the ARM bus must be reflected in the board's device tree, `openwifi/kernel_boot/boards/<board_name>/devicetree.dts`. Linux parses `devicetree.dtb` at boot to discover these blocks. (openwifi obtains a `.dts` by running `dtc` on the ADI image's `.dtb`, then edits it to match the added/modified blocks.)
 4. Study the image-build scripts (see [Software Development Workflow](Software-Development-Workflow.md#building-a-full-sd-image-from-scratch)) to understand how `devicetree.dtb`, `BOOT.BIN`, and the kernel come together into a bootable SD image.
 

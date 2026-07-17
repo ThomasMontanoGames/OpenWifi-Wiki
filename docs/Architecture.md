@@ -36,14 +36,14 @@ Because it registers a normal Linux network interface (`sdr0`), every tool that 
         fill="currentColor" fill-opacity="0.025"
         stroke="currentColor" stroke-opacity="0.22" stroke-width="1.2"/>
   <text x="48" y="66" text-anchor="start" font-size="12.5" font-weight="600"
-        fill="currentColor" fill-opacity="0.72">Software — Linux on the ARM cores (PS)</text>
+        fill="currentColor" fill-opacity="0.72">Software: Linux on the ARM cores (PS)</text>
 
   <!-- Container: FPGA fabric (PL) -->
   <rect x="30" y="380" width="700" height="270" rx="12"
         fill="currentColor" fill-opacity="0.025"
         stroke="currentColor" stroke-opacity="0.22" stroke-width="1.2"/>
   <text x="48" y="406" text-anchor="start" font-size="12.5" font-weight="600"
-        fill="currentColor" fill-opacity="0.72">FPGA fabric (PL) — the openwifi-hw design</text>
+        fill="currentColor" fill-opacity="0.72">FPGA fabric (PL): the openwifi-hw design</text>
 
   <!-- ===== Connectors (drawn before nodes so borders sit on top) ===== -->
   <g fill="none" stroke="currentColor" stroke-width="1.6" stroke-opacity="0.8">
@@ -84,7 +84,7 @@ Because it registers a normal Linux network interface (`sdr0`), every tool that 
       <rect x="205" y="424" width="350" height="58" rx="8" fill="#6366f1" fill-opacity="0.12" stroke="#6366f1" stroke-width="1.4"/>
       <text fill="currentColor"><tspan x="380" y="448">tx_intf / rx_intf / side_ch</tspan><tspan x="380" dy="17">DMA + per-packet metadata</tspan></text>
       <rect x="70" y="560" width="290" height="64" rx="8" fill="#6366f1" fill-opacity="0.12" stroke="#6366f1" stroke-width="1.4"/>
-      <text fill="currentColor"><tspan x="215" y="587">xpu — real-time low MAC</tspan><tspan x="215" dy="17">CSMA/CA · hardware ACK · TSF timer</tspan></text>
+      <text fill="currentColor"><tspan x="215" y="587">xpu · real-time low MAC</tspan><tspan x="215" dy="17">CSMA/CA · hardware ACK · TSF timer</tspan></text>
       <rect x="400" y="560" width="290" height="64" rx="8" fill="#6366f1" fill-opacity="0.12" stroke="#6366f1" stroke-width="1.4"/>
       <text fill="currentColor"><tspan x="545" y="587">openofdm_tx / openofdm_rx</tspan><tspan x="545" dy="17">OFDM PHY</tspan></text>
     </g>
@@ -111,7 +111,7 @@ For the probe sequence, board auto-detection, the TX rings and RX cyclic buffer,
 The FPGA design decomposes into modules whose names match their source files (in `openwifi-hw/ip/`). Understanding these five names unlocks most of the register documentation:
 
 - **`openofdm_tx`**: the OFDM transmitter. Turns a MAC frame into baseband IQ samples (PHY header, pilots, scrambling, modulation). Based on original openwifi work.
-- **`openofdm_rx`**: the OFDM receiver. Detects the preamble, synchronizes, estimates the channel, equalizes, and decodes (including a Xilinx Viterbi decoder). Derived from the [openofdm](https://github.com/open-sdr/openofdm) project (originally by [jhshi](https://github.com/jhshi/openofdm); openwifi's improvements live on the `dot11zynq` branch).
+- **`openofdm_rx`**: the OFDM receiver. Detects the preamble, synchronizes, estimates the channel, equalizes, and decodes (including a Xilinx Viterbi decoder). Derived from the [openofdm](https://github.com/open-sdr/openofdm) project (originally by [jhshi](https://github.com/jhshi/openofdm), with openwifi's improvements on the `dot11zynq` branch).
 - **`tx_intf`**: the transmit interface: DMA from the processor into per-queue FIFOs, the DAC feed, per-packet PHY configuration, and the four hardware TX queues.
 - **`rx_intf`**: the receive interface: takes decoded packets and side-channel data, attaches metadata (TSF timestamp, RSSI, length, MCS, FCS status), and DMAs them up to the processor.
 - **`xpu`**: the "eXtensible Processing Unit," which holds the **real-time low MAC**: the CSMA/CA state machine, NAV, DIFS/SIFS/EIFS timing, the TSF timer, hardware ACK generation and reception, retransmission, RTS/CTS, packet filtering, and the time-slicing gates for the TX queues. If a behavior has to happen in microseconds, it's in `xpu`.
@@ -126,7 +126,7 @@ openwifi's FPGA design is built **on top of the [Analog Devices HDL reference de
 
 ## Packet flow at a glance
 
-Before the step-by-step walkthroughs, here is the whole packet path in one picture. Transmit runs top to bottom from Linux out to the antenna; receive runs back up.
+Before the step-by-step walkthroughs, here is the whole packet path in one picture. Transmit runs top to bottom from Linux out to the antenna, and receive runs back up.
 
 <figure>
 <svg viewBox="0 0 920 300" role="img" aria-label="openwifi packet flow. Transmit (top): Linux mac80211 openwifi_tx to tx_intf (four TX queues) to openofdm_tx to the AD9361 and antenna. Receive (bottom): AD9361 to openofdm_rx to rx_intf to the openwifi rx interrupt back up to Linux." style="width:100%;height:auto;max-width:1000px;font-family:inherit;font-size:13px">

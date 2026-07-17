@@ -151,7 +151,7 @@ The FPGA switches the TX LO/port on only during transmit. To force the LO always
 Because AD9361 retuning can emit unwanted TX (and disrupt cable tests / background scans), you can pin the frequency:
 
 ```bash
-./set_restrict_freq.sh 5220     # lock to 5220 MHz; ignore other tuning requests
+./set_restrict_freq.sh 5220     # lock to 5220 MHz, ignore other tuning requests
 ./set_restrict_freq.sh 0        # remove the lock
 ```
 
@@ -175,7 +175,7 @@ openwifi can gate each of its four TX queues to a fraction of a repeating time c
 | `para_name` | Meaning |
 |---|---|
 | `slice_idx` | Which slice (0–3) subsequent commands configure. **Set to 4 when done to synchronize all slices**, otherwise slice start/end times won't line up. |
-| `addr` | Target MAC for this slice (last 32 bits; e.g. `b94cb1c1` for `6c:fd:b9:4c:b1:c1`) |
+| `addr` | Target MAC for this slice (last 32 bits, e.g. `b94cb1c1` for `6c:fd:b9:4c:b1:c1`) |
 | `slice_total` | Cycle length in µs (e.g. `49999` for 50 ms) |
 | `slice_start` | Slice start time in µs (e.g. `10000` for 10 ms) |
 | `slice_end` | Slice end time in µs (e.g. `39999` for 40 ms) |
@@ -227,11 +227,11 @@ The tables below list the commonly used registers. For the full set, read the mo
 
 | reg | Meaning |
 |---|---|
-| 0 | Reset (per-bit to sub-modules; 1=reset, 0=normal) |
+| 0 | Reset (per-bit to sub-modules, 1=reset, 0=normal) |
 | 2 | Enable/disable RX interrupt: 256=disable, 0=enable |
 | 3 | Loopback IQ source: 256=from `tx_intf`, 0=from AD9361 ADC |
 | 6 | Abnormal packet-length threshold (bits 31-16). DMA terminates if length outside 14..threshold |
-| 11 | RX digital IQ gain (left-shift count; default 4) |
+| 11 | RX digital IQ gain (left-shift count, default 4) |
 | 13 | Delay from RX DMA complete to RX interrupt (unit 0.1 µs) |
 | 16 | RX antenna selection: 0=ant0 (default), 1=ant1 |
 
@@ -279,8 +279,8 @@ The tables below list the commonly used registers. For the full set, read the mo
 | reg | Meaning |
 |---|---|
 | 0 | Reset (per-bit) |
-| 1 | Pilot scrambler initial state (low 7 bits; default 127) |
-| 2 | Data scrambler initial state (low 7 bits; default 127) |
+| 1 | Pilot scrambler initial state (low 7 bits, default 127) |
+| 2 | Data scrambler initial state (low 7 bits, default 127) |
 
 ### `xpu` (low MAC): the big one
 

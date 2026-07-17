@@ -5,9 +5,9 @@ repo_url: https://github.com/ThomasMontanoGames/OpenWifi-Wiki
 repo_name: ThomasMontanoGames/OpenWifi-Wiki
 edit_uri: edit/master/docs/
 
-# Shown in the footer on every page. Keep this line evergreen; the date of
+# Shown in the footer on every page. Keep this line evergreen. The date of
 # the last reconciliation with the openwifi repos lives on the Repositories
-# page, in the "Versions this wiki targets" section — bump it there when
+# page, in the "Versions this wiki targets" section. Bump it there when
 # reconciling.
 copyright: >
   Documentation for the <a href="https://github.com/open-sdr/openwifi">openwifi</a> project.
@@ -139,11 +139,11 @@ nav:
       - Software Development Workflow: Software-Development-Workflow.md
       - Building SD Images: Building-SD-Images.md
       - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
-      - The Linux Driver: Driver-Architecture.md      
+      - The Linux Driver: Driver-Architecture.md
       - FPGA Development: FPGA-Development.md
       - FPGA IP Cores: FPGA-IP-Cores.md
   # The short tab label ("Research") comes from the section name, while the
-  # sidebar entries derive their full titles from each page's H1 — so the key
+  # sidebar entries derive their full titles from each page's H1, so the key
   # "CSI/IQ" wording stays visible without a hand-maintained nav label.
   - Research:
       - Research-Features.md

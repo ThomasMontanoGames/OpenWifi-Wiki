@@ -36,7 +36,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![CSI radar waterfall](assets/img/csi-screen-shot-radar-matlab.jpg)
 
 ??? note "CSI fuzzer"
-    Inject a controlled *artificial* channel response at the transmitter so an eavesdropper's CSI-based sensing is corrupted while normal communication continues. Backed by peer-reviewed privacy research; includes commands to sweep and apply fuzzer parameters and to watch the effect via self-monitoring.
+    Inject a controlled *artificial* channel response at the transmitter so an eavesdropper's CSI-based sensing is corrupted while normal communication continues. Backed by peer-reviewed privacy research. Includes commands to sweep and apply fuzzer parameters and to watch the effect via self-monitoring.
 
     [Read more →](Research-Features.md#csi-fuzzer-privacy-protection) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/csi_fuzzer.md)
 

@@ -155,7 +155,7 @@ Three ingredients go in:
 The script compiles each overlay with `dtc`, preprocesses and compiles the stock `.dts`, then fuses them with `fdtoverlay`:
 
 <figure>
-<svg viewBox="0 0 940 240" role="img" aria-label="How construct_device_tree.sh builds a board device tree: the stock_board.dts is compiled with cpp and dtc into default_devicetree.dtb; the shared openwifi overlay and the per-board overlay are each compiled with dtc into .dtbo files; fdtoverlay then fuses all three into the board's devicetree.dtb, plus a decompiled full_devicetree.dts for inspection." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
+<svg viewBox="0 0 940 240" role="img" aria-label="How construct_device_tree.sh builds a board device tree: the stock_board.dts is compiled with cpp and dtc into default_devicetree.dtb, the shared openwifi overlay and the per-board overlay are each compiled with dtc into .dtbo files, and fdtoverlay then fuses all three into the board's devicetree.dtb, plus a decompiled full_devicetree.dts for inspection." style="width:100%;height:auto;max-width:940px;font-family:inherit;font-size:13px">
   <defs>
     <marker id="dt-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.6"/>
@@ -293,13 +293,13 @@ The board overlay is small and concrete. Here is the complete `overlays/zed_fmcs
 };
 ```
 
-So a board overlay typically supplies: the **AD9361 external reference clock frequency** (40 MHz here; boards with a VCXO/GPS may differ), the **DCXO tuning**, board **LEDs/GPIO**, and any board-unique peripherals or RF-switch controls.
+So a board overlay typically supplies: the **AD9361 external reference clock frequency** (40 MHz here, though boards with a VCXO/GPS may differ), the **DCXO tuning**, board **LEDs/GPIO**, and any board-unique peripherals or RF-switch controls.
 
 ---
 
 ## Porting the device tree to a new board
 
-The guiding principle: **the address and interrupt of every FPGA block on the AXI bus must match between your FPGA build and your device tree.** The FPGA build is the source of truth for those numbers; the device tree has to agree.
+The guiding principle: **the address and interrupt of every FPGA block on the AXI bus must match between your FPGA build and your device tree.** The FPGA build is the source of truth for those numbers, and the device tree has to agree.
 
 A practical sequence:
 
@@ -307,7 +307,7 @@ A practical sequence:
 
 2. **Reuse the shared openwifi overlay if your addresses are standard.** If your FPGA places the openwifi cores at the usual `0x83c0_xxxx` (Zynq-7000) or `0xa00x_xxxx` (ZynqMP) addresses with the standard interrupts, you can use `openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso` **unchanged**. If you moved any block, edit that block's `reg = <...>` and `interrupts = <...>` in the overlay to match Vivado.
 
-3. **Write your board overlay** `overlays/<board_name>.dtso`. Start from the closest existing overlay (`zed_fmcs2.dtso` for a plain FMCOMMS board; `e310v2.dtso`/`sdrpi.dtso` for boards with a VCXO/GPS/extra GPIO). Set:
+3. **Write your board overlay** `overlays/<board_name>.dtso`. Start from the closest existing overlay (`zed_fmcs2.dtso` for a plain FMCOMMS board, or `e310v2.dtso`/`sdrpi.dtso` for boards with a VCXO/GPS/extra GPIO). Set:
     - the **AD9361 reference clock** frequency (`clk_*_fixed` → `ad9361_ext_refclk`) to your board's crystal/VCXO,
     - the **DCXO tuning** if applicable,
     - **LEDs/GPIO** and any **RF-switch/port control** your board needs (e.g. the ANTSDR RF-switch caveat noted in [Supported Boards](Supported-Boards.md#antsdr-microphase) lives here).
@@ -328,7 +328,7 @@ A practical sequence:
 6. **Boot and verify.** After building `BOOT.BIN` + kernel + this `devicetree.dtb` into an SD image (see [Software Development Workflow](Software-Development-Workflow.md#building-a-full-sd-image-from-scratch)), boot with a UART console attached. On a good boot you'll see the AD9361 probe and the `sdr,sdr` driver bind. If it doesn't, the device-tree addresses/interrupts almost certainly disagree with the FPGA. Recheck step 1. Common failures (SPI-flash env, wrong DDR size, ZCU102 SD/SODIMM, no UART) are in [Troubleshooting](Troubleshooting.md#boot-and-networking).
 
 !!! tip "The device tree is where the FPGA meets Linux"
-    A board port is really two halves that must agree: the **FPGA side** (the openwifi-hw Vivado project, which fixes addresses/interrupts; see [FPGA Development](FPGA-Development.md#porting-to-a-new-board)) and the **device-tree side** (this page, which tells Linux those same addresses/interrupts). Get the two to match and the rest of openwifi (driver, `sdrctl`, everything above) works unchanged, because it's all keyed off the `sdr,*` `compatible` strings, not the board.
+    A board port is really two halves that must agree: the **FPGA side** (the openwifi-hw Vivado project, which fixes addresses/interrupts, see [FPGA Development](FPGA-Development.md#porting-to-a-new-board)) and the **device-tree side** (this page, which tells Linux those same addresses/interrupts). Get the two to match and the rest of openwifi (driver, `sdrctl`, everything above) works unchanged, because it's all keyed off the `sdr,*` `compatible` strings, not the board.
 
 ## Related pages
 

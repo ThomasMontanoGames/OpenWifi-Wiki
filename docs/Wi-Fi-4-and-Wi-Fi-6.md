@@ -151,7 +151,7 @@ The key thing to read off it is where the fixed overhead the primer warned about
   <line x1="717" y1="88" x2="905" y2="149" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#ppdu-zoom)"/>
 
   <!-- ===== Level 2: PPDU field structure ===== -->
-  <text x="460" y="130" text-anchor="middle" font-weight="700" fill="currentColor">PPDU structure — the legacy preamble stays, each generation adds training</text>
+  <text x="460" y="130" text-anchor="middle" font-weight="700" fill="currentColor">PPDU structure: the legacy preamble stays, each generation adds training</text>
 
   <!-- shared-legacy-preamble highlight (drawn behind the bars) -->
   <rect x="73" y="151" width="182" height="107" rx="4" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.35" stroke-dasharray="4 3"/>
@@ -192,7 +192,7 @@ The key thing to read off it is where the fixed overhead the primer warned about
   <line x1="905" y1="255" x2="905" y2="328" stroke="currentColor" stroke-opacity="0.45" stroke-dasharray="4 3" marker-end="url(#ppdu-zoom)"/>
 
   <!-- ===== Level 3: A-MPDU inside the Data field ===== -->
-  <text x="460" y="304" text-anchor="middle" font-weight="700" fill="currentColor">Inside the Data field — an A-MPDU of many MPDU subframes</text>
+  <text x="460" y="304" text-anchor="middle" font-weight="700" fill="currentColor">Inside the Data field: an A-MPDU of many MPDU subframes</text>
 
   <rect x="75"  y="330" width="193" height="34" rx="3" fill="#4f5bd5" fill-opacity="0.82"/><text x="171" y="351" text-anchor="middle" font-size="10.5" font-weight="600" fill="#ffffff">MPDU 1</text>
   <rect x="270" y="330" width="193" height="34" rx="3" fill="#0d9488" fill-opacity="0.85"/><text x="366" y="351" text-anchor="middle" font-size="10.5" font-weight="600" fill="#ffffff">MPDU 2</text>

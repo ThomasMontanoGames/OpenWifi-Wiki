@@ -35,12 +35,12 @@ openwifi implements an OFDM PHY equivalent to 802.11a/g and the single-stream, 2
 |---|---|
 | Modulation | OFDM (BPSK / QPSK / 16-QAM / 64-QAM)[^std] |
 | FFT size | 64[^std] |
-| Data subcarriers | 52 (802.11n HT); 48 (802.11a/g legacy)[^11n] |
+| Data subcarriers | 52 (802.11n HT), 48 (802.11a/g legacy)[^11n] |
 | Channel bandwidth | 20 MHz (16.6 MHz occupied)[^std] |
 | FEC | Convolutional coding, rates 1/2, 2/3, 3/4, **5/6** (5/6 added for HT)[^11n] |
-| Guard interval | 800 ns (normal); **400 ns short GI** supported for HT[^11n] |
+| Guard interval | 800 ns (normal), with **400 ns short GI** supported for HT[^11n] |
 | OFDM symbol duration | 4 µs (3.6 µs with short GI)[^std] |
-| Spatial streams | 1 (SISO); MIMO not supported in open source[^11n] |
+| Spatial streams | 1 (SISO), MIMO not supported in open source[^11n] |
 
 !!! note "802.11b is not supported"
     openwifi is OFDM-only. The DSSS/CCK rates of 802.11b are not implemented. An 802.11b `1 Mbps` rate request is converted to `6 Mbps` OFDM.[^docreadme] This is the usual reason a 2.4 GHz client fails to associate. See [Operating Modes → About 802.11b](Operating-Modes.md#about-80211b).
@@ -54,7 +54,7 @@ openwifi implements an OFDM PHY equivalent to 802.11a/g and the single-stream, 2
 
 ## RF front end
 
-The RF characteristics come from the **Analog Devices AD9361/AD9364** agile transceiver rather than from openwifi itself; openwifi controls it in real time over an FPGA SPI interface. Consult the AD9361 datasheet for full RF specs. The openwifi-relevant facts are:
+The RF characteristics come from the **Analog Devices AD9361/AD9364** agile transceiver rather than from openwifi itself. openwifi controls it in real time over an FPGA SPI interface. Consult the AD9361 datasheet for full RF specs. The openwifi-relevant facts are:
 
 | Parameter | Value |
 |---|---|
@@ -107,9 +107,9 @@ openwifi is built to fit the **lowest-end supported FPGA (Xilinx Zynq-7020)**, s
 | ZC706, Zynq-7045 (`xc7z045`) | ~21k | 73.5 | 98 | up to 200 MHz[^release] |
 
 !!! note "These are openwifi-core numbers"
-    The utilization above is for the openwifi design. A complete bitstream also includes peripheral logic (DMA, AXI interconnect, the ADI reference design, clocking), so the *total* device utilization is higher. The figures were published in the openwifi release notes; the later `v1.3.0` and `v1.5.0` releases ship full per-core `report_utilization` archives (`*-utilization.zip`) if you need the exact breakdown for a specific version.[^release]
+    The utilization above is for the openwifi design. A complete bitstream also includes peripheral logic (DMA, AXI interconnect, the ADI reference design, clocking), so the *total* device utilization is higher. The figures were published in the openwifi release notes. The later `v1.3.0` and `v1.5.0` releases ship full per-core `report_utilization` archives (`*-utilization.zip`) if you need the exact breakdown for a specific version.[^release]
 
-**Clock / speed grade.** The `openofdm_tx` core was optimized so the whole design closes timing at **100 MHz on the low-speed-grade 7020 (−1)**; higher-grade parts run at 200 MHz (the release notes cite the 7035 −2/−2L, and the ZC706's Zynq-7045 offers the same 200 MHz option).[^release] The baseband clock is set by `NUM_CLK_PER_US` in `openwifi-hw/boards/openwifi.tcl` (default 100).[^tcl] Per-board options are in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).
+**Clock / speed grade.** The `openofdm_tx` core was optimized so the whole design closes timing at **100 MHz on the low-speed-grade 7020 (−1)**, while higher-grade parts run at 200 MHz (the release notes cite the 7035 −2/−2L, and the ZC706's Zynq-7045 offers the same 200 MHz option).[^release] The baseband clock is set by `NUM_CLK_PER_US` in `openwifi-hw/boards/openwifi.tcl` (default 100).[^tcl] Per-board options are in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).
 
 ### To generate exact numbers for your build
 

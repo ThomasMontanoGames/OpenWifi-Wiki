@@ -14,7 +14,7 @@ The forms are linked from each repository's `CONTRIBUTING.md` (for example, [ope
 ## 2. Set up a development environment
 
 - **Clone the repos you'll work in** (see [The Repositories](Repositories.md) for what lives where): [openwifi](https://github.com/open-sdr/openwifi) for the driver/software, [openwifi-hw](https://github.com/open-sdr/openwifi-hw) for the FPGA. Prebuilt bitstreams are in [openwifi-hw-img](https://github.com/open-sdr/openwifi-hw-img).
-- **Tools:** **Vivado 2022.2 with Vitis** for FPGA and kernel builds, plus host packages `flex bison libssl-dev device-tree-compiler u-boot-tools`. Some boards need a paid Vivado license to rebuild the FPGA; Zynq-7020 boards use the free tier (see [Supported Boards](Supported-Boards.md)).
+- **Tools:** **Vivado 2022.2 with Vitis** for FPGA and kernel builds, plus host packages `flex bison libssl-dev device-tree-compiler u-boot-tools`. Some boards need a paid Vivado license to rebuild the FPGA, while Zynq-7020 boards use the free tier (see [Supported Boards](Supported-Boards.md)).
 - **Environment variables** most build scripts expect: `XILINX_DIR`, `OPENWIFI_HW_IMG_DIR`, `BOARD_NAME` (see [Software Development Workflow → Environment setup](Software-Development-Workflow.md#environment-setup)).
 - **Build guides:** [Software Development Workflow](Software-Development-Workflow.md) (driver + live reload), [FPGA Development](FPGA-Development.md) (bitstream, IP cores, simulation), [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md), and [Building SD Images](Building-SD-Images.md).
 - **No hardware?** The imec [w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html) offers remote access to openwifi boards.
@@ -31,7 +31,7 @@ openwifi is [split across several repos](Repositories.md) by toolchain, so the f
 | The OFDM receiver internals | [openofdm](https://github.com/open-sdr/openofdm) (`dot11zynq` branch) |
 
 !!! warning "Keep the driver and FPGA register maps in sync"
-    If your change touches a register, the driver side (`openwifi/driver/hw_def.h`) and the FPGA side (the core's `*_s_axi.v` in `openwifi-hw/ip/`) must agree; they are two halves of the same contract. See [FPGA IP Cores](FPGA-IP-Cores.md#how-a-register-write-reaches-a-core).
+    If your change touches a register, the driver side (`openwifi/driver/hw_def.h`) and the FPGA side (the core's `*_s_axi.v` in `openwifi-hw/ip/`) must agree, because they are two halves of the same contract. See [FPGA IP Cores](FPGA-IP-Cores.md#how-a-register-write-reaches-a-core).
 
 ## 4. Propose the change
 
@@ -51,7 +51,7 @@ See [FAQ & Resources](FAQ-and-Resources.md#community-and-support) for the full l
 
 ## 6. Licensing
 
-openwifi is dual-licensed: **AGPLv3** for the open-source release, with commercial licensing via [openwifi.tech](https://openwifi.tech). Individual files may be GPL-2.0-or-later or BSD-3-Clause, and vendored third-party components carry their own terms. Your contributions are accepted under the project's license; that is what the CLA in step 1 formalizes. See [FAQ → License](FAQ-and-Resources.md#license).
+openwifi is dual-licensed: **AGPLv3** for the open-source release, with commercial licensing via [openwifi.tech](https://openwifi.tech). Individual files may be GPL-2.0-or-later or BSD-3-Clause, and vendored third-party components carry their own terms. Your contributions are accepted under the project's license, which is what the CLA in step 1 formalizes. See [FAQ → License](FAQ-and-Resources.md#license).
 
 ## Contributing to this wiki
 

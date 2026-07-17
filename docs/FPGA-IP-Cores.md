@@ -90,7 +90,7 @@ The six cores form a transmit chain and a receive chain that meet at the AD9361 
   <line x1="345" y1="383" x2="255" y2="383" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.6" marker-end="url(#ipc-arrow)" fill="none"/>
   <text x="300" y="376" text-anchor="middle" font-size="9.5" fill="currentColor" fill-opacity="0.7">DMA → Linux</text>
 </svg>
-<figcaption><em>The openwifi FPGA signal chain. Solid boxes are openwifi IP cores (teal = transmit, indigo = receive); dashed pills are the external AD9361 RF front end. The <strong>xpu</strong> real-time MAC orchestrates timing and channel access; <strong>side_ch</strong> taps the receiver to stream CSI/IQ to the host.</em></figcaption>
+<figcaption><em>The openwifi FPGA signal chain. Solid boxes are openwifi IP cores (teal = transmit, indigo = receive), and dashed pills are the external AD9361 RF front end. The <strong>xpu</strong> real-time MAC orchestrates timing and channel access, while <strong>side_ch</strong> taps the receiver to stream CSI/IQ to the host.</em></figcaption>
 </figure>
 
 Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) and, where it moves sample data, an AXI-Stream master/slave for DMA. All are authored by Xianjun Jiao (with Michael Mehari co-authoring `openofdm_tx`). A driver file and its FPGA core usually share a name (`xpu.c` ↔ `xpu.v`), and every register the driver writes (`hw_def.h`) has a matching `slv_regN` in the core's `_s_axi.v`.
@@ -115,11 +115,11 @@ What lives inside (`ip/xpu/src/`, 21 Verilog files):
 - **`csma_ca.v`**: the CSMA/CA (DCF) state machine proper. It consumes NAV/DIFS/EIFS enable flags, the contention-window exponent, SIFS/slot/DIFS/backoff timing parameters, MAC-address match, and TX-status feedback to arbitrate channel access exactly per the 802.11 distributed coordination function. This is the hardware DCF, offloaded from `mac80211`.
 - **`tx_control.v`**: sequences packet transmission (the largest logic file at 30 KB).
 - **`tsf_timer.v`**: the 64-bit TSF (Timing Synchronization Function) counter, the 802.11 clock that timestamps received packets and drives timing-critical MAC operations. Readable via `xpu` regs 58/59, loadable via regs 2/3.
-- **`pkt_filter_ctl.v`**: packet address/type filtering (the FPGA side of `openwifi_configure_filter()`; monitor mode opens this fully).
+- **`pkt_filter_ctl.v`**: packet address/type filtering (the FPGA side of `openwifi_configure_filter()`, which monitor mode opens fully).
 - **`phy_rx_parse.v`**: parses PHY-header fields coming out of the receiver.
 - **`rssi.v`, `iq_rssi_to_db.v`, `cca.v`, `dc_rm.v`, `mv_avg*.v`**: clear-channel-assessment / carrier sensing and RSSI measurement (moving-average power, DC removal).
 - **`time_slice_gen.v`**: generates the gating for the four hardware TX queues (`slice_en[0:3]`), the mechanism behind [MAC-address time slicing](sdrctl-and-Runtime-Control.md#time-slicing-network-slicing).
-- **`spi.v`**: an SPI master used to control the AD9361 TX chain in real time (turning the TX LO/switch on just before a packet and off just after; see [Architecture](Architecture.md#rf-and-baseband-the-frequencyclock-design)).
+- **`spi.v`**: an SPI master used to control the AD9361 TX chain in real time (turning the TX LO/switch on just before a packet and off just after, see [Architecture](Architecture.md#rf-and-baseband-the-frequencyclock-design)).
 - **`cw_exp.v`, `tx_on_detection.v`, `edge_to_flip.v`, `fifo_sample_delay.v`, `n_sym_len14_pkt.v`**: contention-window exponent, TX-onset detection, and assorted timing/FIFO helpers.
 
 `xpu` connects to *both* the RF/ADC path (`ddc_i/q`, `mute_adc_out_to_bb`) and the demodulator (`demod_is_ongoing`, `pkt_header_valid`, `fcs_ok`, `pkt_rate`, `pkt_len`), which is why it can implement hardware ACK generation and reception, retransmission, and CCA. It is addressed by the driver as register space `xpu` (category 6) and its git build revision is readable at register 63.
@@ -134,11 +134,11 @@ Notable source (`ip/openofdm_tx/src/`, 28 files):
 
 - **`dot11_tx.v`**: the 802.11 TX datapath FSM.
 - **The IFFT pipeline**: `ifftmain.v`, `ifftstage.v`, `butterfly.v`, `hwbfly.v`, and partial-product multipliers (`bimpy.v`, `longbimpy.v`).
-- **`convenc.v` + `punc_interlv_lut.v`**: convolutional encoder and the punctured-interleave lookup ROMs. `punc_interlv_lut.v` (128 KB) is the largest single file in the whole IP tree; it holds the FEC puncturing/interleaving patterns for every 802.11 MCS.
+- **`convenc.v` + `punc_interlv_lut.v`**: convolutional encoder and the punctured-interleave lookup ROMs. `punc_interlv_lut.v` (128 KB) is the largest single file in the whole IP tree, holding the FEC puncturing/interleaving patterns for every 802.11 MCS.
 - **Preamble ROMs**: `l_stf_rom.v` / `l_ltf_rom.v` (legacy short/long training fields) and `ht_stf_rom.v` / `ht_ltf_rom.v` (802.11n HT training fields).
 - **`modulation.v`, `crc32_tx.v`, `bitreverse.v`, `dpram.v`, `axi_fifo_bram.v`**: the modulation mapper, frame CRC, and buffering.
 
-Addressed as register space `tx` (category 5); scrambler seeds are at regs 1/2 (default 127).
+Addressed as register space `tx` (category 5). Scrambler seeds are at regs 1/2 (default 127).
 
 ---
 
@@ -161,7 +161,7 @@ Two research-relevant pieces live here:
 - **`csi_fuzzer.v`**: injects a controlled *artificial* channel response into the transmitter, the hardware behind the [CSI fuzzer](Research-Features.md#csi-fuzzer-privacy-protection) privacy feature (`tx_intf` register 5).
 - **`ht_sig_crc_calc.v`**: computes the CRC for the 802.11n HT-SIG field.
 
-Also here: `tx_bit_intf.v` (the raw-bit/PHY-level TX interface, the largest file in this core), `dac_intf.v`, `tx_iq_intf.v` (which holds the 512-sample arbitrary-IQ FIFO), and `tx_status_fifo.v`. Addressed as register space `tx_intf` (category 3); see the [tx_intf register table](sdrctl-and-Runtime-Control.md#tx_intf-fpga-tx-interface).
+Also here: `tx_bit_intf.v` (the raw-bit/PHY-level TX interface, the largest file in this core), `dac_intf.v`, `tx_iq_intf.v` (which holds the 512-sample arbitrary-IQ FIFO), and `tx_status_fifo.v`. Addressed as register space `tx_intf` (category 3). See the [tx_intf register table](sdrctl-and-Runtime-Control.md#tx_intf-fpga-tx-interface).
 
 ---
 
@@ -169,7 +169,7 @@ Also here: `tx_bit_intf.v` (the raw-bit/PHY-level TX interface, the largest file
 
 The mirror of `tx_intf`. It unpacks raw ADC samples from the AD9361 (via ADI's `axi_ad9361_adc_dma` / `util_ad9361_adc_pack`), converts them into per-antenna I/Q streams, appends FCS/sequence-number bookkeeping onto received frames (`byte_to_word_fcs_sn_insert.v`), drives status LEDs (`fcs_ok_led`), and DMAs packets plus their metadata up to the processor.
 
-The 16-byte metadata header that `rx_intf` prepends to each received packet is exactly what the driver's `openwifi_rx_interrupt()` parses: TSF timestamp, `rssi_half_db`, AGC status, length, rate index, and the FCS-OK bit. It also exposes 8 debug `trigger_out` signals and supports the FPGA-internal loopback path (`rx_intf` register 3 selects "IQ from `tx_intf`" instead of "IQ from the ADC") used by [self-loopback testing](Research-Features.md#self-loopback-testing). Addressed as register space `rx_intf` (category 2); source in `ip/rx_intf/src/` (11 files) with an `adc_intf` testbench.
+The 16-byte metadata header that `rx_intf` prepends to each received packet is exactly what the driver's `openwifi_rx_interrupt()` parses: TSF timestamp, `rssi_half_db`, AGC status, length, rate index, and the FCS-OK bit. It also exposes 8 debug `trigger_out` signals and supports the FPGA-internal loopback path (`rx_intf` register 3 selects "IQ from `tx_intf`" instead of "IQ from the ADC") used by [self-loopback testing](Research-Features.md#self-loopback-testing). Addressed as register space `rx_intf` (category 2), with source in `ip/rx_intf/src/` (11 files) and an `adc_intf` testbench.
 
 ---
 
@@ -187,4 +187,4 @@ Its inputs (read directly from `side_ch.v` / `side_ch_control.v`) tell the story
 
 ## How a register write reaches a core
 
-Tying it back to the control plane: when you run `sdrctl dev sdr0 set reg xpu 11 16`, the value travels an `nl80211` testmode message → `openwifi_testmode_cmd()` in the driver → the per-core driver API (`xpu_api->reg_write`) → an AXI-Lite write to `slv_reg11` in `xpu_s_axi.v`. The register *category* number is fixed across the whole stack: `rf`=1, `rx_intf`=2, `tx_intf`=3, `rx`=4, `tx`=5, `xpu`=6, and the driver-shadow spaces `drv_rx`=7, `drv_tx`=8, `drv_xpu`=9. The [sdrctl page](sdrctl-and-Runtime-Control.md) documents the registers themselves; this page is what they connect to.
+Tying it back to the control plane: when you run `sdrctl dev sdr0 set reg xpu 11 16`, the value travels an `nl80211` testmode message → `openwifi_testmode_cmd()` in the driver → the per-core driver API (`xpu_api->reg_write`) → an AXI-Lite write to `slv_reg11` in `xpu_s_axi.v`. The register *category* number is fixed across the whole stack: `rf`=1, `rx_intf`=2, `tx_intf`=3, `rx`=4, `tx`=5, `xpu`=6, and the driver-shadow spaces `drv_rx`=7, `drv_tx`=8, `drv_xpu`=9. The [sdrctl page](sdrctl-and-Runtime-Control.md) documents the registers themselves. This page is what they connect to.

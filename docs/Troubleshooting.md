@@ -1,6 +1,6 @@
 # Troubleshooting and Known Issues
 
-Grouped by symptom. When networking won't come up at all, reach for a **USB-UART serial console**; it shows you the boot messages that ssh can't. The authoritative, continuously updated list is the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md); this page reorganizes it and adds the debugging tools.
+Grouped by symptom. When networking won't come up at all, reach for a **USB-UART serial console**. It shows you the boot messages that ssh can't. The authoritative, continuously updated list is the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md). This page reorganizes it and adds the debugging tools.
 
 ## Boot and networking
 
@@ -18,7 +18,7 @@ Seen on neptunesdr. The flashing tool is suspect, so re-flash with a different o
 
 ### ZCU102 kernel panic: "Unable to mount root fs on unknown-block(179,2)"
 
-The same SD card boots on some ZCU102 units but not others; the SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed:
+The same SD card boots on some ZCU102 units but not others. The SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed:
 
 ```
 xlnx,has-cd = <0x1>;
@@ -58,7 +58,7 @@ service isc-dhcp-server restart
 
 ### Big packet loss at slow ping, but fine at fast ping
 
-The *other* device's Wi-Fi power save is the usual culprit; it sleeps between your infrequent packets. Turn it off on that device:
+The *other* device's Wi-Fi power save is the usual culprit, because it sleeps between your infrequent packets. Turn it off on that device:
 
 ```bash
 iw dev wlan0 get power_save
@@ -122,7 +122,7 @@ ForwardToWall=no
 
 ### Instability after a long uptime
 
-`lightdm` has a memory leak; disable it via `systemctl` if you don't need the desktop.
+`lightdm` has a memory leak. Disable it via `systemctl` if you don't need the desktop.
 
 ## Build-host problems
 
@@ -150,7 +150,7 @@ The default is `libtinfo6`. Install `libtinfo5` manually (see [FPGA Development 
 
 ### No UART output on ZCU102 under OpenWrt
 
-Support was validated only on **ZCU102 HW Rev 1.1**, and even then some 4 GB SODIMM modules fail with the U-Boot SPL bootflow. Known-good module: `MTA8ATF51264HZ-2G6B1`; known-failing: `MTA4ATF51264HZ-2G6E1`. The robust fix is to use the **Zynq FSBL instead of U-Boot SPL** (FSBL reads the module's SPD EEPROM and configures DDR correctly), via the repo's `build_zynqmp_boot_bin.sh` or by generating `boot.bin` yourself with OpenWrt-built components. Full analysis is in the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md#no-uart-output-on-zcu102).
+Support was validated only on **ZCU102 HW Rev 1.1**, and even then some 4 GB SODIMM modules fail with the U-Boot SPL bootflow. Known-good module: `MTA8ATF51264HZ-2G6B1`. Known-failing: `MTA4ATF51264HZ-2G6E1`. The robust fix is to use the **Zynq FSBL instead of U-Boot SPL** (FSBL reads the module's SPD EEPROM and configures DDR correctly), via the repo's `build_zynqmp_boot_bin.sh` or by generating `boot.bin` yourself with OpenWrt-built components. Full analysis is in the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md#no-uart-output-on-zcu102).
 
 ## Debugging tools
 
@@ -163,7 +163,7 @@ Turn on per-event driver prints (then read them with `dmesg`):
 ./sdrctl dev sdr0 set reg drv_rx 7 X
 ```
 
-`X` is a bitmask: bit0 = errors, bit1 = regular unicast messages (`openwifi_tx`/`openwifi_tx_interrupt`/`openwifi_rx_interrupt`), bit2 = broadcast messages, bit3 = queue stop/wake messages. E.g. `3` = errors + unicast; `1` = errors only. Search `printk` in `sdr.c` to see every print point.
+`X` is a bitmask: bit0 = errors, bit1 = regular unicast messages (`openwifi_tx`/`openwifi_tx_interrupt`/`openwifi_rx_interrupt`), bit2 = broadcast messages, bit3 = queue stop/wake messages. So `3` = errors + unicast, and `1` = errors only. Search `printk` in `sdr.c` to see every print point.
 
 **Reading a TX print:**
 
@@ -171,7 +171,15 @@ Turn on per-event driver prints (then read them with `dmesg`):
 openwifi_tx: 70B RC0 10M FC0040 DI0000 ADDRffff.../6655443322aa/ffff... flag4001201e QoS00 SC20_1 retr1 ack0 prio0 q0 wr19 rd18
 ```
 
-`70B` = length; `10M` = requested rate (1 Mbps 11b, which openwifi converts to 6 Mbps OFDM); `FC0040` = Frame Control; `ADDR` = addr1/2/3; `SC20_1` = sequence number 20, set by the driver; `retr1` = no retransmission needed (`retrN` = up to N transmissions); `ack0` = no ACK needed; `prio0`/`q0` = Linux priority / FPGA queue; `wr19 rd18` = ring write/read indices.
+- `70B` = length
+- `10M` = requested rate (1 Mbps 11b, which openwifi converts to 6 Mbps OFDM)
+- `FC0040` = Frame Control
+- `ADDR` = addr1/2/3
+- `SC20_1` = sequence number 20, set by the driver
+- `retr1` = no retransmission needed (`retrN` = up to N transmissions)
+- `ack0` = no ACK needed
+- `prio0`/`q0` = Linux priority / FPGA queue
+- `wr19 rd18` = ring write/read indices
 
 **Reading a TX-interrupt print:**
 
@@ -179,7 +187,12 @@ openwifi_tx: 70B RC0 10M FC0040 DI0000 ADDRffff.../6655443322aa/ffff... flag4001
 openwifi_tx_interrupt: tx_result [nof_retx 1 pass 1] SC20 prio0 q0 wr20 rd19 num_slot0 cw0 hwq len... no_room_flag0
 ```
 
-`nof_retx 1` = one transmission total; `pass 1` = ACK received; `num_slot` = CSMA slots waited; `cw` = contention-window exponent (6 ⇒ CW 64; 0 ⇒ never contended); `hwq len` = current FPGA queue length; `no_room_flag` = FPGA queue DMA nearly full.
+- `nof_retx 1` = one transmission total
+- `pass 1` = ACK received
+- `num_slot` = CSMA slots waited
+- `cw` = contention-window exponent (6 ⇒ CW 64, 0 ⇒ never contended)
+- `hwq len` = current FPGA queue length
+- `no_room_flag` = FPGA queue DMA nearly full
 
 **Reading an RX print:**
 
@@ -187,7 +200,12 @@ openwifi_tx_interrupt: tx_result [nof_retx 1 pass 1] SC20 prio0 q0 wr20 rd19 num
 openwifi_rx: 270B ht0aggr0/0 sgi0 240M FC0080 DI0000 ADDR.../00c88b113f5f/00c88b113f5f SC2133 fcs1 buf_idx10 -78dBm
 ```
 
-`ht0` = legacy 11a/g (`ht1` = 11n); `aggr0/0` = not from an AMPDU / not the last AMPDU subframe; `sgi0` = normal guard interval; `240M` = 24 Mbps; `fcs1` = CRC OK (`fcs0` = bad); `-78dBm` = calibrated signal strength.
+- `ht0` = legacy 11a/g (`ht1` = 11n)
+- `aggr0/0` = not from an AMPDU / not the last AMPDU subframe
+- `sgi0` = normal guard interval
+- `240M` = 24 Mbps
+- `fcs1` = CRC OK (`fcs0` = bad)
+- `-78dBm` = calibrated signal strength
 
 ### Native Linux tools
 

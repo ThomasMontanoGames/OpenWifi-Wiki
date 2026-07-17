@@ -10,7 +10,7 @@ openwifi runs on a range of **Xilinx Zynq-7000 / Zynq UltraScale+ (MPSoC)** SoC 
 | `board_name` | Hardware | SoC | Vivado license required? | Notes |
 |---|---|---|---|---|
 | `zc706_fmcs2` | Xilinx ZC706 + AD-FMCOMMS2/3/4 | Zynq-7045 | **Yes** | High-end dev board, 100/200 MHz BB clock options |
-| `zed_fmcs2` | Avnet/Digilent ZedBoard + AD-FMCOMMS2/3/4 | Zynq-7020 | No | The classic reference board; fully tested |
+| `zed_fmcs2` | Avnet/Digilent ZedBoard + AD-FMCOMMS2/3/4 | Zynq-7020 | No | The classic reference board, fully tested |
 | `zc702_fmcs2` | Xilinx ZC702 + AD-FMCOMMS2/3/4 | Zynq-7020 | No | |
 | `zcu102_fmcs2` | Xilinx ZCU102 + AD-FMCOMMS2/3/4 | **Zynq UltraScale+ (64-bit)** | **Yes** | The main 64-bit board, needs ATF/PMUFW boot stages, 240/100 MHz BB clock |
 | `adrv9364z7020` | ADRV9364-Z7020 SoM + ADRV1CRR-BOB carrier | Zynq-7020 | No | Integrated AD9364 (single RX/TX) |

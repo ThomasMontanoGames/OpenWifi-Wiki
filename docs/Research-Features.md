@@ -238,7 +238,7 @@ The same note carries two further quick starts that capture the board's **own TX
 
 <figure markdown>
 ![Dual-antenna collision-capture setup](assets/img/iq_2ant-setup.png){ width="520" }
-<figcaption>Setup: the main antenna (rx0) handles comms and capture; a second monitoring antenna (rx1), placed near the peer, catches collisions.</figcaption>
+<figcaption>Setup: the main antenna (rx0) handles comms and capture, while a second monitoring antenna (rx1), placed near the peer, catches collisions.</figcaption>
 </figure>
 
 ![Dual-antenna capture: rx0 (main) vs rx1 (monitoring)](assets/img/iq_2ant-screen-shot.jpg)

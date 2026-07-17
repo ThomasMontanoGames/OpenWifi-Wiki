@@ -5,7 +5,7 @@ openwifi presents a normal Linux Wi-Fi interface (`sdr0`), so you drive it with 
 A few reminders that apply to every mode:
 
 - Mount the TX and RX antennas as close to perpendicular as you can, since good TX/RX isolation matters.
-- The **ADRV9361-Z7035 has very low 5 GHz TX power**; keep nodes close on that board.
+- The **ADRV9361-Z7035 has very low 5 GHz TX power**, so keep nodes close on that board.
 - Any ssh session below can instead be a USB-UART serial console.
 
 ## Access Point

@@ -12,7 +12,7 @@ It's a full-stack Wi-Fi *design* that runs on FPGA-based SDR hardware, not (yet)
 
 ### Does it do MIMO or 40 MHz?
 
-Not in the open-source release. openwifi's 11n implements 52 subcarriers, 5/6 coding, and 400 ns short guard interval, for a theoretical 72.2 Mbps single-stream. MIMO, 40 MHz bandwidth, and A-MSDU are **not** supported; A-MPDU aggregation is available experimentally (`./wgd.sh 1`). For context, full 11n (4×4 MIMO + 40 MHz) tops out at 600 Mbps, but openwifi targets the single-stream 20 MHz subset.
+Not in the open-source release. openwifi's 11n implements 52 subcarriers, 5/6 coding, and 400 ns short guard interval, for a theoretical 72.2 Mbps single-stream. MIMO, 40 MHz bandwidth, and A-MSDU are **not** supported. A-MPDU aggregation is available experimentally (`./wgd.sh 1`). For context, full 11n (4×4 MIMO + 40 MHz) tops out at 600 Mbps, but openwifi targets the single-stream 20 MHz subset.
 
 ### Why won't my 2.4 GHz phone connect, but 5 GHz works?
 
@@ -76,8 +76,8 @@ openwifi underpins a large and growing body of research across several themes. A
 
 - **The founding paper:** Jiao et al., *openwifi: a free and open-source IEEE802.11 SDR implementation on SoC*, VTC2020-Spring.
 - **CSI sensing & privacy:** the CSI fuzzer work (ACM WiSec 2021) and *Privacy Protection in WiFi Sensing via CSI Fuzzing*.
-- **Real-time / TDD:** a line of work on self-interference-free operation and critical TDD turnaround (WoWMoM 2022; Computer Communications 2023).
-- **Wi-Fi 6 / OFDMA:** experimental OFDMA and cross-technology interference studies (INFOCOM 2024; EuCNC 2025) and a best-paper award at ACM WiNTECH 2025 on coordinated OFDMA with fiber backhaul.
+- **Real-time / TDD:** a line of work on self-interference-free operation and critical TDD turnaround (WoWMoM 2022, Computer Communications 2023).
+- **Wi-Fi 6 / OFDMA:** experimental OFDMA and cross-technology interference studies (INFOCOM 2024, EuCNC 2025) and a best-paper award at ACM WiNTECH 2025 on coordinated OFDMA with fiber backhaul.
 - **HLS transceiver design:** accelerating FPGA Wi-Fi prototyping via High-Level Synthesis (FCCM 2023).
 - **LLMs for hardware:** case studies using large language models to help develop FPGA/wireless systems.
 
@@ -100,7 +100,7 @@ A curated playlist lives in [`doc/videos.md`](https://github.com/open-sdr/openwi
 
 ## License
 
-Dual-licensed: **AGPLv3** for open source, with commercial/advanced licensing via [openwifi.tech](https://openwifi.tech). Some files are GPL-2.0-or-later or BSD-3-Clause, so check individual files. Third-party components (Analog Devices HDL, Xilinx IP, openofdm) carry their own licenses; it's your responsibility to comply for your use case. Analog Devices' [compound-license explanation](https://github.com/analogdevicesinc/hdl/blob/master/LICENSE) is a useful model for the situation.
+Dual-licensed: **AGPLv3** for open source, with commercial/advanced licensing via [openwifi.tech](https://openwifi.tech). Some files are GPL-2.0-or-later or BSD-3-Clause, so check individual files. Third-party components (Analog Devices HDL, Xilinx IP, openofdm) carry their own licenses, and it's your responsibility to comply for your use case. Analog Devices' [compound-license explanation](https://github.com/analogdevicesinc/hdl/blob/master/LICENSE) is a useful model for the situation.
 
 ## Funding and origin
 
