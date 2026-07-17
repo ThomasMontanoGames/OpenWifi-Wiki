@@ -2,7 +2,7 @@
 
 This page covers building and modifying the FPGA design in the [openwifi-hw](https://github.com/open-sdr/openwifi-hw) repository: full bitstream builds, editing and simulating individual IP cores, conditional compilation, changing the baseband clock, migrating to new Vivado/ADI releases, and porting to a new board.
 
-openwifi's FPGA design is built **on top of the [Analog Devices HDL reference designs](https://github.com/analogdevicesinc/hdl)**: openwifi adds its own IP cores and modifications to ADI's board projects. For anything that isn't openwifi-specific, the ADI wiki is often the fastest source of answers.
+The design is built **on top of the [Analog Devices HDL reference designs](https://github.com/analogdevicesinc/hdl)** (see the [FPGA overview](FPGA/index.md) for how that fits together and where the [IP Cores](FPGA-IP-Cores.md) reference picks up). For anything that isn't openwifi-specific, the ADI wiki is often the fastest source of answers.
 
 ## Prerequisites
 

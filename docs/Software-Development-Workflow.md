@@ -6,6 +6,27 @@ The prebuilt SD image may be older than the current repo, so **copy the latest `
 
 If you are in the middle of editing code and just want the steps, start with the [quick reference](#quick-reference-from-code-change-to-running-board) below and follow its links for detail.
 
+## Environment setup
+
+Most host-side build steps expect these environment variables (use absolute paths):
+
+```bash
+export XILINX_DIR=/opt/Xilinx                 # dir containing Vitis/, Vivado/, etc.
+export OPENWIFI_HW_IMG_DIR=/path/to/openwifi-hw-img
+export BOARD_NAME=zed_fmcs2                    # your board
+export ARCH_BIT=32                             # 32 for Zynq-7000, 64 for Zynq UltraScale+ (e.g. ZCU102)
+```
+
+For driver builds you also need Vivado/Vitis installed (the driver is cross-compiled with the kernel toolchain) and a few packages:
+
+```bash
+sudo apt install flex bison libssl-dev device-tree-compiler u-boot-tools -y
+```
+
+Throughout, **`ARCH_BIT`** is `32` for Zynq-7000 boards and `64` for Zynq UltraScale+ boards (e.g. the ZCU102).
+
+For the exact toolchain, kernel, and image versions these builds expect, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
+
 ## Quick reference: from code change to running board
 
 Keep this section open while you work. Find the row that matches what you changed. Each row links to the full instructions. The commands assume the usual setup: sources on your PC, the board reachable at `192.168.10.122`, and the [environment variables](#environment-setup) set.
@@ -39,27 +60,6 @@ The most common cycle is changing driver code and testing it on the board. Once 
 6. Reloading recreates `sdr0` from scratch, so restart whatever mode you were in: AP (`hostapd` / `fosdem.sh`), client (`wpa_supplicant`), or your monitor-mode setup ([Operating Modes](Operating-Modes.md)).
 
 For print-style debugging, add `printk` calls in the driver and watch them live on the board with `dmesg -w` in a second ssh session.
-
-## Environment setup
-
-Most host-side build steps expect these environment variables (use absolute paths):
-
-```bash
-export XILINX_DIR=/opt/Xilinx                 # dir containing Vitis/, Vivado/, etc.
-export OPENWIFI_HW_IMG_DIR=/path/to/openwifi-hw-img
-export BOARD_NAME=zed_fmcs2                    # your board
-export ARCH_BIT=32                             # 32 for Zynq-7000, 64 for Zynq UltraScale+ (e.g. ZCU102)
-```
-
-For driver builds you also need Vivado/Vitis installed (the driver is cross-compiled with the kernel toolchain) and a few packages:
-
-```bash
-sudo apt install flex bison libssl-dev device-tree-compiler u-boot-tools -y
-```
-
-Throughout, **`ARCH_BIT`** is `32` for Zynq-7000 boards and `64` for Zynq UltraScale+ boards (e.g. the ZCU102).
-
-For the exact toolchain, kernel, and image versions these builds expect, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
 
 ## Rebuilding the driver
 
