@@ -140,14 +140,16 @@ nav:
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
   - Developing:
       - Environment Setup: Development-Environment-Setup.md
-      - Software Development Workflow: Software-Development-Workflow.md
-      - Building SD Images: Building-SD-Images.md
-      - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
-      - The Linux Driver: Driver-Architecture.md
+      - Software:
+          - Software/index.md
+          - Workflow: Software-Development-Workflow.md
+          - The Linux Driver: Driver-Architecture.md
       - FPGA:
           - FPGA/index.md
           - Development: FPGA-Development.md
           - IP Cores: FPGA-IP-Cores.md
+      - Building SD Images: Building-SD-Images.md
+      - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
   # The short tab label ("Research") comes from the section name, while the
   # sidebar entries derive their full titles from each page's H1, so the key
   # "CSI/IQ" wording stays visible without a hand-maintained nav label.
