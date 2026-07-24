@@ -247,7 +247,7 @@ The guard interval is the cyclic prefix between OFDM symbols. It exists to absor
 <figcaption>The same OFDM symbols with the normal 800 ns and the short 400 ns guard interval. Figure from the openwifi 802.11n app note.</figcaption>
 </figure>
 
-openwifi's PHY handles 400 ns short-GI frames in both directions, and short GI is what lifts MCS 7 from 65 to 72.2 Mbps. But there's a subtlety in the driver: it only *advertises* short-GI support to peers when `test_mode` **bit 1** is set. The code comment says short GI "seems to bring unnecessary stability issue", so by default a negotiated link runs with the normal 800 ns GI and tops out at 65 Mbps.[^sdrc]
+openwifi's PHY handles 400 ns short-GI frames in both directions, and short GI is what lifts MCS 7 from 65 to 72.2 Mbps. The driver adds a subtlety, though: it only *advertises* short-GI support to peers when `test_mode` **bit 1** is set. The code comment says short GI "seems to bring unnecessary stability issue", so by default a negotiated link runs with the normal 800 ns GI and tops out at 65 Mbps.[^sdrc]
 
 ```bash
 ./wgd.sh 2        # advertise short GI only
@@ -310,7 +310,7 @@ Traces of the plan are visible in the open driver: the rate-override register ma
 
 ### What Wi-Fi 6 would add on this hardware
 
-The generation names state the intent. 802.11n is *high throughput*, 802.11ax is *high efficiency*. Wi-Fi 4 made a single link faster. Wi-Fi 6 mostly makes a busy channel more useful: many stations, small packets, and latency-sensitive traffic instead of one fast file transfer. And unlike Wi-Fi 5, its features don't depend on wide channels or many antennas, so they remain meaningful on this hardware. At 20 MHz with a single stream, the two generations compare like this:[^std]
+The generation names state the intent. 802.11n is *high throughput*, 802.11ax is *high efficiency*. Wi-Fi 4 made a single link faster. Wi-Fi 6 mostly makes a busy channel more useful: many stations, small packets, and latency-sensitive traffic instead of one fast file transfer. Unlike Wi-Fi 5, its features don't depend on wide channels or many antennas, so they remain meaningful on this hardware. At 20 MHz with a single stream, the two generations compare like this:[^std]
 
 | | Wi-Fi 4 (802.11n) | Wi-Fi 6 (802.11ax) |
 |---|---|---|

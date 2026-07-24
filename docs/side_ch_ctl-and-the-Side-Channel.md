@@ -236,10 +236,10 @@ In IQ mode, register 8 picks the one condition that fires a capture. `./side_ch_
 | 30 | TX starts while antenna 1's I amplitude exceeds the threshold |
 | 31 | As 30, for a packet that needs an ACK |
 
-Three things worth knowing before you rely on this table:
+Four things worth knowing before you rely on this table:
 
 - **Free-run is trigger 0 only.** `wh8d0` alone still waits for a decode. Pair it with `wh5d1` to stream continuously.
-- **Trigger 25 reinterprets the match bits.** Registers 1's bit13/bit14 still mean addr1/addr2 match, but bit12 selects a **phy_type** match here rather than a Frame Control match.
+- **Trigger 25 reinterprets the match bits.** Register 1's bit13/bit14 still mean addr1/addr2 match, but bit12 selects a **phy_type** match here rather than a Frame Control match.
 - **Reg 4 bit4 works the other way around for trigger 3.** For triggers 22, 23, 26, 27, and 31 the bit *removes* the needs-ACK requirement, as its name (`disable_tx_pkt_need_ack_check`) suggests. Trigger 3 defaults to firing on *every* transmission, and setting the bit *adds* the requirement, narrowing the capture to packets that expect an ACK.
 - **Capturing your own signal off the air needs the receiver unmuted.** openwifi mutes the RX baseband during its own transmission, so a TX trigger with IQ source 0 (received IQ) records silence. Unmute it first: `./sdrctl dev sdr0 set reg xpu 1 1`.
 

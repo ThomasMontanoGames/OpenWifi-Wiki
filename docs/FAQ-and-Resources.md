@@ -59,7 +59,7 @@ If you use openwifi in research, cite the VTC2020 paper:
 }
 ```
 
-Or cite the code base:
+You can also cite the code base:
 
 ```bibtex
 @electronic{openwifigithub,
