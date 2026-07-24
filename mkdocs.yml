@@ -168,6 +168,6 @@ nav:
       - Troubleshooting: Troubleshooting.md
       - Glossary: Glossary.md
       - FAQ & Resources: FAQ-and-Resources.md
-      - Contributing: Contributing.md
+      - Contributing to openwifi: Contributing-to-openwifi.md
   - openwifi source ↗: https://github.com/open-sdr/openwifi
   - Releases ↗: https://github.com/open-sdr/openwifi/releases

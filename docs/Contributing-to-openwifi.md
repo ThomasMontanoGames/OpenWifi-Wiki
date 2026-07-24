@@ -1,6 +1,6 @@
-# Contributing
+# Contributing to openwifi
 
-openwifi is an open project and welcomes contributions: driver fixes, FPGA improvements, new board support, and documentation. This page covers the one legal prerequisite (the CLA), how to set up a development environment, which repository a change belongs in, and where to reach the community. Each repo's own `CONTRIBUTING.md` is the authoritative source.
+openwifi is an open project and welcomes contributions: driver fixes, FPGA improvements, new board support, and documentation. This page covers the one legal prerequisite (the CLA), how to set up a development environment, which repository a change belongs in, and where to reach the community. Each repo's own `CONTRIBUTING.md` is the authoritative source. For changes to this wiki rather than to openwifi, see [Contributing to this wiki](#contributing-to-this-wiki) at the end of this page.
 
 ## 1. Sign the CLA first
 
@@ -55,4 +55,4 @@ openwifi is dual-licensed: **AGPLv3** for the open-source release, with commerci
 
 ## Contributing to this wiki
 
-This wiki rewrites and reorganizes the documentation in the openwifi repositories. It is not (yet) the project's official documentation, and the repositories are always the source of truth. If the wiki and a repo disagree, trust the repo, and fixing the wiki to match is itself a welcome contribution. The wiki lives in its own repository and is edited via pull request there. The pages are plain Markdown built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), and `mkdocs build --strict` must pass (it fails on any broken internal link).
+This wiki rewrites and reorganizes the documentation in the openwifi repositories. It is not the project's official documentation, and the repositories are always the source of truth. If the wiki and a repo disagree, trust the repo, and fixing the wiki to match is itself a welcome contribution. The wiki lives in its own repository and is edited via pull request there. The pages are plain Markdown built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), and `mkdocs build --strict` must pass.
