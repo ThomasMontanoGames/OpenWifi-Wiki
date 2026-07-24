@@ -1,8 +1,8 @@
 site_name: openwifi Wiki
 site_description: Documentation for openwifi, the free and open-source, Linux mac80211-compatible, full-stack IEEE 802.11 implementation on SDR hardware.
-site_url: https://thomasmontanogames.github.io/OpenWifi-Wiki/
-repo_url: https://github.com/ThomasMontanoGames/OpenWifi-Wiki
-repo_name: ThomasMontanoGames/OpenWifi-Wiki
+site_url: https://thomas-montano.github.io/OpenWifi-Wiki/
+repo_url: https://github.com/thomas-montano/OpenWifi-Wiki
+repo_name: thomas-montano/OpenWifi-Wiki
 edit_uri: edit/master/docs/
 
 # Shown in the footer on every page. Keep this line evergreen. The date of
@@ -62,8 +62,15 @@ theme:
 # Make `mkdocs build --strict` fail on links to missing anchors, not just
 # missing pages (the default only validates the page half of a link).
 validation:
+  # A page that exists in docs/ but was never listed in the nav is invisible
+  # on the site, so treat it the same as a broken link.
+  nav:
+    omitted_files: warn
   links:
     anchors: warn
+    # An absolute link like /Software/ breaks under the /OpenWifi-Wiki/
+    # subpath this site is served from. Links between pages must be relative.
+    absolute_links: warn
 
 extra_css:
   - assets/stylesheets/extra.css
