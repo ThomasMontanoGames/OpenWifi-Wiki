@@ -122,11 +122,15 @@
 .md-typeset table:not([class]) tbody tr:hover {
   background: color-mix(in srgb, var(--md-accent-fg-color) 7%, transparent);
 }
-/* Keep code tokens (board names, register names) on one line so a column
-   is never squeezed narrower than its content and clips a character. The
-   table scrolls horizontally instead if it runs out of room. */
+/* Keep a single code token (board name, register name, path) on one line so
+   a column is never squeezed narrower than its content and clips a
+   character. `overflow-wrap: normal` is what enforces that: a token with no
+   spaces stays whole and the table scrolls horizontally instead. Multi-word
+   code, like a quoted error message, may still wrap at its spaces, so one
+   long span cannot claim half the table and squeeze the other columns. */
 .md-typeset table:not([class]) code {
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: normal;
 }
 
 /* ---- Code ---- */
