@@ -111,7 +111,7 @@ Receive does not use a descriptor ring in the same way. The driver allocates a *
 
 The rate field at offset 14 is packed. The low 5 bits are the rate index (valid range 8 to 23), where bit 4 doubles as the HT flag, so an index of 16 or above means 802.11n. Bit 5 is short guard interval, bit 6 is A-MPDU aggregation, bit 7 marks the last subframe of an aggregate, and the high byte carries the measured phase offset.
 
-**The FCS-OK bit is not in the header.** It is the top bit (`0x80`) of the *last byte of the frame payload*, at offset `16 + len - 1`. This catches people out when writing custom parsers.
+**The FCS-OK bit is not in the header.** It is the top bit (`0x80`) of the *last byte of the frame payload*, at offset `16 + len - 1`. This is easy to miss when writing a custom parser.
 
 The driver then converts `rssi_half_db` into dBm using the per-band and per-channel `rssi_correction` value, and hands the frame plus its metadata to Linux with `ieee80211_rx_irqsafe()`. The packet-exist flag at offset 10 is how the handler knows whether a slot actually holds a new packet, since the FPGA writes into the buffer asynchronously.
 

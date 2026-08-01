@@ -78,7 +78,7 @@ You never have to guess which build you have. Register 22 reports it:
 
 ## Command format
 
-`side_ch_ctl` takes its instructions as a single **parameter string**: one argument, no spaces, no separators between the fields. That's why the commands look like line noise until you know where the breaks fall. Every string is one of three actions:
+`side_ch_ctl` takes its instructions as a single **parameter string**: one argument, no spaces, no separators between the fields. That is why the commands are hard to read until you know where the fields break. Every string is one of three actions:
 
 ```bash
 ./side_ch_ctl whXdY     # write register X with decimal value Y
@@ -117,7 +117,7 @@ Both radixes work on every register, so the choice is only about readability. Th
 ### What the parser accepts
 
 - **Lowercase only.** `WH3D987` is rejected. The uppercase branches exist in `side_ch_ctl.c` but are commented out.
-- **The register index must be 0–31**, else you get `Invalid register index (should be 0~31)!`. `side_ch.ko` does *not* re-check this, so this is the only thing standing between you and a write past the register file.
+- **The register index must be 0–31**, else you get `Invalid register index (should be 0~31)!`. `side_ch.ko` does *not* re-check this, so this check is the only protection against a write past the register file.
 - **The whole string must be 1–31 characters.**
 - **A malformed `g` interval falls back to 100 ms** with a warning instead of failing, so a typo like `gfoo` polls at the default rather than exiting.
 - A read needs at least 3 characters, a write at least 5 (`wh3d9` is the shortest legal write).
@@ -133,7 +133,7 @@ Two flags that appear in no app note:
 ./side_ch_ctl rh20 1                # "value only": print just the number
 ```
 
-`-s` sets the UDP destination. It defaults to **192.168.10.1**, and the port is fixed at **4000**. Any *other* extra argument turns on value-only mode, which drops the `parse:`/`tx:`/`rx:` chatter and prints the bare value. That's what you want when reading a register from a script. (The `1` above is just a convention, any extra argument works.)
+`-s` sets the UDP destination. It defaults to **192.168.10.1**, and the port is fixed at **4000**. Any *other* extra argument turns on value-only mode, which drops the `parse:`/`tx:`/`rx:` lines and prints the bare value. That's what you want when reading a register from a script. (The `1` above is just a convention, any extra argument works.)
 
 ## What `g` actually does
 
@@ -281,12 +281,12 @@ Nothing is matching or triggering. In CSI mode, reset the filter with `wh1h0001`
 
 ### A reloaded module still carries the last session's settings
 
-Reloading `side_ch.ko` does *not* return the core to a clean state. `dev_probe()` writes only registers 0, 1, 3, 4, 8, 11, and 12 (registers 3, 11, and 12 only in IQ mode), so registers 5, 6, 7, 9, 10, and 19 keep whatever you last put there. The reset it pulses through register 0 drives the capture FSM, not the register file, which clears only when the FPGA is reconfigured. Two ways this bites:
+Reloading `side_ch.ko` does *not* return the core to a clean state. `dev_probe()` writes only registers 0, 1, 3, 4, 8, 11, and 12 (registers 3, 11, and 12 only in IQ mode), so registers 5, 6, 7, 9, 10, and 19 keep whatever you last put there. The reset it pulses through register 0 drives the capture FSM, not the register file, which clears only when the FPGA is reconfigured. This causes two problems:
 
 - A leftover `wh5h4` from a loopback test still taps `tx_intf` after the reload, so the IQ quick start silently captures your own transmit instead of the air. Register 5 needs no enabling bit, so nothing else hides the mistake.
 - Going from IQ mode back to CSI mode by reloading with no `iq_len_init` leaves register 3 bit 0 **still set**, because the driver only writes that register when `iq_len_init > 0`. The FPGA stays in IQ mode while the driver frames for CSI. (Also flagged under [Unverified](#unverified-a-suspected-upstream-bug).)
 
-Write the stale registers back by hand (`wh5d0`, `wh3d0`), or reload the bitstream with `./wgd.sh` for a guaranteed clean slate.
+Write the stale registers back by hand (`wh5d0`, `wh3d0`), or reload the bitstream with `./wgd.sh` for a guaranteed clean state.
 
 ### Nothing reaches the PC
 

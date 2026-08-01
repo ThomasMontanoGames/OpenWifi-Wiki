@@ -1,6 +1,6 @@
 # Application Notes
 
-openwifi ships a set of **application notes** in [`openwifi/doc/app_notes/`](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/README.md): short, task-focused write-ups for specific scenarios and modes. Their material is woven into the thematic wiki pages (Operating Modes, Research Features, sdrctl, and so on), and this page indexes every note in one place.
+openwifi ships a set of **application notes** in [`openwifi/doc/app_notes/`](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/README.md): short, task-focused write-ups for specific scenarios and modes. Their material is spread across the thematic wiki pages (Operating Modes, Research Features, sdrctl, and so on), and this page indexes every note in one place.
 
 Each entry below expands to a short summary and the note's key figures. Use **Read more** to jump to the fuller treatment in context, or **Original note** to open the app note on GitHub.
 

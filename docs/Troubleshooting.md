@@ -1,6 +1,6 @@
 # Troubleshooting and Known Issues
 
-Grouped by symptom. When networking won't come up at all, reach for a **USB-UART serial console**. It shows you the boot messages that ssh can't. The authoritative, continuously updated list is the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md). This page reorganizes it and adds the debugging tools.
+Grouped by symptom. When networking won't come up at all, use a **USB-UART serial console**. It shows you the boot messages that ssh can't. The authoritative, continuously updated list is the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md). This page reorganizes it and adds the debugging tools.
 
 ## Boot and networking
 
@@ -58,7 +58,7 @@ service isc-dhcp-server restart
 
 ### Big packet loss at slow ping, but fine at fast ping
 
-The *other* device's Wi-Fi power save is the usual culprit, because it sleeps between your infrequent packets. Turn it off on that device:
+The *other* device's Wi-Fi power save is the usual cause, because it sleeps between your infrequent packets. Turn it off on that device:
 
 ```bash
 iw dev wlan0 get power_save

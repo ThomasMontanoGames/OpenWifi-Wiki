@@ -80,14 +80,14 @@
 *[MAC]: Medium Access Control: split in openwifi between Linux (upper) and the FPGA xpu (low).
 *[MCS]: Modulation and Coding Scheme: an index selecting modulation + code rate (openwifi supports 0-7).
 *[MIMO]: Multiple-Input Multiple-Output: multiple spatial streams (not supported in the open-source release).
-*[MPDU]: MAC Protocol Data Unit: a single 802.11 MAC frame; several MPDUs are packed together in an A-MPDU.
+*[MPDU]: MAC Protocol Data Unit: a single 802.11 MAC frame. Several MPDUs are packed together in an A-MPDU.
 *[minstrel_ht]: The default Linux mac80211 rate-control algorithm.
 *[NAV]: Network Allocation Vector: the virtual carrier-sense timer set by RTS/CTS.
 *[nl80211]: The netlink interface between user space and cfg80211 (openwifi's sdrctl uses its testmode path).
 *[OFDM]: Orthogonal Frequency-Division Multiplexing: the modulation used by 802.11a/g/n.
 *[OFDMA]: Orthogonal Frequency-Division Multiple Access: the 802.11ax feature (not in the open-source release).
 *[openofdm]: The open-source 802.11 OFDM receiver openwifi's openofdm_rx core is based on.
-*[OpenWrt]: The router-focused embedded Linux distribution; openwifi ships as an OpenWrt kernel module.
+*[OpenWrt]: The router-focused embedded Linux distribution. openwifi ships as an OpenWrt kernel module.
 *[PER]: Packet Error Rate: the fraction of packets lost or received in error.
 *[PHY]: The physical layer: modulation, coding, and RF (openofdm cores plus the AD9361).
 *[PL]: Programmable Logic: the FPGA-fabric half of a Xilinx Zynq SoC.
@@ -124,5 +124,5 @@
 *[Vitis]: Xilinx's software/HLS design tool, used alongside Vivado.
 *[wpa_supplicant]: The standard Linux client for joining Wi-Fi networks.
 *[xpu]: openwifi's real-time MAC core: CSMA/CA, TSF, hardware ACK, filtering, and TX-queue gating.
-*[Zynq]: Xilinx SoC family combining ARM cores (PS) with FPGA fabric (PL); Zynq-7000 is 32-bit.
+*[Zynq]: Xilinx SoC family combining ARM cores (PS) with FPGA fabric (PL). Zynq-7000 is 32-bit.
 *[MPSoC]: Zynq UltraScale+ (MPSoC): Xilinx's 64-bit SoC family (ZCU102).

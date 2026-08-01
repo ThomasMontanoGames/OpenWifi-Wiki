@@ -10,7 +10,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 - An SD card, 16 GB or larger.
 - Two antennas suitable for 2.4/5 GHz (or SMA cables + at least 30 dB attenuation for conducted tests).
 - An Ethernet cable between the board and your PC.
-- Optionally a USB-UART cable for a serial console, which is invaluable when networking doesn't come up.
+- Optionally a USB-UART cable for a serial console, which helps a lot when networking doesn't come up.
 
 **Supported boards.** The most common ones are below. The full matrix, per-board hardware notes, and the GPIO/LED debug map are on the [Supported Boards](Supported-Boards.md) page.
 
@@ -38,7 +38,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 ## 2. Flash the SD card
 
 1. Download the prebuilt openwifi image linked from the [openwifi README](https://github.com/open-sdr/openwifi#download-img-and-quick-start) and unzip it to a `.img` file.
-2. Write it to the SD card with your favorite imaging tool (GNOME Disks, Startup Disk Creator, win32diskimager) or with `dd`:
+2. Write it to the SD card with an imaging tool (GNOME Disks, Startup Disk Creator, win32diskimager) or with `dd`:
 
    ```bash
    # Find the correct sector count first:

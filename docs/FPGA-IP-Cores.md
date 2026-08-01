@@ -108,7 +108,7 @@ Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) a
 
 ## `xpu`: the real-time MAC
 
-`xpu` (sometimes read as "transceiver/eXtensible processing unit") is the central core of openwifi and the largest: its register file `xpu_s_axi.v` (48 KB, 64 registers) is the biggest register bank of any core, and twice the size of the other cores' banks. It implements everything that has to happen in **microseconds** (too fast for the Linux MAC to handle), which is exactly why openwifi can meet 802.11 timing that a pure-software MAC cannot.
+`xpu` (sometimes read as "transceiver/eXtensible processing unit") is the central core of openwifi and the largest: its register file `xpu_s_axi.v` (48 KB, 64 registers) is the biggest register bank of any core, and twice the size of the other cores' banks. It implements everything that has to happen in **microseconds** (too fast for the Linux MAC to handle), which is why openwifi can meet 802.11 timing that a pure-software MAC cannot.
 
 What lives inside (`ip/xpu/src/`, 21 Verilog files):
 
@@ -175,13 +175,13 @@ The 16-byte metadata header that `rx_intf` prepends to each received packet is e
 
 ## `side_ch`: the CSI / IQ capture side channel
 
-openwifi's signature research core. `side_ch` taps into the receiver's I/Q datapath *and* the OFDM demodulator's internal results, buffers them, and streams them out over its own AXI-Stream DMA channel, completely independent of the normal packet RX/TX path. This is what lets you pull per-packet **CSI, equalizer output, frequency offset, raw IQ, AGC gain, and RSSI** up to a PC.
+This is openwifi's research capture core. `side_ch` taps into the receiver's I/Q datapath *and* the OFDM demodulator's internal results, buffers them, and streams them out over its own AXI-Stream DMA channel, completely independent of the normal packet RX/TX path. This is what lets you pull per-packet **CSI, equalizer output, frequency offset, raw IQ, AGC gain, and RSSI** up to a PC.
 
-Its inputs (read directly from `side_ch.v` / `side_ch_control.v`) tell the story: TX-side taps (`openofdm_tx_iq0/iq1`, `tx_intf_iq0/iq1`), raw ADC-rate I/Q (`sample0_in`/`sample1_in`), demodulator status (`demod_is_ongoing`, `long/short_preamble_detected`, `ht_unsupport`, `pkt_rate`, `pkt_len`), and, critically, **`csi`/`csi_valid`** and **`equalizer`/`equalizer_valid`**, the per-subcarrier channel estimate and equalizer coefficients from the OFDM receiver. Everything is timestamped against the shared 64-bit TSF (so captures line up with packets) and tagged with RSSI.
+Its inputs (read directly from `side_ch.v` / `side_ch_control.v`) show what it can reach: TX-side taps (`openofdm_tx_iq0/iq1`, `tx_intf_iq0/iq1`), raw ADC-rate I/Q (`sample0_in`/`sample1_in`), demodulator status (`demod_is_ongoing`, `long/short_preamble_detected`, `ht_unsupport`, `pkt_rate`, `pkt_len`), and most importantly **`csi`/`csi_valid`** and **`equalizer`/`equalizer_valid`**, the per-subcarrier channel estimate and equalizer coefficients from the OFDM receiver. Everything is timestamped against the shared 64-bit TSF (so captures line up with packets) and tagged with RSSI.
 
 `side_ch_control.v` (36 KB) is the capture/trigger FSM implementing the [32 trigger conditions](side_ch_ctl-and-the-Side-Channel.md#trigger-reference-register-8). A `MAX_NUM_DMA_SYMBOL` parameter sizes the internal FIFO: 8192 normally, halved to 4096 on small FPGAs via the `SIDE_CH_LESS_BRAM` macro, which is why Zynq-7020 boards cap capture length lower.
 
-`side_ch` is the odd core out of the build in one way: it is **not** part of the main `sdr.ko` driver. It has its own kernel module `side_ch.ko` (built by `openwifi/driver/side_ch/make_driver.sh`) and its own user-space tool `side_ch_ctl`, because you load and unload it on demand rather than always running it. See [Research Features](Research-Features.md) for the full workflow, and [side_ch_ctl and the Side Channel](side_ch_ctl-and-the-Side-Channel.md) for the command grammar and the register map.
+`side_ch` differs from the other cores in one way: it is **not** part of the main `sdr.ko` driver. It has its own kernel module `side_ch.ko` (built by `openwifi/driver/side_ch/make_driver.sh`) and its own user-space tool `side_ch_ctl`, because you load and unload it on demand rather than always running it. See [Research Features](Research-Features.md) for the full workflow, and [side_ch_ctl and the Side Channel](side_ch_ctl-and-the-Side-Channel.md) for the command grammar and the register map.
 
 ---
 

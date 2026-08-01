@@ -16,7 +16,7 @@ Not in the open-source release. openwifi's 11n implements 52 subcarriers, 5/6 co
 
 ### Why won't my 2.4 GHz phone connect, but 5 GHz works?
 
-openwifi is OFDM-only and not backward-compatible with 802.11b, which trips up 2.4 GHz association. Suppress 11b rates on both ends, or just use 5 GHz. Full details: [Operating Modes → About 802.11b](Operating-Modes.md#about-80211b).
+openwifi is OFDM-only and not backward-compatible with 802.11b, which makes 2.4 GHz association fail. Suppress 11b rates on both ends, or just use 5 GHz. Full details: [Operating Modes → About 802.11b](Operating-Modes.md#about-80211b).
 
 ### Can it work outside normal Wi-Fi frequencies?
 
@@ -36,7 +36,7 @@ Yes. The imec [w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials
 
 ### Will there be an openwifi ASIC (e.g. on SkyWater sky130)?
 
-It's frequently requested, and the team is supportive but not actively working on it. The current focus is maturing the FPGA IP to match commercial chips. A Wi-Fi chip is deceptively complex (cheap only because of enormous volume).
+It's frequently requested, and the team is supportive but not actively working on it. The current focus is maturing the FPGA IP to match commercial chips. A Wi-Fi chip is more complex than it looks, and cheap only because of enormous production volume.
 
 Anyone doing a serious ASIC analysis would need to port many vendor IP cores (FFT, Viterbi, FIFO, RAM/ROM, FIR, AXI DMA/lite, dividers, multipliers) plus handle two hard parts: the AD9361 RF interface (the AD9361 is an expensive 70 MHz–6 GHz SDR front end, not a cheap dedicated Wi-Fi radio) and the AXI-bus coupling to the processor (great for latency, but platform-specific). The team welcomes a larger organization leading such an effort. Full reasoning: the [ASIC considerations note](https://github.com/open-sdr/openwifi/blob/master/doc/asic/skywater-130-pdk-and-asic-considerations.md).
 
@@ -72,7 +72,7 @@ You can also cite the code base:
 
 ## Selected publications
 
-openwifi underpins a large and growing body of research across several themes. A full, categorized list (Feature/System, TSN/Real-Time, CSI Sensing/Security, Wi-Fi & Cellular 5G/6G) is maintained in [`doc/publications.md`](https://github.com/open-sdr/openwifi/blob/master/doc/publications.md). Highlights:
+openwifi is used in a large body of research across several themes. A full, categorized list (Feature/System, TSN/Real-Time, CSI Sensing/Security, Wi-Fi & Cellular 5G/6G) is maintained in [`doc/publications.md`](https://github.com/open-sdr/openwifi/blob/master/doc/publications.md). Highlights:
 
 - **The founding paper:** Jiao et al., *openwifi: a free and open-source IEEE802.11 SDR implementation on SoC*, VTC2020-Spring.
 - **CSI sensing & privacy:** the CSI fuzzer work (ACM WiSec 2021) and *Privacy Protection in WiFi Sensing via CSI Fuzzing*.

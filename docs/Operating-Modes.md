@@ -169,4 +169,4 @@ openwifi is **OFDM-only** and therefore not backward-compatible with 802.11b. Th
   ./build_wpa_supplicant_wo11b.sh
   ```
 
-Using 5 GHz channels sidesteps the whole issue, which is why the default demo uses channel 44.
+Using 5 GHz channels avoids the issue entirely, which is why the default demo uses channel 44.

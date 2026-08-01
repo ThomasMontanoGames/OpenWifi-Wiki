@@ -114,7 +114,7 @@ The FPGA design decomposes into modules whose names match their source files (in
 - **`openofdm_rx`**: the OFDM receiver. Detects the preamble, synchronizes, estimates the channel, equalizes, and decodes (including a Xilinx Viterbi decoder). Derived from the [openofdm](https://github.com/open-sdr/openofdm) project (originally by [jhshi](https://github.com/jhshi/openofdm), with openwifi's improvements on the `dot11zynq` branch).
 - **`tx_intf`**: the transmit interface: DMA from the processor into per-queue FIFOs, the DAC feed, per-packet PHY configuration, and the four hardware TX queues.
 - **`rx_intf`**: the receive interface: takes decoded packets and side-channel data, attaches metadata (TSF timestamp, RSSI, length, MCS, FCS status), and DMAs them up to the processor.
-- **`xpu`**: the "eXtensible Processing Unit," which holds the **real-time low MAC**: the CSMA/CA state machine, NAV, DIFS/SIFS/EIFS timing, the TSF timer, hardware ACK generation and reception, retransmission, RTS/CTS, packet filtering, and the time-slicing gates for the TX queues. If a behavior has to happen in microseconds, it's in `xpu`.
+- **`xpu`**: the "eXtensible Processing Unit," which holds the **real-time low MAC**: the CSMA/CA state machine, NAV, DIFS/SIFS/EIFS timing, the TSF timer, hardware ACK generation and reception, retransmission, RTS/CTS, packet filtering, and the time-slicing gates for the TX queues. Anything that has to happen within microseconds is implemented in `xpu`.
 
 There's also a **`side_ch`** (side channel) module used for research features (CSI and IQ capture), described on the [Research Features](Research-Features.md) page.
 
@@ -217,7 +217,7 @@ openwifi drives the AD9361 in **FDD mode with identical TX and RX frequencies**,
 - **No LO leakage during receive**, so the receiver isn't self-interfered, which enables full-duplex self-reception (the basis of the CSI radar and loopback features).
 - **Fast TX/RX turnaround** (~0.6 µs), which is what makes the tight SIFS and hardware ACK timing achievable (SIFS is 10 µs in 2.4 GHz and 16 µs in 5 GHz).
 
-The AD9361↔FPGA IQ rate is 40 Msps, decimated/interpolated inside the FPGA to the 20 Msps the Wi-Fi baseband uses. Crucially, the **FPGA baseband clock is derived from the AD9361 clock**, so RF and baseband never drift relative to each other. This design (replacing the older "offset tuning" approach) is what gives openwifi its good EVM, spectral mask conformance, sensitivity, and RSSI accuracy.
+The AD9361↔FPGA IQ rate is 40 Msps, decimated/interpolated inside the FPGA to the 20 Msps the Wi-Fi baseband uses. The **FPGA baseband clock is derived from the AD9361 clock**, so RF and baseband never drift relative to each other. This design (replacing the older "offset tuning" approach) is what gives openwifi its good EVM, spectral mask conformance, sensitivity, and RSSI accuracy.
 
 ![Baseband clock derived from the AD9361 clock](assets/img/bb-clk.jpg)
 
@@ -272,7 +272,7 @@ openwifi supports **A-MPDU aggregation experimentally** (`./wgd.sh 1`, which set
 | FPGA IP cores | `openwifi-hw/ip/{openofdm_tx,openofdm_rx,tx_intf,rx_intf,xpu,side_ch}/` |
 | Board-level FPGA projects | `openwifi-hw/boards/<board_name>/` |
 
-A useful convention: a driver file and its FPGA counterpart usually share a name (`xpu.c` ↔ `xpu.v`), and each FPGA register is `slv_regN` in the `.v` file. The register tables on the [sdrctl](sdrctl-and-Runtime-Control.md) page always point back to these.
+One convention to note: a driver file and its FPGA counterpart usually share a name (`xpu.c` ↔ `xpu.v`), and each FPGA register is `slv_regN` in the `.v` file. The register tables on the [sdrctl](sdrctl-and-Runtime-Control.md) page always point back to these.
 
 ## Two communication channels between driver and user space
 

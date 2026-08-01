@@ -1,6 +1,6 @@
 # Supported Boards and Hardware
 
-openwifi runs on a range of **Xilinx Zynq-7000 / Zynq UltraScale+ (MPSoC)** SoC boards, nearly all paired with an **Analog Devices AD9361-family** RF front end (FMCOMMS2/3/4 or an integrated equivalent). The RFSoC4x2 is the exception, using the RFSoC's integrated RF data converters instead (the driver treats it as its own hardware type). This page is the reference for which boards are supported, what makes each one special, and the hardware facts you need when choosing or bringing up a board.
+openwifi runs on a range of **Xilinx Zynq-7000 / Zynq UltraScale+ (MPSoC)** SoC boards, nearly all paired with an **Analog Devices AD9361-family** RF front end (FMCOMMS2/3/4 or an integrated equivalent). The RFSoC4x2 is the exception, using the RFSoC's integrated RF data converters instead (the driver treats it as its own hardware type). This page is the reference for which boards are supported, what is specific to each one, and the hardware facts you need when choosing or bringing up a board.
 
 !!! info "The `board_name` is the key identifier"
     Every board has a short `board_name` used identically across all repos: `openwifi-hw/boards/<board_name>/`, `openwifi-hw-img/boards/<board_name>/sdk/`, and `openwifi/kernel_boot/boards/<board_name>/`. Set `export BOARD_NAME=<board_name>` before running any build script. See [Repositories](Repositories.md).
@@ -62,7 +62,7 @@ A Zynq-7020 + AD936x SDR in a **Raspberry-Pi form factor**. Notable spec: Zynq X
 ## Board bring-up quirks worth knowing up front
 
 - **ADRV9361-Z7035 low 5 GHz TX power.** Keep nodes close (or plan for attenuation) when testing this board at 5 GHz. This is called out in nearly every operating-mode walkthrough.
-- **ZCU102 is the odd one out.** It is the main 64-bit (Zynq UltraScale+) target (the RFSoC4x2 is the only other 64-bit entry in the matrix), so it uses a different boot chain (ARM Trusted Firmware BL31 + PMU firmware, built by `build_zynqmp_boot_bin.sh`), a `system.dts` instead of `devicetree.dts`, and can hit SD-card, RTC, and SODIMM-module issues (see [Troubleshooting](Troubleshooting.md)).
+- **ZCU102 differs from every other board.** It is the main 64-bit (Zynq UltraScale+) target (the RFSoC4x2 is the only other 64-bit entry in the matrix), so it uses a different boot chain (ARM Trusted Firmware BL31 + PMU firmware, built by `build_zynqmp_boot_bin.sh`), a `system.dts` instead of `devicetree.dts`, and can hit SD-card, RTC, and SODIMM-module issues (see [Troubleshooting](Troubleshooting.md)).
 - **neptunesdr** sometimes shows an `EXT4-fs error` on first boot. Re-flash with a different imaging tool.
 - **CH341-based UART adapters** (antsdr_e200 and others) may need `sudo apt remove brltty` before the console device appears.
 
@@ -80,7 +80,7 @@ Changing it requires re-running `openwifi.tcl` to regenerate the project (see [F
 
 ## Visual debugging: the GPIO/LED map
 
-openwifi-hw routes several real-time FPGA status signals to board LEDs and PMOD test points, which is invaluable for scoping the TX/RX/CSMA state machine on hardware. Two conventions are used: **flip** (the LED toggles on each event pulse, so it visibly flashes) and **raw** (the line directly mirrors the live 1/0 signal state).
+openwifi-hw routes several real-time FPGA status signals to board LEDs and PMOD test points, which makes it much easier to scope the TX/RX/CSMA state machine on hardware. Two conventions are used: **flip** (the LED toggles on each event pulse, so it visibly flashes) and **raw** (the line directly mirrors the live 1/0 signal state).
 
 On the **ZCU102**, for example, the LEDs map to:
 

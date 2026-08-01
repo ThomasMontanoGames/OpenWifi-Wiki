@@ -70,7 +70,7 @@
 }
 .md-content { max-width: none; }
 
-/* Keep body text at a comfortable measure; wide blocks are exempt below. */
+/* Keep body text at a comfortable measure. Wide blocks are exempt below. */
 .md-typeset > p,
 .md-typeset > ul,
 .md-typeset > ol {
@@ -168,7 +168,7 @@
 }
 /* Content raster images sit on a white matte so transparent line-art
    diagrams (e.g. the CSI-fuzzer figures) stay readable in dark mode. Opaque
-   screenshots are unaffected; the matte only shows through transparency.
+   screenshots are unaffected, because the matte only shows through transparency.
    Inline SVG diagrams are theme-aware <svg> elements and are excluded. */
 .md-typeset img {
   display: block;

@@ -1,6 +1,6 @@
 # CSI, IQ Capture and Research Features
 
-The research features are what set openwifi apart from a commercial card. Because the PHY is open and the platform can receive its own transmissions (full duplex), you get instrumentation that no commercial Wi-Fi chip exposes. This page covers the **side channel** (the mechanism behind CSI and IQ capture), CSI extraction, the CSI radar and CSI fuzzer, IQ capture and its many trigger conditions, loopback self-testing, and the FPGA/driver counters.
+The research features are the main thing openwifi offers that a commercial card does not. Because the PHY is open and the platform can receive its own transmissions (full duplex), you get instrumentation that no commercial Wi-Fi chip exposes. This page covers the **side channel** (the mechanism behind CSI and IQ capture), CSI extraction, the CSI radar and CSI fuzzer, IQ capture and its many trigger conditions, loopback self-testing, and the FPGA/driver counters.
 
 ## The side channel: one mechanism, two data types
 
@@ -127,7 +127,7 @@ Then on the PC, `python3 side_info_display.py 8 waterfall` shows CSI, a CSI wate
 
 ## CSI fuzzer (privacy protection)
 
-Wi-Fi CSI can be used to sense people and activity **passively and without consent** (keystrokes, presence, motion). The CSI fuzzer fights back by injecting a controlled *artificial* channel response into the transmitter, so an eavesdropper's CSI-based sensing is corrupted while normal communication continues. It's backed by peer-reviewed work ([ACM WiSec 2021](https://dl.acm.org/doi/pdf/10.1145/3448300.3468255) and a [privacy-protection paper](https://ieeexplore.ieee.org/abstract/document/10818006)).
+Wi-Fi CSI can be used to sense people and activity **passively and without consent** (keystrokes, presence, motion). The CSI fuzzer counters this by injecting a controlled *artificial* channel response into the transmitter, so an eavesdropper's CSI-based sensing is corrupted while normal communication continues. It is backed by peer-reviewed work ([ACM WiSec 2021](https://dl.acm.org/doi/pdf/10.1145/3448300.3468255) and a [privacy-protection paper](https://ieeexplore.ieee.org/abstract/document/10818006)).
 
 <figure markdown>
 ![CSI fuzzer: unauthorized sensing before vs. with the fuzzer](assets/img/csi-fuzzer-system-before-vs-now.png)
@@ -138,7 +138,7 @@ The fuzzer's principle, with the artificial CSI applied at the transmitter so it
 
 ![CSI fuzzer principle](assets/img/csi-fuzzer-principle.png)
 
-Thanks to full duplex, you can watch the artificial CSI you're creating via the same self-monitoring setup. First set up CSI self-monitoring as in [CSI radar](#csi-radar-full-duplex-self-sensing), then in another ssh session:
+Full duplex lets you watch the artificial CSI you're creating via the same self-monitoring setup. First set up CSI self-monitoring as in [CSI radar](#csi-radar-full-duplex-self-sensing), then in another ssh session:
 
 ```bash
 cd openwifi
@@ -287,7 +287,7 @@ Comprehensive per-packet TX/RX counters are on the [sdrctl page](sdrctl-and-Runt
 
 Two additional counter sources live in the FPGA:
 
-**openofdm_rx watchdog counters**: the `signal_watchdog` inside `openofdm_rx` detects abnormal signals early so the receiver isn't tied up chasing junk. Select an event with `sdrctl dev sdr0 set reg rx 17 <type>` (0 = phase offset too big, 1 = too many small equalizer outputs, 2 = DC / slow sine detected, 3 = packet too short, 4 = packet too long), read the count with `get reg rx 30`, and clear it by writing any value to reg 30.
+**openofdm_rx watchdog counters**: the `signal_watchdog` inside `openofdm_rx` detects abnormal signals early so the receiver does not spend time decoding them. Select an event with `sdrctl dev sdr0 set reg rx 17 <type>` (0 = phase offset too big, 1 = too many small equalizer outputs, 2 = DC / slow sine detected, 3 = packet too short, 4 = packet too long), read the count with `get reg rx 30`, and clear it by writing any value to reg 30.
 
 **Side-channel PHY RX/TX counters**: after `insmod side_ch.ko`, registers 26–31 count paired events (each register has two selectable sources chosen by bits in register 19), e.g. short/long preamble detected, `phy_tx_start`/`phy_tx_done`, header-valid strobes, RSSI-above-threshold, AGC lock/gain-change, and "data packet for me with good FCS." Set the addr2 target in register 7 and the RSSI-event threshold in register 9. Read a counter with `rhX`, and reset one by writing any value to registers 26–31. The exact event→register mapping is in the [FPGA counter note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/perf_counter.md).
 

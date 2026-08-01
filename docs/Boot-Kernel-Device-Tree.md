@@ -92,7 +92,7 @@ The sequence: the SoC's boot ROM loads **BOOT.BIN**, whose **FSBL** (First Stage
 
 ### 32-bit vs 64-bit boot
 
-The two SoC families build BOOT.BIN differently, which is why ZCU102 is "the odd one out":
+The two SoC families build BOOT.BIN differently, which is why the ZCU102 needs a separate build path:
 
 | | Zynq-7000 (32-bit) | Zynq UltraScale+ / MPSoC (64-bit, e.g. ZCU102) |
 |---|---|---|
@@ -319,7 +319,7 @@ insmod /root/openwifi/sdr.ko     # openwifi stack: insmod by path, like wgd.sh
 
 ## The device tree
 
-This is the heart of a board port. The **device tree** is a data structure describing the hardware (every peripheral, its register address, its interrupts, its clocks) that Linux reads at boot to know what exists. openwifi's driver is a Linux **platform driver** that binds to a device-tree node with `compatible = "sdr,sdr"`, and it learns the AXI addresses and interrupts of every FPGA core *from the device tree*. If the device tree doesn't match the FPGA build, the driver won't find the hardware (or will bind to the wrong addresses).
+This is the central piece of a board port. The **device tree** is a data structure describing the hardware (every peripheral, its register address, its interrupts, its clocks) that Linux reads at boot to know what exists. openwifi's driver is a Linux **platform driver** that binds to a device-tree node with `compatible = "sdr,sdr"`, and it learns the AXI addresses and interrupts of every FPGA core *from the device tree*. If the device tree doesn't match the FPGA build, the driver won't find the hardware (or will bind to the wrong addresses).
 
 ### How openwifi builds a board's device tree
 

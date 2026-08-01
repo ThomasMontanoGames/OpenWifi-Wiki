@@ -76,7 +76,7 @@ extra_css:
   - assets/stylesheets/extra.css
 
 extra_javascript:
-  # Opens external links (other sites) in a new tab; internal wiki links stay
+  # Opens external links (other sites) in a new tab. Internal wiki links stay
   # in the same tab so navigation.instant keeps handling them.
   - assets/javascripts/external-links.js
 

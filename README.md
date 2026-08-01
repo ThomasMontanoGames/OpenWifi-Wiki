@@ -6,7 +6,7 @@ Built with [MkDocs](https://www.mkdocs.org/) + [Material](https://squidfunk.gith
 
 ## Structure
 
-Pages live in `docs/`. Their grouping into sections and their order are defined in [`mkdocs.yml`](mkdocs.yml), which is the single source of truth for the page list; the [live site](https://thomas-montano.github.io/OpenWifi-Wiki/) shows the same structure rendered. Broadly, the pages progress from orientation (what openwifi is, the repositories, getting started, architecture, boards), through everyday use and the `sdrctl` reference, into development (build workflow, boot/kernel/device tree, the FPGA design), research features, an index of the application notes, and help and troubleshooting.
+Pages live in `docs/`. Their grouping into sections and their order are defined in [`mkdocs.yml`](mkdocs.yml), which is the single source of truth for the page list. The [live site](https://thomas-montano.github.io/OpenWifi-Wiki/) shows the same structure rendered. Broadly, the pages progress from orientation (what openwifi is, the repositories, getting started, architecture, boards), through everyday use and the `sdrctl` reference, into development (build workflow, boot/kernel/device tree, the FPGA design), research features, an index of the application notes, and help and troubleshooting.
 
 The theme and custom styling live in `mkdocs.yml` and [`docs/assets/stylesheets/extra.css`](docs/assets/stylesheets/extra.css).
 

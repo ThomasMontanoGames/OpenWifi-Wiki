@@ -91,9 +91,9 @@ cd openwifi/user_space
 
 It builds and copies onto the card:
 
-- the **kernel image**: `adi-linux-64/arch/arm64/boot/Image` (64-bit) or `adi-linux/arch/arm/boot/uImage` (32-bit);
-- the **device tree**: `kernel_boot/boards/zcu102_fmcs2/system.dtb` (64-bit) or `kernel_boot/boards/$BOARD_NAME/devicetree.dtb` (32-bit);
-- **`BOOT.BIN`**: from `kernel_boot/boards/$BOARD_NAME/output_boot_bin/BOOT.BIN`;
+- the **kernel image**: `adi-linux-64/arch/arm64/boot/Image` (64-bit) or `adi-linux/arch/arm/boot/uImage` (32-bit)
+- the **device tree**: `kernel_boot/boards/zcu102_fmcs2/system.dtb` (64-bit) or `kernel_boot/boards/$BOARD_NAME/devicetree.dtb` (32-bit)
+- **`BOOT.BIN`**: from `kernel_boot/boards/$BOARD_NAME/output_boot_bin/BOOT.BIN`
 - the openwifi **driver**, and the **`user_space` + `webserver`** files.
 
 (See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md) for how those three artifacts are built.)
@@ -281,7 +281,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 ### OpenWrt tips
 
 - **Userspace tools are pre-installed.** The openwifi package puts all `user_space` files under `/root/openwifi` (so the app-note scripts work), and installs the compiled tools (`sdrctl`, `inject_80211`, `analyze_80211`, `side_ch_ctl`) into `/usr/bin`: they're in `$PATH`, so no `./` or specific directory needed.
-- **Kernel modules are packed in.** No manual copying is needed, and `insmod side_ch` just works.
+- **Kernel modules are packed in.** No manual copying is needed, and `insmod side_ch` works directly.
 - **SSH uses mDNS:** `ssh root@openwrt.lan`, no password by default.
 - The app-note [IQ and CSI workflows](Research-Features.md) work on OpenWrt with minor differences (e.g. `insmod side_ch iq_len_init=4095`, then `side_ch_ctl` and the host-side Python display scripts as usual).
 

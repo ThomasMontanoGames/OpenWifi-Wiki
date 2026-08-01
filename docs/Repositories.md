@@ -1,6 +1,6 @@
 # The openwifi Project and Its Repositories
 
-New to openwifi? Start here. This page explains **what the project is made of**, **why it is split across several repositories**, and, most usefully, **where to look when you need to find something**. Once the repository map makes sense, everything else on this wiki has an obvious home.
+New to openwifi? Start here. This page explains **what the project is made of**, **why it is split across several repositories**, and, most usefully, **where to look when you need to find something**. Once the repository map makes sense, the rest of this wiki is easier to place.
 
 ## The one-sentence version
 
@@ -95,7 +95,7 @@ The two you will clone and work with day to day are **openwifi** and **openwifi-
 ## How the pieces fit at build and run time
 
 - **At run time**, only the `openwifi` repo's artifacts run on the board: the FPGA bitstream (`system_top.bit.bin`), the kernel driver (`sdr.ko` and friends), and the user-space tools. The bitstream originally came from `openwifi-hw` (or was downloaded from `openwifi-hw-img`).
-- **At build time**, the driver must agree with the FPGA on the **register map**. That contract is expressed in two mirror-image places: `openwifi/driver/hw_def.h` (the addresses the driver writes) and each core's `*_s_axi.v` in `openwifi-hw/ip/` (the registers the FPGA implements). A driver file and its FPGA counterpart usually even share a name (`xpu.c` ↔ `xpu.v`). This is why the two repos are versioned together in spirit even though they are separate in git.
+- **At build time**, the driver must agree with the FPGA on the **register map**. That contract is expressed in two mirror-image places: `openwifi/driver/hw_def.h` (the addresses the driver writes) and each core's `*_s_axi.v` in `openwifi-hw/ip/` (the registers the FPGA implements). A driver file and its FPGA counterpart usually even share a name (`xpu.c` ↔ `xpu.v`). This is why the two repos are versioned together even though they are separate in git.
 - **The submodule chain**: `openwifi-hw` pulls in two submodules. [`analogdevicesinc/hdl`](https://github.com/analogdevicesinc/hdl) (the Analog Devices FPGA reference design openwifi is built on top of, pinned to tag `2022_R2`) sits at `adi-hdl/`, and `openofdm` (branch `dot11zynq`) sits at `ip/openofdm_rx/`. A fresh `openwifi-hw` clone has these as **empty directories** until you run `./prepare_adi_lib.sh` and `./get_ip_openofdm_rx.sh` (or `git submodule update --init`).
 
 ## Versions this wiki targets
@@ -171,7 +171,7 @@ openwifi/
 
 ```
 openwifi-hw/
-├── ip/                # the custom openwifi IP cores (the heart of the design)
+├── ip/                # the custom openwifi IP cores
 │   ├── xpu/                # real-time MAC: CSMA/CA, ACK, TSF, TX-queue gating, RSSI/CCA
 │   ├── openofdm_tx/        # 802.11 OFDM transmitter (IFFT, FEC, modulation, preambles)
 │   ├── openofdm_rx/        # 802.11 OFDM receiver (submodule → openofdm, dot11zynq branch)
