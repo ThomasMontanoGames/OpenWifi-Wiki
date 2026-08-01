@@ -1,6 +1,6 @@
 # The openwifi Project and Its Repositories
 
-New to openwifi? Start here. This page explains **what the project is made of**, **why it is split across several repositories**, and, most usefully, **where to look when you need to find something**. Once the repository map makes sense, the rest of this wiki is easier to place.
+New to openwifi? Start here. This page explains **what the project is made of**, **why it is split across several repositories**, and, most usefully, **where to look when you need to find something**. Once the repository map makes sense, the rest of this wiki is easier to navigate.
 
 ## The one-sentence version
 

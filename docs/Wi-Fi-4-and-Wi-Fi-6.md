@@ -81,7 +81,7 @@ This section is for people who know RF and digital modulation but haven't worked
 
 Skipping a whole generation looks odd until you check where Wi-Fi 5's speed actually comes from: 80 and 160 MHz channels, up to eight spatial streams, and MU-MIMO, all in the 5 GHz band only. A 20 MHz single-stream design can use none of that. The only 11ac feature that would apply is 256-QAM, worth roughly 87 Mbps at 20 MHz single-stream versus 72 Mbps for 11n.[^std]
 
-Wi-Fi 6 is different. It reworks the OFDM numerology and adds OFDMA, which subdivides a single 20 MHz channel between users. Those features matter even at 20 MHz with a single stream. Between the two generations, Wi-Fi 6 is the one that this hardware can use, so going from 11n to 11ax skips almost nothing openwifi could have used.
+Wi-Fi 6 is different. It reworks the OFDM numerology and adds OFDMA, which subdivides a single 20 MHz channel between users. Those features matter even at 20 MHz with a single stream. Between the two generations, Wi-Fi 6 is the one that this hardware can benefit from, so going from 11n to 11ax skips almost nothing openwifi could have used.
 
 ## Wi-Fi 4 (802.11n) in the open-source release
 
