@@ -4,6 +4,8 @@ This page explains how an openwifi board actually boots: the boot image, the ker
 
 If you just want to flash a card and run, see [Getting Started](Getting-Started.md). If you want to rebuild the driver or a full SD image, see [Software Development Workflow](Software-Development-Workflow.md). This page is for understanding and modifying the boot chain itself. All paths below are in the [openwifi](https://github.com/open-sdr/openwifi) repo under `kernel_boot/` unless noted.
 
+If you already have a working board and only want to move it onto a newly built kernel and set of modules, go straight to [Updating a board to a newly built kernel](#updating-a-board-to-a-newly-built-kernel), which is the complete procedure from a PC-side build to `sdr0` showing up in `ifconfig -a`.
+
 ## The boot chain at a glance
 
 A Zynq board boots from the SD card's `BOOT` partition, which holds three things openwifi cares about:
@@ -131,9 +133,11 @@ Four small patches (in `kernel_boot/`, documented in `kernel_patch_readme.md`) a
 
 `kernel_config` / `kernel_config_zynqmp` are full defconfig-style `.config` files (Linux 6.12, 32-bit ARM vs 64-bit ARM) with the ADI driver bundles enabled.
 
-### Copying the kernel modules onto the card
+### Where the kernel and its modules live on the board
 
-The kernel build produces the image **and** a tree of `.ko` modules, but openwifi does not use `make modules_install`. Instead the modules are staged by hand: `update_sdcard.sh` (the "rebuild SD card" script, see [Building SD Images](Building-SD-Images.md#3-run-update_sdcardsh)) copies them onto the card once per architecture (`ARCH = 32` and `64`), so a single card carries both a 32-bit and a 64-bit set:
+The kernel build produces the image **and** a tree of `.ko` modules, but openwifi does not use `make modules_install`. The modules are staged by hand instead. Knowing where they end up is what makes the update procedure below, and any debugging of it, understandable.
+
+`update_sdcard.sh` (the "rebuild SD card" script, see [Building SD Images](Building-SD-Images.md#3-run-update_sdcardsh)) does the staging when you write a fresh card. It copies the files once per architecture (`ARCH = 32` and `64`), so a single card could carry both a 32-bit and a 64-bit set:
 
 | What | From (on the host) | To (on the card) |
 |---|---|---|
@@ -142,24 +146,154 @@ The kernel build produces the image **and** a tree of `.ko` modules, but openwif
 | In-tree kernel modules (all `.ko`, via `find`) | `adi-linux[-64]/` | `rootfs/root/kernel_modules<ARCH>/` |
 | Module metadata: `Module.symvers`, `modules.builtin`, `modules.builtin.modinfo`, `modules.order` | `adi-linux[-64]/` | `rootfs/root/kernel_modules<ARCH>/` |
 
-`<ARCH>` is `32` or `64`, giving `openwifi32`/`openwifi64` and `kernel_modules32`/`kernel_modules64` directories side by side on the `rootfs` partition. At this point the modules are only *staged*; nothing is under `/lib/modules` yet.
+`<ARCH>` is `32` or `64`, giving `openwifi32`/`openwifi64` and `kernel_modules32`/`kernel_modules64` directories side by side on the `rootfs` partition. At this point the modules are only *staged*. Nothing is under `/lib/modules` yet.
 
-The board picks the set matching its architecture at first boot (or when you re-run `populate_kernel_image_module_reboot.sh`), which:
+The board-side script `populate_kernel_image_module_reboot.sh` is what finishes the job. It picks the set matching the board's architecture and:
 
-- moves the board-support modules (`ad9361_drv.ko`, `adi_axi_hdmi.ko`, `axidmatest.ko`, `lcd.ko`, `xilinx_dma.ko`) out of `kernel_modules` and into `openwifi/`, next to the driver;
-- symlinks the staged directory into the module path (`ln -s /root/kernel_modules /lib/modules/$(uname -r)`) and runs `depmod`, so `modprobe`/`insmod` can resolve dependencies for the running kernel;
-- copies the kernel image, `BOOT.BIN`, and device tree into the `BOOT` partition, then reboots.
+- moves the board-support modules (`ad9361_drv.ko`, `adi_axi_hdmi.ko`, `axidmatest.ko`, `lcd.ko`, `xilinx_dma.ko`) out of `kernel_modules` and into `openwifi/`, next to the driver,
+- symlinks the staged directory into the module path (`ln -s /root/kernel_modules /lib/modules/$(uname -r)`) and runs `depmod`, so `modprobe` can resolve dependencies for the running kernel,
+- copies the kernel image, `BOOT.BIN` and the device tree into the `BOOT` partition, then reboots.
 
-Because that symlink is tied to `$(uname -r)`, a kernel **version** bump needs the populate step run **twice**: once to install the new image, then again after the first reboot so the symlink points at the new `$(uname -r)`. See [Bulk update helpers](Software-Development-Workflow.md#bulk-update-helpers) for the running-board version of this flow.
+The end state on a running board is this layout, and both halves of it have to be right before `sdr0` can appear:
+
+```
+/root/openwifi/           # openwifi driver .ko + board-support .ko  (wgd.sh insmods these by path)
+/root/kernel_modules/     # every in-tree .ko, plus Module.symvers and the modules.* metadata
+/lib/modules/$(uname -r) -> /root/kernel_modules     # the only path modprobe searches
+```
+
+`wgd.sh` loads the openwifi stack with `insmod` from `/root/openwifi/`, and loads `mac80211` with `modprobe`, which only works through that symlink. A missing or stale symlink is the single most common reason a freshly updated board comes up without `sdr0`.
+
+### Updating a board to a newly built kernel
+
+This is the full procedure for a board that already boots openwifi and that you want to move onto a kernel you just built, whether you changed the kernel config, changed a patch, or moved to a new ADI branch. Steps 1 to 4 run on your PC, steps 5 to 8 on the board. The end state is `sdr0` listed by `ifconfig -a`.
+
+The commands assume the [environment variables](Software-Development-Workflow.md#environment-setup) are set, the board is reachable at `192.168.10.122` and your PC is at `192.168.10.1`, which is what the transfer scripts hard-code. The same scripts are listed in short form under [Bulk update helpers](Software-Development-Workflow.md#bulk-update-helpers), and there is an FTP-based alternative there (`sdcard_boot_update.sh` plus `wgd.sh remote`) if you prefer to pull from the board instead of pushing from the PC.
+
+**1. Build the kernel on the PC.**
+
+```bash
+cd openwifi/user_space
+./prepare_kernel.sh $XILINX_DIR $ARCH_BIT
+```
+
+Write down the kernel release string it produced, because everything below depends on whether it changed:
+
+```bash
+cat ../adi-linux-64/include/config/kernel.release   # 64-bit, use ../adi-linux/... for 32-bit
+```
+
+If that string is the same as the `uname -r` the board reports today, this is a config or patch change only and step 6 below becomes a no-op. If it differs, the board is getting a genuinely new kernel version and step 6 matters.
+
+**2. Rebuild the driver against that same kernel.**
+
+```bash
+cd openwifi/driver
+./make_all.sh $XILINX_DIR $ARCH_BIT
+```
+
+Do not skip this. A `.ko` can only be loaded by the exact kernel build it was compiled against, so a new kernel always means a new `sdr.ko` and a new set of sub-core modules. Reusing the old driver `.ko`s is the most common way to end up with a board that boots fine and still has no `sdr0`.
+
+**3. Send the kernel, the modules and the boot files to the board.**
+
+```bash
+cd openwifi/user_space
+./transfer_kernel_image_module_to_board.sh ../adi-linux-64 $BOARD_NAME   # ../adi-linux for 32-bit
+```
+
+The first argument is the built kernel tree, the second is one of the supported board names (`zed_fmcs2`, `zcu102_fmcs2`, `antsdr`, `e310v2`, `sdrpi`, and so on). The script collects every `.ko` from that tree, the module metadata (`Module.symvers`, `modules.builtin`, `modules.builtin.modinfo`, `modules.order`), the kernel image (`Image` for `zcu102_fmcs2`, `uImage` otherwise), and `BOOT.BIN` and the `.dtb` if they exist under `kernel_boot/`. It packs all of that into `kernel_modules.tar.gz` and `scp`s it, plus `populate_kernel_image_module_reboot.sh`, into `/root` on the board.
+
+If you also changed the FPGA or the device tree, generate the new `BOOT.BIN` first with `boot_bin_gen.sh` (see [Software Development Workflow](Software-Development-Workflow.md#updating-the-fpga-image-on-a-running-board)) so that this step picks it up. Otherwise the board keeps its existing `BOOT.BIN` and `.dtb`, which is what you want for a kernel-only change.
+
+**4. Send the rebuilt driver.**
+
+```bash
+./transfer_driver_userspace_to_board.sh
+```
+
+This packs the driver `.ko`s into `openwifi.tar.gz` and copies it, along with `populate_driver_userspace.sh`, into `/root` on the board.
+
+**5. Install the kernel and modules on the board.**
+
+```bash
+ssh root@192.168.10.122
+./populate_kernel_image_module_reboot.sh
+```
+
+It unpacks the archive into `/root/kernel_modules`, moves the board-support modules into `/root/openwifi/`, creates the `/lib/modules/$(uname -r)` symlink, runs `depmod`, copies the kernel image, `BOOT.BIN` and the device tree into the `BOOT` partition, and reboots. Expect the ssh session to drop.
+
+**6. After the reboot, check the module symlink, and run the populate script a second time if it is wrong.**
+
+The symlink in step 5 was created for the kernel that was running *at that moment*, which is the old one. If the new kernel has a different release string, the board now boots a kernel that has no `/lib/modules` entry at all, `modprobe mac80211` fails, and `wgd.sh` cannot bring up `sdr0`. Check it:
+
+```bash
+uname -r                          # should be the release string from step 1
+ls -l /lib/modules/$(uname -r)    # should point at /root/kernel_modules
+```
+
+If that directory is missing, run `./populate_kernel_image_module_reboot.sh` again (it reboots again, and this time the symlink is made for the new kernel), or fix it directly:
+
+```bash
+ln -s /root/kernel_modules /lib/modules/$(uname -r)
+depmod -a
+```
+
+If the kernel release string did **not** change, the existing symlink is still correct and one run is enough.
+
+**7. Install the driver.**
+
+```bash
+./populate_driver_userspace.sh
+```
+
+This puts the freshly built `.ko`s into `/root/openwifi/`.
+
+**8. Load everything and confirm `sdr0`.**
+
+```bash
+cd /root/openwifi
+./wgd.sh
+ifconfig -a | grep sdr0
+ifconfig sdr0 up
+```
+
+`wgd.sh` loads the FPGA image first if `system_top.bit.bin` is present in the directory, then `insmod`s `ad9361_drv` and `xilinx_dma`, `modprobe`s `mac80211`, and finally `insmod`s `tx_intf`, `rx_intf`, `openofdm_tx`, `openofdm_rx`, `xpu` and `sdr`. `sdr.ko` registering itself with `mac80211` is what creates the `sdr0` interface.
+
+Use `ifconfig -a` rather than plain `ifconfig`, because `wgd.sh` leaves the interface **down**, so it does not show in the short listing. `ip link` works just as well if `net-tools` is not installed. Once `ifconfig sdr0 up` succeeds the board is back to a normal openwifi state and you can continue with [Getting Started](Getting-Started.md) or [Operating Modes](Operating-Modes.md).
+
+#### If `sdr0` does not appear
+
+Read `dmesg | tail -40` right after `./wgd.sh`. The message tells you which step above did not take:
+
+| What you see | What it means | Fix |
+|---|---|---|
+| `insmod: ERROR: could not insert module ...: Invalid module format`, and `dmesg` shows `version magic ... should be ...` | The `.ko` was built against a different kernel than the one running | Rebuild the driver (step 2) against the kernel that is actually booted, and re-copy it. Compare `modinfo /root/openwifi/sdr.ko \| grep vermagic` with `uname -r` |
+| `modprobe: FATAL: Module mac80211 not found in directory /lib/modules/<version>` | The `/lib/modules` symlink is missing or still points at the old kernel version | Step 6 |
+| `insmod: ERROR: ... Unknown symbol in module`, with `dmesg` naming `ad9361_set_tx_atten` or `ad9361_do_calib_run` | The loaded `ad9361_drv.ko` is an unpatched one, so the exported functions the driver needs are absent | Confirm `prepare_kernel.sh` applied the [kernel patches](#the-kernel-patches), then redo steps 1, 3 and 5 |
+| Modules load with no error, but no `sdr0` and `dmesg` shows no openwifi probe lines at all | The driver never bound, because nothing in the device tree matches `compatible = "sdr,sdr"`, or the `.dtb` in the `BOOT` partition is not the openwifi one | [The device tree](#the-device-tree) below, and check that step 5 really wrote the `.dtb` into `BOOT` |
+| `Unsupported PRODUCT_ID 0xFF` or `0x00` at AD9361 probe | The AD9361 is not responding over SPI, which is a hardware or FMC-connection problem, not a kernel one | [Troubleshooting → hardware quirks](Troubleshooting.md#hardware-quirks) |
+
+A quick full-state check, useful to paste into a bug report:
+
+```bash
+uname -r
+ls -l /lib/modules/$(uname -r)
+modinfo /root/openwifi/sdr.ko | grep vermagic
+lsmod | grep -E 'sdr|mac80211|ad9361|xilinx_dma'
+dmesg | grep -i -E 'sdr|ad9361|openwifi'
+```
+
+!!! note "Updating the device tree or `BOOT.BIN` only"
+    Steps 3 and 5 already carry `BOOT.BIN` and the `.dtb` along with the kernel, so a device-tree change alone can use the same flow. The only requirement is a power-cycle or reboot, because those two are read at boot and cannot be reloaded live. The alternative is to mount the `BOOT` partition on your PC and copy the files in directly.
 
 ### Doing it by hand on a running board (`scp`, no scripts)
 
-If a board is already up and you just rebuilt one or more modules, you don't need `update_sdcard.sh` or a reboot; you can push the `.ko`s over the network and reload them live. The one thing to get right is *which* directory each module lands in, and that follows directly from how `wgd.sh` loads it (see the populate step above for the `/lib/modules` symlink these rely on):
+If a board is already up and you just rebuilt one or more modules against the **same** kernel it is running, you do not need the full procedure above, `update_sdcard.sh` or a reboot. You can push the `.ko`s over the network and reload them live. The one thing to get right is *which* directory each module lands in, and that follows directly from how `wgd.sh` loads it (this still relies on the `/lib/modules` symlink described above):
 
 - **openwifi driver stack** (`sdr`, `tx_intf`, `rx_intf`, `openofdm_tx`, `openofdm_rx`, `xpu`) and the **board-support modules** (`ad9361_drv`, `xilinx_dma`, …): `wgd.sh` `insmod`s these by explicit path from its **own directory**, so they go into `/root/openwifi/`. Putting them in `kernel_modules/` will *not* make `wgd.sh` find them.
 - **Base kernel modules** (`mac80211`, `cfg80211`, other in-tree `.ko`s): these are the only ones `wgd.sh` pulls with `modprobe`, so they go into `/root/kernel_modules/` (the `/lib/modules/$(uname -r)` target).
 
-The openwifi driver `.ko`s live in `driver/` on the host after `make_all.sh`; in-tree modules come from the built `adi-linux[-64]/` tree:
+The openwifi driver `.ko`s live in `driver/` on the host after `make_all.sh`. In-tree modules come from the built `adi-linux[-64]/` tree:
 
 ```bash
 # openwifi driver / board-support module -> the openwifi dir wgd.sh insmods from
@@ -179,7 +313,7 @@ insmod /root/openwifi/sdr.ko     # openwifi stack: insmod by path, like wgd.sh
 ```
 
 !!! warning "The module must match the running kernel"
-    A `.ko` is only loadable by the exact kernel it was built against; `insmod` will reject it (`version magic` / `invalid module format`) if you changed the kernel config or bumped the kernel version. Copying modules live only works when you rebuilt **just the module** against the **same** kernel that's booted. If you changed the kernel itself, you have to install the new image and reboot (the twice-run populate flow above), not just `scp` the `.ko`s.
+    A `.ko` is only loadable by the exact kernel it was built against. `insmod` will reject it (`version magic` / `invalid module format`) if you changed the kernel config or bumped the kernel version. Copying modules live only works when you rebuilt **just the module** against the **same** kernel that is booted. If you changed the kernel itself, you have to install the new image and reboot, so use the [full update procedure](#updating-a-board-to-a-newly-built-kernel) instead of `scp`ing the `.ko`s.
 
 ---
 

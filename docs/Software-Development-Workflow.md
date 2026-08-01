@@ -33,7 +33,7 @@ Keep this section open while you work. Find the row that matches what you change
 | **`inject_80211` / `analyze_80211`** (`user_space/inject_80211/`) | `scp` the source to the board, then **on the board**: `make` | Run it ([usage](Operating-Modes.md#packet-injection-and-fuzzing)) |
 | **Helper scripts** (`user_space/*.sh`, `*.py`) | Nothing to compile. Copy them to the board with `scp`. The Python display scripts (`side_info_display.py`, `iq_capture.py`, and others) run on the PC instead | Run them |
 | **FPGA Verilog / IP cores** | On the PC: rebuild the bitstream ([FPGA Development](FPGA-Development.md)), then `boot_bin_gen.sh` and `scp system_top.bit.bin` to the board | `./wgd.sh`, no reboot needed ([details](#updating-the-fpga-image-on-a-running-board)) |
-| **Kernel config or device tree** | On the PC ([Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md)), then copy the results into the `BOOT` partition ([bulk helpers](#bulk-update-helpers)) | Power-cycle the board |
+| **Kernel config or device tree** | Rebuild on the PC, then transfer and populate on the board. Full step-by-step in [Updating a board to a newly built kernel](Boot-Kernel-Device-Tree.md#updating-a-board-to-a-newly-built-kernel), short form under [bulk helpers](#bulk-update-helpers) | Reboot. A kernel **version** change also needs the driver rebuilt and the populate script run twice |
 
 ### The driver iteration loop
 
@@ -161,7 +161,7 @@ cd ~/openwifi/sdrctl_src/ && make clean && make && cp sdrctl ../ && cd ..
 
 For larger updates (kernel, modules, device tree, rootfs) there are paired host/board scripts:
 
-- **Kernel + modules + device tree:** on the host, `prepare_kernel.sh`, `boot_bin_gen.sh`, and `transfer_kernel_image_module_to_board.sh`. On the board, `populate_kernel_image_module_reboot.sh` (run it again after the first reboot if the kernel *version* changed, so symlinks point at the new version).
+- **Kernel + modules + device tree:** on the host, `prepare_kernel.sh`, `boot_bin_gen.sh`, and `transfer_kernel_image_module_to_board.sh`. On the board, `populate_kernel_image_module_reboot.sh` (run it again after the first reboot if the kernel *version* changed, so symlinks point at the new version). The whole flow, with the verification steps that get you back to a working `sdr0`, is written out in [Updating a board to a newly built kernel](Boot-Kernel-Device-Tree.md#updating-a-board-to-a-newly-built-kernel).
 - **Driver + user space:** on the host, `make_all.sh` and `transfer_driver_userspace_to_board.sh`. On the board, `populate_driver_userspace.sh`.
 - **Over FTP:** set up an anonymous FTP server on the PC rooted at your `openwifi` directory, then on the board `./sdcard_boot_update.sh $BOARD_NAME` (pulls `uImage`, `BOOT.BIN`, `devicetree.dtb` into the boot partition, then power-cycle) and `./wgd.sh remote` (pulls driver files and brings up `sdr0`).
 - **rootfs as a disk:** on the PC, *File manager → Connect to Server → `sftp://root@192.168.10.122/root`* (password `openwifi`).
