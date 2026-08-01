@@ -142,21 +142,21 @@ The kernel build produces the image **and** a tree of `.ko` modules, but openwif
 | In-tree kernel modules (all `.ko`, via `find`) | `adi-linux[-64]/` | `rootfs/root/kernel_modules<ARCH>/` |
 | Module metadata: `Module.symvers`, `modules.builtin`, `modules.builtin.modinfo`, `modules.order` | `adi-linux[-64]/` | `rootfs/root/kernel_modules<ARCH>/` |
 
-`<ARCH>` is `32` or `64`, giving `openwifi32`/`openwifi64` and `kernel_modules32`/`kernel_modules64` directories side by side on the `rootfs` partition. At this point the modules are only *staged* — nothing is under `/lib/modules` yet.
+`<ARCH>` is `32` or `64`, giving `openwifi32`/`openwifi64` and `kernel_modules32`/`kernel_modules64` directories side by side on the `rootfs` partition. At this point the modules are only *staged*; nothing is under `/lib/modules` yet.
 
 The board picks the set matching its architecture at first boot (or when you re-run `populate_kernel_image_module_reboot.sh`), which:
 
 - moves the board-support modules (`ad9361_drv.ko`, `adi_axi_hdmi.ko`, `axidmatest.ko`, `lcd.ko`, `xilinx_dma.ko`) out of `kernel_modules` and into `openwifi/`, next to the driver;
-- symlinks the staged directory into the module path — `ln -s /root/kernel_modules /lib/modules/$(uname -r)` — and runs `depmod`, so `modprobe`/`insmod` can resolve dependencies for the running kernel;
+- symlinks the staged directory into the module path (`ln -s /root/kernel_modules /lib/modules/$(uname -r)`) and runs `depmod`, so `modprobe`/`insmod` can resolve dependencies for the running kernel;
 - copies the kernel image, `BOOT.BIN`, and device tree into the `BOOT` partition, then reboots.
 
 Because that symlink is tied to `$(uname -r)`, a kernel **version** bump needs the populate step run **twice**: once to install the new image, then again after the first reboot so the symlink points at the new `$(uname -r)`. See [Bulk update helpers](Software-Development-Workflow.md#bulk-update-helpers) for the running-board version of this flow.
 
 ### Doing it by hand on a running board (`scp`, no scripts)
 
-If a board is already up and you just rebuilt one or more modules, you don't need `update_sdcard.sh` or a reboot — you can push the `.ko`s over the network and reload them live. The catch is *where* each module has to land, and that depends on how it gets loaded: `wgd.sh` `insmod`s the openwifi/board modules **by explicit path from the `openwifi/` directory**, while the base 802.11 modules are pulled with `modprobe` from the kernel's module path. There is no single "modules folder" that covers both.
+If a board is already up and you just rebuilt one or more modules, you don't need `update_sdcard.sh` or a reboot; you can push the `.ko`s over the network and reload them live. The catch is *where* each module has to land, and that depends on how it gets loaded: `wgd.sh` `insmod`s the openwifi/board modules **by explicit path from the `openwifi/` directory**, while the base 802.11 modules are pulled with `modprobe` from the kernel's module path. There is no single "modules folder" that covers both.
 
-On a stock openwifi rootfs the running kernel has `/lib/modules/$(uname -r)` symlinked to `/root/kernel_modules` (created by the populate step above), with `depmod` already run against it. That symlink is only what `modprobe` uses — the openwifi driver stack is loaded from `/root/openwifi/` regardless.
+On a stock openwifi rootfs the running kernel has `/lib/modules/$(uname -r)` symlinked to `/root/kernel_modules` (created by the populate step above), with `depmod` already run against it. That symlink is only what `modprobe` uses; the openwifi driver stack is loaded from `/root/openwifi/` regardless.
 
 1. **Find the running kernel version and where modules resolve** (on the board):
 
@@ -165,7 +165,7 @@ On a stock openwifi rootfs the running kernel has `/lib/modules/$(uname -r)` sym
    ls -l /lib/modules/$(uname -r)  # should be a symlink to /root/kernel_modules
    ```
 
-2. **Copy the rebuilt module over — and mind *which* directory.** This is the part that trips people up, because `wgd.sh` does **not** search two locations. It loads every module it names *explicitly*, and only the base 802.11 stack comes from the module path. So the destination has to match how that module gets loaded:
+2. **Copy the rebuilt module over, and mind *which* directory.** This is the part that trips people up, because `wgd.sh` does **not** search two locations. It loads every module it names *explicitly*, and only the base 802.11 stack comes from the module path. So the destination has to match how that module gets loaded:
 
     - **openwifi driver stack** (`sdr`, `tx_intf`, `rx_intf`, `openofdm_tx`, `openofdm_rx`, `xpu`) and the **board-support modules** (`ad9361_drv`, `xilinx_dma`, …): `wgd.sh` runs `insmod <dir>/<name>.ko` from its **own directory** (the `openwifi/` folder you `cd` into). These must go into `/root/openwifi/`. Putting them in `kernel_modules/` will *not* make `wgd.sh` find them.
     - **Base kernel modules** (`mac80211`, `cfg80211`, other in-tree `.ko`s): these are the only ones `wgd.sh` pulls with `modprobe`, which resolves them through `/lib/modules/$(uname -r)` → `/root/kernel_modules`. These go into `/root/kernel_modules/`.
@@ -181,9 +181,9 @@ On a stock openwifi rootfs the running kernel has `/lib/modules/$(uname -r)` sym
        root@<board-ip>:/root/kernel_modules/
    ```
 
-   On the board these are `/root/openwifi` and `/root/kernel_modules` regardless of the `32`/`64` suffix used on the card layout. Note `ad9361_drv` is a special case: the populate step *moves* it (and `xilinx_dma`, `adi_axi_hdmi`, `lcd`, `axidmatest`) from `kernel_modules/` into `openwifi/`, and `wgd.sh` `insmod`s it from there — so if you rebuilt *that*, drop it in `/root/openwifi/` too.
+   On the board these are `/root/openwifi` and `/root/kernel_modules` regardless of the `32`/`64` suffix used on the card layout. Note `ad9361_drv` is a special case: the populate step *moves* it (and `xilinx_dma`, `adi_axi_hdmi`, `lcd`, `axidmatest`) from `kernel_modules/` into `openwifi/`, and `wgd.sh` `insmod`s it from there, so if you rebuilt *that*, drop it in `/root/openwifi/` too.
 
-3. **Refresh dependency metadata and reload** (on the board). `depmod` only matters for modules resolved by name (`modprobe`); a driver `insmod`'d by full path — which is what `wgd.sh` does for the openwifi stack — does not need it:
+3. **Refresh dependency metadata and reload** (on the board). `depmod` only matters for modules resolved by name (`modprobe`); a driver `insmod`'d by full path (which is what `wgd.sh` does for the openwifi stack) does not need it:
 
    ```bash
    depmod -a                 # rebuild modules.dep, only needed for modprobe'd modules
@@ -192,10 +192,10 @@ On a stock openwifi rootfs the running kernel has `/lib/modules/$(uname -r)` sym
    # modprobe mac80211             # base stack: resolved from /lib/modules -> kernel_modules
    ```
 
-   The simplest way to reload the whole openwifi stack in the right order after an `scp` is just to re-run `./wgd.sh` in `/root/openwifi/` — it `rmmod`s and `insmod`s `sdr` plus its five sub-core modules from that directory for you.
+   The simplest way to reload the whole openwifi stack in the right order after an `scp` is just to re-run `./wgd.sh` in `/root/openwifi/`; it `rmmod`s and `insmod`s `sdr` plus its five sub-core modules from that directory for you.
 
 !!! warning "The module must match the running kernel"
-    A `.ko` is only loadable by the exact kernel it was built against — `insmod` will reject it (`version magic` / `invalid module format`) if you changed the kernel config or bumped the kernel version. Copying modules live only works when you rebuilt **just the module** against the **same** kernel that's booted. If you changed the kernel itself, you have to install the new image and reboot (the twice-run populate flow above), not just `scp` the `.ko`s.
+    A `.ko` is only loadable by the exact kernel it was built against; `insmod` will reject it (`version magic` / `invalid module format`) if you changed the kernel config or bumped the kernel version. Copying modules live only works when you rebuilt **just the module** against the **same** kernel that's booted. If you changed the kernel itself, you have to install the new image and reboot (the twice-run populate flow above), not just `scp` the `.ko`s.
 
 ---
 
