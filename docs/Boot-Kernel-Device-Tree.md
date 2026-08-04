@@ -286,6 +286,132 @@ dmesg | grep -i -E 'sdr|ad9361|openwifi'
 !!! note "Updating the device tree or `BOOT.BIN` only"
     Steps 3 and 5 already carry `BOOT.BIN` and the `.dtb` along with the kernel, so a device-tree change alone can use the same flow. The only requirement is a power-cycle or reboot, because those two are read at boot and cannot be reloaded live. The alternative is to mount the `BOOT` partition on your PC and copy the files in directly.
 
+### The same update without the transfer and populate scripts
+
+Steps 3 to 7 above are just file copies, so you can do them by hand. That is worth doing when your board is not at the hard-coded `192.168.10.122`, when you only want part of the update, or when you want to see exactly which files are touched. Everything below is what `transfer_kernel_image_module_to_board.sh`, `transfer_driver_userspace_to_board.sh`, `populate_kernel_image_module_reboot.sh` and `populate_driver_userspace.sh` do, with the tar step dropped and the paths spelled out. It replaces steps 3, 4, 5 and 7, and still needs steps 1 and 2 (build the kernel, rebuild the driver against it) done first.
+
+**On the PC: pick the arch-dependent names.**
+
+```bash
+cd openwifi/user_space
+
+BOARD_IP=192.168.10.122
+BOARD_NAME=zcu102_fmcs2
+
+# 64-bit board (zcu102_fmcs2)
+KDIR=../adi-linux-64
+KERNEL_IMAGE=$KDIR/arch/arm64/boot/Image
+DTB_NAME=system.dtb
+
+# 32-bit board (everything else)
+# KDIR=../adi-linux
+# KERNEL_IMAGE=$KDIR/arch/arm/boot/uImage
+# DTB_NAME=devicetree.dtb
+```
+
+**On the PC: collect the in-tree modules.**
+
+```bash
+rm -rf kernel_modules && mkdir -p kernel_modules
+find $KDIR/ -name \*.ko -exec cp {} ./kernel_modules/ \;
+cp $KDIR/Module.symvers $KDIR/modules.builtin $KDIR/modules.builtin.modinfo \
+   $KDIR/modules.order ./kernel_modules/
+```
+
+The `find` flattens the whole kernel tree into one directory, so there is no `kernel/drivers/...` hierarchy under it. That flat layout is exactly what `/lib/modules/$(uname -r)` will point at on the board, and it is why the four metadata files have to travel with the `.ko`s. Without `modules.order` and `modules.builtin`, `depmod` cannot build a usable `modules.dep` and `modprobe mac80211` fails.
+
+**On the PC: add the boot files.**
+
+```bash
+cp $KERNEL_IMAGE ./kernel_modules/
+```
+
+Add `BOOT.BIN` and the device tree only if you rebuilt them, for example after an FPGA or device-tree change. For a kernel-only update leave both out and the board keeps the ones it already has.
+
+```bash
+cp ../kernel_boot/boards/$BOARD_NAME/output_boot_bin/BOOT.BIN ./kernel_modules/
+cp ../kernel_boot/boards/$BOARD_NAME/$DTB_NAME ./kernel_modules/
+```
+
+**On the PC: collect the driver modules.**
+
+```bash
+rm -rf openwifi && mkdir -p openwifi
+find ../driver/ -name \*.ko -exec cp {} ./openwifi/ \;
+```
+
+That picks up `sdr.ko` and the sub-core modules (`tx_intf`, `rx_intf`, `openofdm_tx`, `openofdm_rx`, `xpu`) plus `side_ch.ko`.
+
+**Copy both sets to the board.**
+
+```bash
+ssh root@$BOARD_IP 'rm -rf /root/kernel_modules && mkdir -p /root/kernel_modules /root/openwifi'
+scp kernel_modules/* root@$BOARD_IP:/root/kernel_modules/
+scp openwifi/*.ko    root@$BOARD_IP:/root/openwifi/
+```
+
+Wiping `/root/kernel_modules` first is not optional. Any `.ko` left over from the previous kernel stays visible to `depmod` and `modprobe`, and a stale one loads with the wrong version magic or shadows the new module of the same name. On a slow link, `tar -zcf kernel_modules.tar.gz kernel_modules`, one `scp`, and `tar -zxf` on the board is the faster equivalent, which is what the scripts do.
+
+**On the board: put the files where `wgd.sh` expects them.**
+
+```bash
+ssh root@$BOARD_IP
+cd /root
+
+# board-support modules belong next to the driver, wgd.sh insmods them by path
+for m in ad9361_drv adi_axi_hdmi axidmatest lcd xilinx_dma ; do
+    mv -f ./kernel_modules/$m.ko ./openwifi/ 2>/dev/null
+done
+
+# point the module search path of the running kernel at the staged directory
+rm -rf /lib/modules/$(uname -r)
+ln -s /root/kernel_modules /lib/modules/$(uname -r)
+depmod
+
+# keep wgd.sh from reprogramming the FPGA with the old bitstream
+mv -f ./openwifi/system_top.bit.bin ./openwifi/system_top.bit.bin.bak
+```
+
+Not every board has all five board-support modules, so `mv` failing on one of them is normal. The `system_top.bit.bin` rename only matters if you copied a new `BOOT.BIN`: the new bitstream is then already loaded at boot, and letting `wgd.sh` push the old `.bit.bin` on top of it would undo the update. Skip that line if you did not touch `BOOT.BIN`.
+
+**On the board: write the boot files and reboot.**
+
+```bash
+umount /mnt 2>/dev/null
+mount /dev/mmcblk0p1 /mnt
+cp ./kernel_modules/Image /mnt/          # uImage on a 32-bit board
+cp ./kernel_modules/BOOT.BIN /mnt/       # only if you copied a new one
+cp ./kernel_modules/system.dtb /mnt/     # devicetree.dtb on 32-bit, only if new
+sync
+umount /mnt
+reboot now
+```
+
+`/dev/mmcblk0p1` is the first partition of the SD card, which is the FAT `BOOT` partition. The `sync` before `umount` is worth keeping, because a kernel image half-written to a FAT partition is a board that does not come back.
+
+**After the reboot: check the symlink, exactly as in step 6.**
+
+```bash
+uname -r
+ls -l /lib/modules/$(uname -r)
+```
+
+The symlink was made for the kernel that was running while you typed the commands, which was the old one. If the release string changed, remake it now:
+
+```bash
+rm -rf /lib/modules/$(uname -r)
+ln -s /root/kernel_modules /lib/modules/$(uname -r)
+depmod -a
+```
+
+Then load the stack and confirm the interface, the same as step 8:
+
+```bash
+cd /root/openwifi
+./wgd.sh
+ifconfig -a | grep sdr0
+```
+
 ### Doing it by hand on a running board (`scp`, no scripts)
 
 If a board is already up and you just rebuilt one or more modules against the **same** kernel it is running, you do not need the full procedure above, `update_sdcard.sh` or a reboot. You can push the `.ko`s over the network and reload them live. The one thing to get right is *which* directory each module lands in, and that follows directly from how `wgd.sh` loads it (this still relies on the `/lib/modules` symlink described above):
