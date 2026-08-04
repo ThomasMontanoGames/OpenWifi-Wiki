@@ -4,7 +4,7 @@ This page explains how an openwifi board actually boots: the boot image, the ker
 
 If you just want to flash a card and run, see [Getting Started](Getting-Started.md). If you want to rebuild the driver or a full SD image, see [Software Development Workflow](Software-Development-Workflow.md). This page is for understanding and modifying the boot chain itself. All paths below are in the [openwifi](https://github.com/open-sdr/openwifi) repo under `kernel_boot/` unless noted.
 
-If you already have a working board and only want to move it onto a newly built kernel and set of modules, go straight to [Updating a board to a newly built kernel](#updating-a-board-to-a-newly-built-kernel), which is the complete procedure from a PC-side build to `sdr0` showing up in `ifconfig -a`.
+If you already have a working board and only want to move it onto a newly built kernel and set of modules, go straight to [Updating a running board](#updating-a-running-board), which covers the whole path from a PC-side build to `sdr0` showing up in `ifconfig -a`, with the scripts or by hand.
 
 ## The boot chain at a glance
 
@@ -133,9 +133,21 @@ Four small patches (in `kernel_boot/`, documented in `kernel_patch_readme.md`) a
 
 `kernel_config` / `kernel_config_zynqmp` are full defconfig-style `.config` files (Linux 6.12, 32-bit ARM vs 64-bit ARM) with the ADI driver bundles enabled.
 
+---
+
+## Updating a running board
+
+Everything above is how a board is built and what it boots. This part is the routine operation: taking a board that already runs openwifi and moving it onto a kernel, a module set or a driver you just built. The layout section comes first, because all three procedures after it are variations on getting the same files into the same two directories.
+
+- [Updating a board to a newly built kernel](#updating-a-board-to-a-newly-built-kernel): the normal path, using the transfer and populate scripts. New kernel, reboot needed.
+- [The same update by hand](#the-same-update-by-hand-without-the-scripts): the identical set of copies with plain `scp`, for when the scripts' hard-coded addresses or their all-or-nothing behavior do not suit you.
+- [Replacing a single module on a running board](#replacing-a-single-module-on-a-running-board): the light case. Same kernel, one rebuilt `.ko`, no reboot.
+
+Picking the third when the kernel actually changed is the usual mistake, and it shows up as `invalid module format` at `insmod`.
+
 ### Where the kernel and its modules live on the board
 
-The kernel build produces the image **and** a tree of `.ko` modules, but openwifi does not use `make modules_install`. The modules are staged by hand instead. Knowing where they end up is what makes the update procedure below, and any debugging of it, understandable.
+The kernel build produces the image **and** a tree of `.ko` modules, but openwifi does not use `make modules_install`. The modules are staged by hand instead. Knowing where they end up is what makes the update procedures below, and any debugging of them, understandable.
 
 `update_sdcard.sh` (the "rebuild SD card" script, see [Building SD Images](Building-SD-Images.md#3-run-update_sdcardsh)) does the staging when you write a fresh card. It copies the files once per architecture (`ARCH = 32` and `64`), so a single card could carry both a 32-bit and a 64-bit set:
 
@@ -286,9 +298,9 @@ dmesg | grep -i -E 'sdr|ad9361|openwifi'
 !!! note "Updating the device tree or `BOOT.BIN` only"
     Steps 3 and 5 already carry `BOOT.BIN` and the `.dtb` along with the kernel, so a device-tree change alone can use the same flow. The only requirement is a power-cycle or reboot, because those two are read at boot and cannot be reloaded live. The alternative is to mount the `BOOT` partition on your PC and copy the files in directly.
 
-### The same update without the transfer and populate scripts
+### The same update by hand, without the scripts
 
-Steps 3 to 7 above are just file copies, so you can do them by hand. That is worth doing when your board is not at the hard-coded `192.168.10.122`, when you only want part of the update, or when you want to see exactly which files are touched. Everything below is what `transfer_kernel_image_module_to_board.sh`, `transfer_driver_userspace_to_board.sh`, `populate_kernel_image_module_reboot.sh` and `populate_driver_userspace.sh` do, with the tar step dropped and the paths spelled out. It replaces steps 3, 4, 5 and 7, and still needs steps 1 and 2 (build the kernel, rebuild the driver against it) done first.
+Steps 3 to 7 above are only file copies and a symlink, so you can do them by hand. That is worth doing when your board is not at the hard-coded `192.168.10.122`, when you only want part of the update, or when you want to see exactly which files are touched. Everything below is what `transfer_kernel_image_module_to_board.sh`, `transfer_driver_userspace_to_board.sh`, `populate_kernel_image_module_reboot.sh` and `populate_driver_userspace.sh` do, with the tar step dropped and the paths spelled out. It replaces steps 3 to 7, and still needs steps 1 and 2 (build the kernel, rebuild the driver against it) done first.
 
 **On the PC: pick the arch-dependent names.**
 
@@ -412,9 +424,11 @@ cd /root/openwifi
 ifconfig -a | grep sdr0
 ```
 
-### Doing it by hand on a running board (`scp`, no scripts)
+If it does not show up, the same table applies: [If `sdr0` does not appear](#if-sdr0-does-not-appear).
 
-If a board is already up and you just rebuilt one or more modules against the **same** kernel it is running, you do not need the full procedure above, `update_sdcard.sh` or a reboot. You can push the `.ko`s over the network and reload them live. The one thing to get right is *which* directory each module lands in, and that follows directly from how `wgd.sh` loads it (this still relies on the `/lib/modules` symlink described above):
+### Replacing a single module on a running board
+
+If a board is already up and you just rebuilt one or more modules against the **same** kernel it is running, you need neither of the two procedures above, nor `update_sdcard.sh`, nor a reboot. You can push the `.ko`s over the network and reload them live. The one thing to get right is *which* directory each module lands in, and that follows directly from how `wgd.sh` loads it (this still relies on the `/lib/modules` symlink described above):
 
 - **openwifi driver stack** (`sdr`, `tx_intf`, `rx_intf`, `openofdm_tx`, `openofdm_rx`, `xpu`) and the **board-support modules** (`ad9361_drv`, `xilinx_dma`, …): `wgd.sh` `insmod`s these by explicit path from its **own directory**, so they go into `/root/openwifi/`. Putting them in `kernel_modules/` will *not* make `wgd.sh` find them.
 - **Base kernel modules** (`mac80211`, `cfg80211`, other in-tree `.ko`s): these are the only ones `wgd.sh` pulls with `modprobe`, so they go into `/root/kernel_modules/` (the `/lib/modules/$(uname -r)` target).
