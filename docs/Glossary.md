@@ -123,7 +123,7 @@ HLS
 :   High-Level Synthesis: generating FPGA logic from C++ (via Vitis HLS). openwifi's channel-estimation and equalizer stages are available as HLS modules. See [FPGA Development](FPGA-Development.md#high-level-synthesis-hls-modules).
 
 hostapd
-:   The standard Linux user-space daemon that turns a Wi-Fi interface into an access point. openwifi runs stock `hostapd` over `sdr0`.
+:   The standard Linux user-space daemon that turns a Wi-Fi interface into an access point. openwifi runs stock `hostapd` over `sdr0`. See [hostapd and wpa_supplicant](hostapd-and-wpa_supplicant.md).
 
 HT
 :   High Throughput: the 802.11n feature set. Related terms: **HT-SIG** (the 11n signal field), **STF/LTF** (short/long training fields in the preamble).
@@ -273,7 +273,7 @@ Vivado / Vitis
 :   Xilinx's FPGA design tools. openwifi's FPGA build targets **Vivado 2022.2 with Vitis**. Some boards need a paid Vivado license to rebuild the FPGA, but the prebuilt images need none.
 
 wpa_supplicant
-:   The standard Linux user-space client for joining Wi-Fi networks. openwifi runs stock `wpa_supplicant` over `sdr0` in client mode.
+:   The standard Linux user-space client for joining Wi-Fi networks. openwifi runs stock `wpa_supplicant` over `sdr0` in client mode. See [hostapd and wpa_supplicant](hostapd-and-wpa_supplicant.md).
 
 `xpu`
 :   openwifi's real-time MAC core (its largest FPGA IP block): CSMA/CA, TSF timer, hardware ACK generation/reception, packet filtering, RSSI/CCA, and TX-queue gating. See [FPGA IP Cores](FPGA-IP-Cores.md#xpu-the-real-time-mac).

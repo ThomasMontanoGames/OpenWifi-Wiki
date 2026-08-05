@@ -12,7 +12,7 @@ openwifi is a **SoftMAC** Wi-Fi design. The word "soft" refers to where the *upp
 
 Layered from top to bottom:
 
-- **Linux user space**: `hostapd`, `wpa_supplicant`, `iw`, `dhclient`, `tcpdump`, plus openwifi's own `sdrctl` tool and helper scripts.
+- **Linux user space**: `hostapd`, `wpa_supplicant`, `iw`, `dhclient`, `tcpdump`, plus openwifi's own `sdrctl` tool and helper scripts. The two Wi-Fi daemons are stock builds that reach the driver only through nl80211 and `mac80211`, never directly (see [hostapd and wpa_supplicant](hostapd-and-wpa_supplicant.md)).
 - **Linux kernel: cfg80211 / mac80211**: the generic Linux wireless stack. Handles the upper MAC and calls into the driver through a fixed API.
 - **openwifi driver (`driver/sdr.c` and friends)**: a SoftMAC driver that implements the mac80211 API and translates it into FPGA register writes and DMA transfers.
 - **FPGA design (the openwifi-hw repo)**: OFDM transmitter and receiver, the CSMA/CA low MAC, and DMA interfaces to the processor.

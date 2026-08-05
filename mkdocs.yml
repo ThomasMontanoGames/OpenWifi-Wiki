@@ -143,6 +143,7 @@ nav:
       - Specifications: Specifications.md
   - Using openwifi:
       - Operating Modes: Operating-Modes.md
+      - hostapd & wpa_supplicant: hostapd-and-wpa_supplicant.md
       - Wi-Fi 4 & Wi-Fi 6 Features: Wi-Fi-4-and-Wi-Fi-6.md
       - sdrctl & Runtime Control: sdrctl-and-Runtime-Control.md
   - Developing:

@@ -2,6 +2,8 @@
 
 openwifi presents a normal Linux Wi-Fi interface (`sdr0`), so you drive it with the same tools you'd use for any card: `hostapd`, `wpa_supplicant`, `iw`, `iwconfig`. This page walks through each mode. Throughout, **"on board"** means commands run over ssh on the SDR board, and **"on PC"** means commands run on your computer.
 
+The two daemons used below are covered in their own right on [hostapd and wpa_supplicant](hostapd-and-wpa_supplicant.md): what they do, how they reach openwifi, which config files to edit, and how to read their output when a link will not come up.
+
 A few reminders that apply to every mode:
 
 - Mount the TX and RX antennas as close to perpendicular as you can, since good TX/RX isolation matters.
