@@ -180,7 +180,6 @@ jobs:
           git add .github/sync-state.json
           git commit -m "chore: record synced upstream commits
 
-          Updates the last-processed SHA for each openwifi source repository.
-
-          Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>"
+          Updates the last-processed SHA for each openwifi source repository."
+          
           git push origin master
