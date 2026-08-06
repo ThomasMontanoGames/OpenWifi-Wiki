@@ -457,28 +457,54 @@ def render_prompt(repo_result, context_path, dry_run=False):
            documented behavior. Ignore pure refactors, test-only changes, and
            internal code with no user-visible effect.
 
-        3. If nothing is documentation-relevant, say so clearly and stop. Do not
+        3. Doing nothing is the default and the most common correct outcome. If
+           nothing is documentation-relevant, say so clearly and stop. Do not
            create a branch and do not open a pull request. Forcing an unnecessary
-           documentation change is worse than doing nothing.
+           documentation change is worse than doing nothing, and a run that ends
+           with no pull request is a success, not a failure.
 
-        4. If something is relevant, search `docs/` and the `nav` section of
+           In particular, do not edit a page merely because upstream reworded,
+           reformatted, or reorganized something that this wiki already covers
+           correctly. This wiki is not a mirror of the upstream README files. It
+           frequently states things in its own way, in more detail, and that is
+           deliberate. A difference in wording between here and upstream is not
+           by itself a defect.
+
+        4. Verify every factual claim before you write it down. If you are about
+           to describe something in this wiki as stale, broken, wrong, outdated,
+           or missing, first confirm that it actually is. A path that upstream
+           stopped linking to may still exist. A file may be duplicated across
+           both source repos. A command may still work under its old name.
+
+           Use the tools you have to check, for example by reading the wiki page
+           and comparing it against the diff you were given. If you cannot
+           confirm the claim, do not make it.
+
+           If the edit you are proposing is an alignment or a preference rather
+           than a correction, say exactly that in the commit message and the pull
+           request description. Do not describe a cosmetic change as a fix. An
+           honest "this matches upstream's new phrasing, the previous text was
+           not wrong" is far more useful to the reviewer than an overstated
+           justification.
+
+        5. If something is relevant, search `docs/` and the `nav` section of
            `mkdocs.yml` for the page or pages that need updating. Prefer a small,
            surgical edit to an existing page over a new page. If a genuinely new
            page is needed, add it to the `nav` in `mkdocs.yml` in the same change,
            because a page missing from the nav is invisible on the site.
 
-        5. Make the edits on a new branch named exactly:
+        6. Make the edits on a new branch named exactly:
 
                %s
 
            That name already follows the Conventional Branch format this repo
            uses. Do not rename it.
 
-        6. Run `mkdocs build --strict` and fix anything it reports before you open
+        7. Run `mkdocs build --strict` and fix anything it reports before you open
            the pull request. It fails on broken internal links and missing
            anchors.
 
-        7. Commit using a Conventional Commits message, as described in the git
+        8. Commit using a Conventional Commits message, as described in the git
            conventions section of CLAUDE.md. Almost always the type is `docs`.
            The subject is imperative mood, lowercase after the colon, no trailing
            period, and 72 characters or fewer. For example:
@@ -486,15 +512,20 @@ def render_prompt(repo_result, context_path, dry_run=False):
                docs(boards): document the rfsoc4x2 and LibreSDR targets
 
            Add a body explaining why the change was needed, wrapped at 72
-           characters.
+           characters. The body must be accurate. Do not claim the previous text
+           was wrong unless you confirmed that in step 4.
 
-        8. Push the branch and open a pull request against the `master` branch of
+        9. Push the branch and open a pull request against the `master` branch of
            this wiki repository using `gh pr create`. Title the pull request in
            the same Conventional Commits format as the commit subject, because it
            becomes the squash-merge subject. In the description, link back to each
            source commit and pull request you acted on, and explain what changed
-           upstream and why you edited the pages you edited. Do not merge the pull
-           request. Leave it for a human.
+           upstream and why you edited the pages you edited.
+
+           State plainly whether each edit is a correction or an alignment, so
+           the reviewer knows how carefully to look. If you were unable to verify
+           something, say which part is unverified rather than leaving it out.
+           Do not merge the pull request. Leave it for a human.
         %s
         """)
 
