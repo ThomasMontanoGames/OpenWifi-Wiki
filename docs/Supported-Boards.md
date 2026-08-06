@@ -41,7 +41,7 @@ Several low-cost integrated boards are worth understanding beyond the one-line m
 An enhanced ADALM-Pluto: Zynq-7020 + AD936x, usable both as a generic SDR (PlutoSDR/FMCOMMS-class) and as an openwifi platform.
 
 !!! warning "ANTSDR RF-switch frequency limitation"
-    The stock ANTSDR RF front-end switch is **hardcoded to the high band and only passes 3–6 GHz**, so frequencies below 3 GHz are blocked. A known TODO is to add RF-switch control to the device tree so the switch tracks the tuned frequency. Until then, plan to test ANTSDR in the 5 GHz band. (`openwifi-hw/boards/antsdr/notes.md`.)
+    The stock ANTSDR RF front-end switch is **hardcoded to the high band and only passes 3–6 GHz**, so frequencies below 3 GHz are blocked. A known TODO is to add RF-switch control to the device tree so the switch tracks the tuned frequency. Until then, plan to test ANTSDR in the 5 GHz band. (`openwifi/kernel_boot/boards/antsdr/notes.md`.)
 
 ### ANTSDR-E200 (MicroPhase)
 
