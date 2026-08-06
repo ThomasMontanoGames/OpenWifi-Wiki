@@ -1,3 +1,21 @@
+# MkDocs build output.
 site/
+
+# Local scratch notes, never published.
 internal/
+
+# Plugin cache (git-revision-date-localized). It writes its own .gitignore
+# containing "*", but that file is generated, so do not rely on it alone.
+.cache/
+
+# Python bytecode from the sync helper script.
 __pycache__/
+
+# Local virtualenvs for the MkDocs toolchain.
+.venv/
+venv/
+
+# Windows Explorer artifacts. docs/assets/img/ holds several dozen images, and
+# browsing that folder is enough for Explorer to drop a Thumbs.db in it.
+Thumbs.db
+desktop.ini

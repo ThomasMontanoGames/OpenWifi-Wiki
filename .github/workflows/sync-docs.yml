@@ -9,10 +9,16 @@ name: Sync wiki with openwifi upstream
 
 on:
   schedule:
-    # Every 6 hours. Pushes upstream are rare, so this is generous. Change to
-    # "0 */12 * * *" to halve the number of runs. GitHub delays scheduled runs
-    # under load, so treat the cadence as approximate rather than exact.
-    - cron: "0 */6 * * *"
+    # Once a day. Pushes to the source repos are rare, often weeks apart, so a
+    # daily check is plenty and a backlog of several commits batches into one
+    # session anyway.
+    #
+    # The odd time is deliberate. GitHub queues every scheduled run in the world
+    # and delays them under load, and the top of the hour is the worst offender.
+    # 04:17 UTC is off-peak, so the run starts closer to on time. Treat the
+    # cadence as approximate regardless: a delayed run loses nothing, because the
+    # state file means the next one picks up exactly where this one stopped.
+    - cron: "17 4 * * *"
   workflow_dispatch:
     inputs:
       dry_run:
