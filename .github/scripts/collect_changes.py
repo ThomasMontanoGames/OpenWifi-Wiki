@@ -571,17 +571,26 @@ def main():
     new_state = {"version": 1, "repos": dict(state.get("repos", {}))}
 
     for repo in repos:
-        last_sha = (state.get("repos", {}).get(repo) or {}).get("last_sha")
+        previous = state.get("repos", {}).get(repo) or {}
+        last_sha = previous.get("last_sha")
         result = collect_repo(repo, last_sha,
                               dry_run_latest=args.dry_run_latest,
                               max_commits=args.max_commits)
 
         # State always advances to the head we just looked at, including when
         # every commit was filtered out. That is what makes reruns idempotent.
+        #
+        # The timestamp only moves when the SHA does. Refreshing it on every run
+        # would make the state file differ after every nightly poll, which turns
+        # the "nothing changed, nothing to commit" guard in the workflow into a
+        # commit a day. `last_synced` therefore means "when upstream last moved
+        # under us", not "when the cron last fired". The workflow run history
+        # already records the latter.
         if not args.dry_run_latest:
+            unchanged = result["head_sha"] == last_sha
             new_state["repos"][repo] = {
                 "last_sha": result["head_sha"],
-                "last_synced": now,
+                "last_synced": previous.get("last_synced", now) if unchanged else now,
                 "default_branch": result["branch"],
             }
 
