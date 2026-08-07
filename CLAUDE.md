@@ -136,7 +136,11 @@ Rules:
 - Lowercase, words separated by hyphens. No spaces, no underscores, no
   uppercase.
 - Use the same type vocabulary as the commit types below.
-- Never commit directly to `master`. Every change arrives as a pull request.
+- The automated upstream-sync agent must always open a pull request and never
+  commit directly to `master` (see [Automated upstream sync](#automated-upstream-sync)).
+  The human maintainer editing locally may push a small, self-reviewed change
+  straight to `master`. When in doubt, or when the change is large or touches
+  the nav or the build, use a branch and a pull request.
 
 ### Commit messages
 
