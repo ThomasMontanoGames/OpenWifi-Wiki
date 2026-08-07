@@ -3,12 +3,12 @@
   "repos": {
     "open-sdr/openwifi": {
       "last_sha": "f6674ee555733665ab9f42feb181e6d70e7c91ca",
-      "last_synced": "2026-08-06T17:41:42+00:00",
+      "last_synced": "2026-08-07T05:50:14+00:00",
       "default_branch": "master"
     },
     "open-sdr/openwifi-hw": {
       "last_sha": "d047d794195beb72e12d2a9a6c205c16399cf288",
-      "last_synced": "2026-08-06T17:41:42+00:00",
+      "last_synced": "2026-08-07T05:50:14+00:00",
       "default_branch": "master"
     }
   }
