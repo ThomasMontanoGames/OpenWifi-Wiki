@@ -112,8 +112,8 @@ The FPGA design decomposes into modules whose names match their source files (in
 
 - **`openofdm_tx`**: the OFDM transmitter. Turns a MAC frame into baseband IQ samples (PHY header, pilots, scrambling, modulation). Based on original openwifi work.
 - **`openofdm_rx`**: the OFDM receiver. Detects the preamble, synchronizes, estimates the channel, equalizes, and decodes (including a Xilinx Viterbi decoder). Derived from the [openofdm](https://github.com/open-sdr/openofdm) project (originally by [jhshi](https://github.com/jhshi/openofdm), with openwifi's improvements on the `dot11zynq` branch).
-- **`tx_intf`**: the transmit interface: DMA from the processor into per-queue FIFOs, the DAC feed, per-packet PHY configuration, and the four hardware TX queues.
-- **`rx_intf`**: the receive interface: takes decoded packets and side-channel data, attaches metadata (TSF timestamp, RSSI, length, MCS, FCS status), and DMAs them up to the processor.
+- **`tx_intf`**: the transmit interface: DMA from the processor into per-queue FIFOs, the TX BRAM that `openofdm_tx` reads the frame out of, the DAC feed that carries the modulated IQ back out, per-packet PHY configuration, and the four hardware TX queues.
+- **`rx_intf`**: the receive interface: unpacks the ADC samples into IQ streams for `openofdm_rx`, takes the decoded packets and side-channel data back, attaches metadata (TSF timestamp, RSSI, length, MCS, FCS status), and DMAs them up to the processor.
 - **`xpu`**: the "eXtensible Processing Unit," which holds the **real-time low MAC**: the CSMA/CA state machine, NAV, DIFS/SIFS/EIFS timing, the TSF timer, hardware ACK generation and reception, retransmission, RTS/CTS, packet filtering, and the time-slicing gates for the TX queues. Anything that has to happen within microseconds is implemented in `xpu`.
 
 There's also a **`side_ch`** (side channel) module used for research features (CSI and IQ capture), described on the [Research Features](Research-Features.md) page.
@@ -126,10 +126,10 @@ openwifi's FPGA design is built **on top of the [Analog Devices HDL reference de
 
 ## Packet flow at a glance
 
-Before the step-by-step walkthroughs, here is the whole packet path in one picture. Transmit runs top to bottom from Linux out to the antenna, and receive runs back up.
+Before the step-by-step walkthroughs, here is the whole packet path in one picture. The transmit lane runs left to right from Linux out to the antenna, and the receive lane runs back. Note where the two interface cores sit: `tx_intf` and `rx_intf` are the cores that touch the AD9361 converters, and the OFDM cores hang off them rather than sitting between them and the radio.
 
 <figure>
-<svg viewBox="0 0 920 300" role="img" aria-label="openwifi packet flow. Transmit (top): Linux mac80211 openwifi_tx to tx_intf (four TX queues) to openofdm_tx to the AD9361 and antenna. Receive (bottom): AD9361 to openofdm_rx to rx_intf to the openwifi rx interrupt back up to Linux." style="width:100%;height:auto;max-width:1000px;font-family:inherit;font-size:13px">
+<svg viewBox="0 0 920 400" role="img" aria-label="openwifi packet flow. Transmit lane: Linux mac80211 to openwifi_tx to tx_intf (four TX queues) to the DAC and the AD9361. openofdm_tx sits above tx_intf, which hands it the frame bytes and gets modulated IQ back. Receive lane: the AD9361 through the ADC to rx_intf, then to the openwifi rx interrupt and back up to Linux. openofdm_rx sits below rx_intf, which hands it the ADC IQ and gets decoded bytes back." style="width:100%;height:auto;max-width:1000px;font-family:inherit;font-size:13px">
   <defs>
     <marker id="pf-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.6"/>
@@ -137,60 +137,80 @@ Before the step-by-step walkthroughs, here is the whole packet path in one pictu
   </defs>
 
   <!-- lane labels -->
-  <text x="391" y="88" text-anchor="middle" font-size="10" font-weight="700" fill="#0d9488" letter-spacing="0.08em">TRANSMIT →</text>
-  <text x="391" y="262" text-anchor="middle" font-size="10" font-weight="700" fill="#4f5bd5" letter-spacing="0.08em">← RECEIVE</text>
+  <text x="72" y="112" text-anchor="middle" font-size="10" font-weight="700" fill="#0d9488" letter-spacing="0.08em">TRANSMIT →</text>
+  <text x="72" y="298" text-anchor="middle" font-size="10" font-weight="700" fill="#4f5bd5" letter-spacing="0.08em">← RECEIVE</text>
 
   <!-- endpoints (span both lanes) -->
-  <rect x="12" y="96" width="120" height="144" rx="12" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3"/>
-  <text x="72" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Linux</text>
-  <text x="72" y="180" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7">mac80211</text>
-  <rect x="788" y="96" width="120" height="144" rx="12" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.3" stroke-dasharray="4 3"/>
-  <text x="848" y="162" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">AD9361 RF</text>
-  <text x="848" y="180" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7">→ antenna</text>
+  <rect x="12" y="124" width="120" height="152" rx="12" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.4" stroke-width="1.3"/>
+  <text x="72" y="194" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">Linux</text>
+  <text x="72" y="212" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7">mac80211</text>
+  <rect x="788" y="124" width="120" height="152" rx="12" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <text x="848" y="194" text-anchor="middle" font-size="13" font-weight="700" fill="currentColor">AD9361 RF</text>
+  <text x="848" y="212" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.7">→ antenna</text>
 
   <!-- TX lane arrows -->
   <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
-    <line x1="132" y1="122" x2="150" y2="122" marker-end="url(#pf-arrow)"/>
-    <line x1="288" y1="122" x2="322" y2="122" marker-end="url(#pf-arrow)"/>
-    <line x1="460" y1="122" x2="494" y2="122" marker-end="url(#pf-arrow)"/>
-    <line x1="632" y1="122" x2="788" y2="122" marker-end="url(#pf-arrow)"/>
+    <line x1="132" y1="150" x2="160" y2="150" marker-end="url(#pf-arrow)"/>
+    <line x1="298" y1="150" x2="330" y2="150" marker-end="url(#pf-arrow)"/>
+    <line x1="468" y1="150" x2="540" y2="150" marker-end="url(#pf-arrow)"/>
+    <line x1="600" y1="150" x2="788" y2="150" marker-end="url(#pf-arrow)"/>
   </g>
   <!-- TX boxes (teal) -->
-  <rect x="150" y="96" width="138" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="219" y="117" text-anchor="middle" font-size="12" font-weight="700" fill="#0d9488">openwifi_tx()</text>
-  <text x="219" y="132" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">driver builds config</text>
-  <rect x="322" y="96" width="138" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="391" y="117" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">tx_intf</text>
-  <text x="391" y="132" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">4 TX queues, DMA</text>
-  <rect x="494" y="96" width="138" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="563" y="117" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">openofdm_tx</text>
-  <text x="563" y="132" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">OFDM modulate</text>
+  <rect x="160" y="124" width="138" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="229" y="145" text-anchor="middle" font-size="12" font-weight="700" fill="#0d9488">openwifi_tx()</text>
+  <text x="229" y="160" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">driver builds config</text>
+  <rect x="330" y="124" width="138" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="399" y="145" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">tx_intf</text>
+  <text x="399" y="160" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">4 TX queues, DMA</text>
+  <rect x="540" y="132" width="60" height="36" rx="18" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text x="570" y="155" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.85">DAC</text>
+
+  <!-- openofdm_tx hangs off tx_intf -->
+  <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
+    <line x1="370" y1="124" x2="370" y2="88" marker-end="url(#pf-arrow)"/>
+    <line x1="428" y1="88" x2="428" y2="124" marker-end="url(#pf-arrow)"/>
+  </g>
+  <text x="364" y="110" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">frame bytes</text>
+  <text x="434" y="110" font-size="10" fill="currentColor" fill-opacity="0.75">IQ</text>
+  <rect x="330" y="36" width="138" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="399" y="57" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">openofdm_tx</text>
+  <text x="399" y="72" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">OFDM modulate</text>
 
   <!-- RX lane arrows (right to left) -->
   <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
-    <line x1="788" y1="214" x2="632" y2="214" marker-end="url(#pf-arrow)"/>
-    <line x1="494" y1="214" x2="460" y2="214" marker-end="url(#pf-arrow)"/>
-    <line x1="322" y1="214" x2="288" y2="214" marker-end="url(#pf-arrow)"/>
-    <line x1="150" y1="214" x2="132" y2="214" marker-end="url(#pf-arrow)"/>
+    <line x1="788" y1="250" x2="600" y2="250" marker-end="url(#pf-arrow)"/>
+    <line x1="540" y1="250" x2="468" y2="250" marker-end="url(#pf-arrow)"/>
+    <line x1="330" y1="250" x2="298" y2="250" marker-end="url(#pf-arrow)"/>
+    <line x1="160" y1="250" x2="132" y2="250" marker-end="url(#pf-arrow)"/>
   </g>
   <!-- RX boxes (indigo) -->
-  <rect x="494" y="188" width="138" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="563" y="209" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f5bd5">openofdm_rx</text>
-  <text x="563" y="224" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">sync · decode</text>
-  <rect x="322" y="188" width="138" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="391" y="209" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f5bd5">rx_intf</text>
-  <text x="391" y="224" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">+ metadata · DMA</text>
-  <rect x="150" y="188" width="138" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="219" y="209" text-anchor="middle" font-size="12" font-weight="700" fill="#4f5bd5">rx interrupt</text>
-  <text x="219" y="224" text-anchor="middle" font-size="8.5" fill="currentColor" fill-opacity="0.7">openwifi_rx_interrupt</text>
+  <rect x="540" y="232" width="60" height="36" rx="18" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text x="570" y="255" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.85">ADC</text>
+  <rect x="330" y="224" width="138" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="399" y="245" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f5bd5">rx_intf</text>
+  <text x="399" y="260" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">+ metadata · DMA</text>
+  <rect x="160" y="224" width="138" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="229" y="245" text-anchor="middle" font-size="12" font-weight="700" fill="#4f5bd5">rx interrupt</text>
+  <text x="229" y="260" text-anchor="middle" font-size="8.5" fill="currentColor" fill-opacity="0.7">openwifi_rx_interrupt</text>
+
+  <!-- openofdm_rx hangs off rx_intf -->
+  <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.6" fill="none">
+    <line x1="370" y1="276" x2="370" y2="312" marker-end="url(#pf-arrow)"/>
+    <line x1="428" y1="312" x2="428" y2="276" marker-end="url(#pf-arrow)"/>
+  </g>
+  <text x="364" y="298" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">ADC IQ</text>
+  <text x="434" y="298" font-size="10" fill="currentColor" fill-opacity="0.75">decoded bytes</text>
+  <rect x="330" y="312" width="138" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="399" y="333" text-anchor="middle" font-size="12.5" font-weight="700" fill="#4f5bd5">openofdm_rx</text>
+  <text x="399" y="348" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">sync · decode</text>
 </svg>
-<figcaption><em>The packet path. <strong>Top (teal) is transmit:</strong> the driver's <code>openwifi_tx()</code> hands a frame through <code>tx_intf</code>'s four TX queues and <code>openofdm_tx</code> to the AD9361. The <code>xpu</code> core releases it when CSMA/CA allows, then raises <code>openwifi_tx_interrupt</code> with the result. <strong>Bottom (indigo) is receive:</strong> <code>openofdm_rx</code> decodes, <code>rx_intf</code> attaches TSF/RSSI/MCS/FCS metadata and DMAs the frame up, and <code>openwifi_rx_interrupt</code> hands it to Linux.</em></figcaption>
+<figcaption><em>The packet path. <strong>Teal is transmit:</strong> the driver's <code>openwifi_tx()</code> DMAs a frame into one of <code>tx_intf</code>'s four TX queues, <code>openofdm_tx</code> reads the bytes out and hands modulated IQ back, and <code>tx_intf</code> drives the DAC. The <code>xpu</code> core releases the packet when CSMA/CA allows, then raises <code>openwifi_tx_interrupt</code> with the result. <strong>Indigo is receive:</strong> <code>rx_intf</code> takes the IQ from the ADC and passes it to <code>openofdm_rx</code>, which decodes and hands the bytes back, then <code>rx_intf</code> attaches TSF/RSSI/MCS/FCS metadata and DMAs the frame up to <code>openwifi_rx_interrupt</code>.</em></figcaption>
 </figure>
 
 ## The receive path, step by step
 
-1. A signal arrives at the AD9361 and is delivered to the FPGA as IQ samples.
-2. `openofdm_rx` detects, synchronizes, and decodes it. Whether the FCS/CRC passes or fails, the packet is offered up if the current frame-filtering rules allow it (in monitor mode, everything is allowed, even bad-CRC frames and control frames like ACKs).
+1. A signal arrives at the AD9361 and is delivered to the FPGA as ADC samples. `rx_intf` unpacks them into per-antenna IQ streams and feeds them to the demodulator.
+2. `openofdm_rx` detects, synchronizes, and decodes it, and hands the bytes back to `rx_intf`. Whether the FCS/CRC passes or fails, the packet is offered up if the current frame-filtering rules allow it (in monitor mode, everything is allowed, even bad-CRC frames and control frames like ACKs).
 3. `rx_intf` writes the packet plus metadata into a DMA buffer and raises an interrupt.
 4. The driver's `openwifi_rx_interrupt()` runs: it pulls the raw buffer, parses out the inserted metadata (TSF timestamp, raw RSSI that it corrects to dBm per band/channel, length, MCS, FCS-valid flag), and hands the packet and its metadata to Linux via `ieee80211_rx_irqsafe()`.
 
@@ -202,7 +222,8 @@ The [exact 16-byte metadata layout](Driver-Architecture.md#the-receive-path-insi
 2. The driver reads what it needs from the 802.11 header and mac80211 metadata: length and MCS, unicast vs broadcast, whether an ACK is required and the maximum number of retransmissions the FPGA may attempt, which TX queue / time slice to use, whether RTS/CTS or CTS-to-self protection applies, and whether the driver should insert a sequence number.
 3. It picks one of four TX rings (by Linux priority, or by destination MAC when time slicing is active) and writes the frame into a buffer descriptor.
 4. It writes the per-packet FPGA configuration (so the FPGA generates the right PHY header, etc.) and fires a DMA transfer into one of the four FPGA TX queues. The packet may not go out immediately: the FPGA sends it when the channel and the CSMA state machine allow.
-5. When the FPGA finishes sending, it raises an interrupt. `openwifi_tx_interrupt()` reads back the result (success or failure, meaning whether an ACK was received, and how many retransmissions happened) and reports it to Linux via `ieee80211_tx_status_irqsafe()`.
+5. When it is released, `openofdm_tx` reads the frame out of the TX BRAM inside `tx_intf` and hands the modulated IQ back, and `tx_intf` drives it into the DAC.
+6. When the FPGA finishes sending, it raises an interrupt. `openwifi_tx_interrupt()` reads back the result (success or failure, meaning whether an ACK was received, and how many retransmissions happened) and reports it to Linux via `ieee80211_tx_status_irqsafe()`.
 
 The ring sizes, the index cross-checking, and the queue-mapping hook are covered on [The Linux Driver](Driver-Architecture.md#the-transmit-path-inside-the-driver).
 

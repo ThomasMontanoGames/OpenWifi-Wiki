@@ -6,10 +6,12 @@ This is the material you want when you are about to modify the PHY or the real-t
 
 ## The signal chain
 
-The six cores form a transmit chain and a receive chain that meet at the AD9361 RF front end, with the `xpu` real-time MAC orchestrating everything and `side_ch` tapping the receiver for research capture:
+The six cores form a transmit chain and a receive chain that meet at the AD9361 RF front end, with the `xpu` real-time MAC orchestrating everything and `side_ch` tapping the receiver for research capture.
+
+`tx_intf` and `rx_intf` are **not** links in a straight line between the processor and the converters. Each one sits on **both** sides of its OFDM core: `tx_intf` takes the frame in over DMA, hands the bytes to `openofdm_tx`, takes the modulated IQ back, and is itself what drives the DAC. `rx_intf` takes the IQ in from the ADC, hands it to `openofdm_rx`, takes the decoded bytes back, and DMAs them to Linux.
 
 <figure>
-<svg viewBox="0 0 880 430" role="img" aria-label="openwifi FPGA signal chain: the xpu real-time MAC orchestrates a transmit chain (Linux to tx_intf to openofdm_tx to DAC to AD9361 RF) and a receive chain (AD9361 to ADC to rx_intf to openofdm_rx to Linux), while side_ch taps the receiver to capture CSI and IQ." style="width:100%;height:auto;max-width:1080px;font-family:inherit;font-size:13px">
+<svg viewBox="0 0 880 470" role="img" aria-label="openwifi FPGA signal chain. The main chain runs Linux to tx_intf to DAC to AD9361 RF to ADC to rx_intf to Linux. openofdm_tx hangs off tx_intf below it: tx_intf hands it the frame bytes and it hands back modulated IQ, which tx_intf sends on to the DAC. openofdm_rx hangs off rx_intf below it: rx_intf hands it the ADC IQ and it hands back decoded bytes, which rx_intf DMAs up to Linux. The xpu real-time MAC sits above the chain and side_ch taps the receiver to capture CSI and IQ." style="width:100%;height:auto;max-width:1080px;font-family:inherit;font-size:13px">
   <defs>
     <marker id="ipc-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.6"/>
@@ -17,80 +19,95 @@ The six cores form a transmit chain and a receive chain that meet at the AD9361 
   </defs>
 
   <!-- xpu: the orchestrator, on top -->
-  <rect x="124" y="40" width="642" height="58" rx="12" fill="#c2740a" fill-opacity="0.08" stroke="#c2740a" stroke-opacity="0.6" stroke-width="1.5"/>
-  <text x="445" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#c2740a">xpu · real-time MAC</text>
-  <text x="445" y="85" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.8">CSMA/CA · TSF timer · ACK gen/rx · CCA · packet filter · 4× TX-queue gating</text>
+  <rect x="97" y="40" width="686" height="58" rx="12" fill="#c2740a" fill-opacity="0.08" stroke="#c2740a" stroke-opacity="0.6" stroke-width="1.5"/>
+  <text x="440" y="65" text-anchor="middle" font-size="14" font-weight="700" fill="#c2740a">xpu · real-time MAC</text>
+  <text x="440" y="85" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.8">CSMA/CA · TSF timer · ACK gen/rx · CCA · packet filter · 4× TX-queue gating</text>
 
-  <!-- vertical connectors between xpu and the chain -->
+  <!-- xpu to the two interface cores -->
   <g stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" fill="none">
-    <line x1="171" y1="188" x2="171" y2="98" marker-end="url(#ipc-arrow)"/>
-    <line x1="284" y1="98" x2="284" y2="188" marker-end="url(#ipc-arrow)"/>
-    <line x1="710" y1="188" x2="710" y2="98" marker-end="url(#ipc-arrow)"/>
+    <line x1="263" y1="188" x2="263" y2="98" marker-start="url(#ipc-arrow)" marker-end="url(#ipc-arrow)"/>
+    <line x1="617" y1="188" x2="617" y2="98" marker-end="url(#ipc-arrow)"/>
   </g>
-  <text x="163" y="132" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">status /</text>
-  <text x="163" y="144" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">timing</text>
-  <text x="292" y="132" font-size="10" fill="currentColor" fill-opacity="0.75">TX gating /</text>
-  <text x="292" y="144" font-size="10" fill="currentColor" fill-opacity="0.75">timing</text>
-  <text x="718" y="132" font-size="10" fill="currentColor" fill-opacity="0.75">demod</text>
-  <text x="718" y="144" font-size="10" fill="currentColor" fill-opacity="0.75">status</text>
+  <text x="271" y="132" font-size="10" fill="currentColor" fill-opacity="0.75">queue gating ·</text>
+  <text x="271" y="144" font-size="10" fill="currentColor" fill-opacity="0.75">ACK into TX BRAM</text>
+  <text x="609" y="132" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">ADC IQ for</text>
+  <text x="609" y="144" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">CCA / RSSI</text>
 
-  <!-- main signal chain (y=214) -->
-  <!-- inter-node arrows -->
-  <g stroke="currentColor" stroke-opacity="0.6" stroke-width="1.6" fill="none">
-    <line x1="114" y1="214" x2="124" y2="214" marker-end="url(#ipc-arrow)"/>
-    <line x1="218" y1="214" x2="228" y2="214" marker-end="url(#ipc-arrow)"/>
-    <line x1="340" y1="214" x2="350" y2="214" marker-end="url(#ipc-arrow)"/>
-    <line x1="394" y1="214" x2="402" y2="214" marker-end="url(#ipc-arrow)"/>
-    <line x1="488" y1="214" x2="496" y2="214" marker-end="url(#ipc-arrow)"/>
-    <line x1="540" y1="214" x2="550" y2="214" marker-end="url(#ipc-arrow)"/>
-    <line x1="644" y1="214" x2="654" y2="214" marker-end="url(#ipc-arrow)"/>
-    <line x1="766" y1="214" x2="776" y2="214" marker-end="url(#ipc-arrow)"/>
+  <!-- xpu to the two OFDM cores, routed around the outside -->
+  <g stroke="currentColor" stroke-opacity="0.5" stroke-width="1.4" fill="none">
+    <path d="M197,328 H64 V70 H97" marker-end="url(#ipc-arrow)"/>
+    <path d="M683,328 H816 V70 H783" marker-end="url(#ipc-arrow)"/>
   </g>
-  <text x="119" y="205" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.6">DMA</text>
-  <text x="771" y="205" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.6">DMA</text>
+  <text x="72" y="294" font-size="10" fill="currentColor" fill-opacity="0.75">tx start / done</text>
+  <text x="808" y="294" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">demod status</text>
+
+  <!-- main chain: Linux · tx_intf · DAC · AD9361 · ADC · rx_intf · Linux (y=214) -->
+  <g stroke="currentColor" stroke-opacity="0.6" stroke-width="1.6" fill="none">
+    <line x1="177" y1="214" x2="211" y2="214" marker-end="url(#ipc-arrow)"/>
+    <line x1="315" y1="214" x2="335" y2="214" marker-end="url(#ipc-arrow)"/>
+    <line x1="379" y1="214" x2="397" y2="214" marker-end="url(#ipc-arrow)"/>
+    <line x1="483" y1="214" x2="501" y2="214" marker-end="url(#ipc-arrow)"/>
+    <line x1="545" y1="214" x2="565" y2="214" marker-end="url(#ipc-arrow)"/>
+    <line x1="669" y1="214" x2="703" y2="214" marker-end="url(#ipc-arrow)"/>
+  </g>
+  <text x="194" y="206" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.6">DMA</text>
+  <text x="686" y="206" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.6">DMA</text>
 
   <!-- Linux (TX) -->
-  <rect x="54" y="188" width="60" height="52" rx="10" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.3"/>
-  <text x="84" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Linux</text>
+  <rect x="97" y="188" width="80" height="52" rx="10" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.3"/>
+  <text x="137" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Linux</text>
   <!-- tx_intf (teal) -->
-  <rect x="124" y="188" width="94" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="171" y="209" text-anchor="middle" font-size="13" font-weight="700" fill="#0d9488">tx_intf</text>
-  <text x="171" y="224" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">TX BRAM · fuzzer</text>
-  <!-- openofdm_tx (teal) -->
-  <rect x="228" y="188" width="112" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="284" y="209" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">openofdm_tx</text>
-  <text x="284" y="224" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">IFFT · FEC · mod</text>
+  <rect x="211" y="188" width="104" height="52" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="263" y="209" text-anchor="middle" font-size="13" font-weight="700" fill="#0d9488">tx_intf</text>
+  <text x="263" y="224" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">TX BRAM · DAC feed</text>
   <!-- DAC (external, dashed) -->
-  <rect x="350" y="194" width="44" height="40" rx="20" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.2" stroke-dasharray="4 3"/>
-  <text x="372" y="218" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.85">DAC</text>
+  <rect x="335" y="194" width="44" height="40" rx="20" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text x="357" y="218" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.85">DAC</text>
   <!-- AD9361 (external, dashed) -->
-  <rect x="402" y="194" width="86" height="40" rx="20" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.4" stroke-dasharray="4 3"/>
-  <text x="445" y="218" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">AD9361 RF</text>
+  <rect x="397" y="194" width="86" height="40" rx="20" fill="currentColor" fill-opacity="0.06" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.4" stroke-dasharray="4 3"/>
+  <text x="440" y="218" text-anchor="middle" font-size="11.5" font-weight="600" fill="currentColor">AD9361 RF</text>
   <!-- ADC (external, dashed) -->
-  <rect x="496" y="194" width="44" height="40" rx="20" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.2" stroke-dasharray="4 3"/>
-  <text x="518" y="218" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.85">ADC</text>
+  <rect x="501" y="194" width="44" height="40" rx="20" fill="currentColor" fill-opacity="0.05" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.2" stroke-dasharray="4 3"/>
+  <text x="523" y="218" text-anchor="middle" font-size="11" fill="currentColor" fill-opacity="0.85">ADC</text>
   <!-- rx_intf (indigo) -->
-  <rect x="550" y="188" width="94" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="597" y="209" text-anchor="middle" font-size="13" font-weight="700" fill="#4f5bd5">rx_intf</text>
-  <text x="597" y="224" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">unpack · metadata</text>
-  <!-- openofdm_rx (indigo) -->
-  <rect x="654" y="188" width="112" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
-  <text x="710" y="209" text-anchor="middle" font-size="12" font-weight="700" fill="#4f5bd5">openofdm_rx</text>
-  <text x="710" y="224" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">sync · eq · Viterbi</text>
+  <rect x="565" y="188" width="104" height="52" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="617" y="209" text-anchor="middle" font-size="13" font-weight="700" fill="#4f5bd5">rx_intf</text>
+  <text x="617" y="224" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">ADC unpack · metadata</text>
   <!-- Linux (RX) -->
-  <rect x="776" y="188" width="60" height="52" rx="10" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.3"/>
-  <text x="806" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Linux</text>
+  <rect x="703" y="188" width="80" height="52" rx="10" fill="currentColor" fill-opacity="0.04" stroke="currentColor" stroke-opacity="0.35" stroke-width="1.3"/>
+  <text x="743" y="218" text-anchor="middle" font-size="12" font-weight="600" fill="currentColor">Linux</text>
+
+  <!-- the two OFDM cores hang off their interface core -->
+  <g stroke="currentColor" stroke-opacity="0.6" stroke-width="1.6" fill="none">
+    <line x1="239" y1="240" x2="239" y2="300" marker-end="url(#ipc-arrow)"/>
+    <line x1="287" y1="300" x2="287" y2="240" marker-end="url(#ipc-arrow)"/>
+    <line x1="593" y1="240" x2="593" y2="300" marker-end="url(#ipc-arrow)"/>
+    <line x1="641" y1="300" x2="641" y2="240" marker-end="url(#ipc-arrow)"/>
+  </g>
+  <text x="233" y="274" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">frame bytes</text>
+  <text x="293" y="274" font-size="10" fill="currentColor" fill-opacity="0.75">IQ</text>
+  <text x="587" y="274" text-anchor="end" font-size="10" fill="currentColor" fill-opacity="0.75">IQ</text>
+  <text x="647" y="274" font-size="10" fill="currentColor" fill-opacity="0.75">bytes · fcs_ok</text>
+
+  <!-- openofdm_tx (teal) -->
+  <rect x="197" y="300" width="132" height="56" rx="10" fill="#0d9488" fill-opacity="0.05" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="263" y="323" text-anchor="middle" font-size="12.5" font-weight="700" fill="#0d9488">openofdm_tx</text>
+  <text x="263" y="339" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">FEC · mod · IFFT</text>
+  <!-- openofdm_rx (indigo) -->
+  <rect x="551" y="300" width="132" height="56" rx="10" fill="#4f5bd5" fill-opacity="0.05" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="617" y="323" text-anchor="middle" font-size="12" font-weight="700" fill="#4f5bd5">openofdm_rx</text>
+  <text x="617" y="339" text-anchor="middle" font-size="9" fill="currentColor" fill-opacity="0.7">sync · eq · Viterbi</text>
 
   <!-- side_ch tap + box -->
-  <path d="M710,240 V322 H525 V356" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" fill="none" marker-end="url(#ipc-arrow)"/>
-  <text x="618" y="314" text-anchor="middle" font-size="10.5" fill="currentColor" fill-opacity="0.8">csi / equalizer / raw IQ taps</text>
-  <rect x="345" y="356" width="200" height="54" rx="12" fill="#be3d73" fill-opacity="0.06" stroke="#be3d73" stroke-opacity="0.55" stroke-width="1.5"/>
-  <text x="445" y="381" text-anchor="middle" font-size="13" font-weight="700" fill="#be3d73">side_ch · CSI / IQ capture</text>
-  <text x="445" y="398" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">per-packet CSI, equalizer, raw IQ</text>
-  <line x1="345" y1="383" x2="255" y2="383" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.6" marker-end="url(#ipc-arrow)" fill="none"/>
-  <text x="300" y="376" text-anchor="middle" font-size="9.5" fill="currentColor" fill-opacity="0.7">DMA → Linux</text>
+  <path d="M617,356 V374 H440 V392" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" fill="none" marker-end="url(#ipc-arrow)"/>
+  <text x="528" y="368" text-anchor="middle" font-size="10.5" fill="currentColor" fill-opacity="0.8">CSI · equalizer · raw IQ taps</text>
+  <rect x="340" y="392" width="200" height="54" rx="12" fill="#be3d73" fill-opacity="0.06" stroke="#be3d73" stroke-opacity="0.55" stroke-width="1.5"/>
+  <text x="440" y="417" text-anchor="middle" font-size="13" font-weight="700" fill="#be3d73">side_ch · CSI / IQ capture</text>
+  <text x="440" y="434" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">per-packet CSI, equalizer, raw IQ</text>
+  <line x1="340" y1="419" x2="250" y2="419" stroke="currentColor" stroke-opacity="0.6" stroke-width="1.6" marker-end="url(#ipc-arrow)" fill="none"/>
+  <text x="295" y="411" text-anchor="middle" font-size="9.5" fill="currentColor" fill-opacity="0.7">DMA → Linux</text>
 </svg>
-<figcaption><em>The openwifi FPGA signal chain. Solid boxes are openwifi IP cores (teal = transmit, indigo = receive), and dashed pills are the external AD9361 RF front end. The <strong>xpu</strong> real-time MAC orchestrates timing and channel access, while <strong>side_ch</strong> taps the receiver to stream CSI/IQ to the host.</em></figcaption>
+<figcaption><em>The openwifi FPGA signal chain. Solid boxes are openwifi IP cores (teal = transmit, indigo = receive), and dashed pills are the external AD9361 RF front end. The row through the middle is the path to and from the radio, and each OFDM core hangs off its interface core: <code>tx_intf</code> feeds <code>openofdm_tx</code> the frame bytes and sends the IQ it gets back to the DAC, <code>rx_intf</code> feeds <code>openofdm_rx</code> the ADC IQ and DMAs the bytes it gets back to Linux. The <strong>xpu</strong> real-time MAC orchestrates timing and channel access, while <strong>side_ch</strong> taps the receiver to stream CSI/IQ to the host.</em></figcaption>
 </figure>
 
 Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) and, where it moves sample data, an AXI-Stream master/slave for DMA. All are authored by Xianjun Jiao (with Michael Mehari co-authoring `openofdm_tx`). A driver file and its FPGA core usually share a name (`xpu.c` ↔ `xpu.v`), and every register the driver writes (`hw_def.h`) has a matching `slv_regN` in the core's `_s_axi.v`.
