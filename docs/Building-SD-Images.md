@@ -217,7 +217,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
     ./give_board_internet_access.sh wlan0 eth0
     ```
 
-4. Reach **LuCI** at `http://192.168.10.122` (from the PC) or `http://192.168.13.1` (from a device on the `openwrt-openwifi` SSID). There is no password by default. Set one for any real use. Network → Wireless is where you tweak the radio:
+4. Reach **LuCI** at `http://192.168.10.122` (`http://openwrt.lan` should work too) from the PC, or `http://192.168.13.1` from a device on the `openwrt-openwifi` SSID. There is no password by default. Set one for any real use. Network → Wireless is where you tweak the radio:
 
     ![OpenWrt LuCI wireless configuration page](assets/img/openwrt-luci-wireless.png)
 
@@ -228,10 +228,10 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
 **Prerequisite:** Docker on a Linux host (Windows untested). Vivado is **not** required.
 
-1. **Clone** the OpenWrt source with openwifi support (branch `nlnet` = OpenWrt v24.10, Linux 6.6, mac80211 v6.12):
+1. **Clone** the OpenWrt source with openwifi support (branch `openwrt-openwifi_v25.12.5` = OpenWrt v25.12.5, Linux 6.12, mac80211 v6.18):
 
     ```bash
-    git clone --branch nlnet https://github.com/open-sdr/openwrt-openwifi.git
+    git clone --branch openwrt-openwifi_v25.12.5 https://github.com/open-sdr/openwrt-openwifi.git
     ```
 
 2. **Build the container** ([OpenWrt's Docker guide](https://openwrt.org/docs/guide-user/virtualization/obtain.firmware.docker)):
@@ -277,6 +277,9 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
     ```
 
 7. **Flash** the resulting image with the same `dd` procedure as the quick start (mind the different output path). Exit the container with `Ctrl+D` first.
+
+!!! tip "Building for every board at once"
+    `doc/img_build_instruction/openwrt/build_all_images.sh` in the openwifi repo repeats steps 5 to 7 for every `*_defconfig` in `openwrt-openwifi/configs/`, so it produces the whole set of prebuilt images in one run. It runs each board's build inside the same Docker container, retries a failed build up to four times, and writes the results to `./output_images`.
 
 ### OpenWrt tips
 
