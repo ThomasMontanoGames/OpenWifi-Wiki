@@ -3,6 +3,19 @@ name: Deploy wiki to GitHub Pages
 on:
   push:
     branches: [master]
+    # Only rebuild when something that affects the built site changes. A push
+    # that touches only, say, the sync-state file or a script under
+    # .github/scripts/ no longer triggers a deploy. Keep this list in sync with
+    # every build input: page content and assets (docs/), the snippets file
+    # auto-appended to every page (includes/), the config, the dependency pins,
+    # and this workflow itself. workflow_dispatch below stays as a manual
+    # escape hatch to force a deploy regardless of what changed.
+    paths:
+      - docs/**
+      - includes/**
+      - mkdocs.yml
+      - requirements.txt
+      - .github/workflows/deploy.yml
   workflow_dispatch:
 
 permissions:
@@ -26,6 +39,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.x"
+          # Cache the pip download/build of the MkDocs toolchain, keyed on
+          # requirements.txt, so a run only reinstalls when the pins change.
+          cache: pip
       - run: pip install -r requirements.txt
       - run: mkdocs build --strict
       - uses: actions/upload-pages-artifact@v3
