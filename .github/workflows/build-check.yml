@@ -1,0 +1,43 @@
+name: Build check
+
+# Validates that a pull request builds cleanly before it is merged. deploy.yml
+# only runs `mkdocs build --strict` on push to master, so without this a pull
+# request with a broken internal link or a missing anchor would look green and
+# only fail after merge, when the deploy runs. This runs the same strict build
+# on every pull request that touches a build input, which matters most for the
+# automated upstream-sync agent: its pull requests get checked before you
+# review them. Keep the paths list in sync with the one in deploy.yml.
+
+on:
+  pull_request:
+    paths:
+      - docs/**
+      - includes/**
+      - mkdocs.yml
+      - requirements.txt
+      - .github/workflows/build-check.yml
+
+permissions:
+  contents: read
+
+# Cancel an in-progress check when a new commit is pushed to the same pull
+# request, so only the latest revision is validated.
+concurrency:
+  group: build-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so the git-revision-date-localized plugin behaves the
+          # same as it does in the deploy build (a shallow clone has no dates).
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: mkdocs build --strict
