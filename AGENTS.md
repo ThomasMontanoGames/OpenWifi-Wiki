@@ -82,7 +82,9 @@ Three GitHub Actions workflows in `.github/workflows/`:
   setup: **Settings → Pages → Source: GitHub Actions**.
 - `build-check.yml` — runs the same strict build on every pull request that
   touches a build input, so a broken link cannot look green until the deploy
-  fails after merge. Keep its `paths` list in sync with `deploy.yml`.
+  fails after merge. It also fails the build on any code fence without a
+  language tag (an awk check), which MkDocs itself does not check. Keep its
+  `paths` list in sync with `deploy.yml`.
 - `sync-docs.yml` — daily scheduled job (also manually dispatchable with dry-run
   options) that polls the two source repositories via
   `.github/scripts/collect_changes.py` and, when commits look
