@@ -215,7 +215,7 @@ cd openwifi/user_space
 
 The first argument is the built kernel tree, the second is one of the supported board names (`zed_fmcs2`, `zcu102_fmcs2`, `antsdr`, `e310v2`, `sdrpi`, and so on). The script collects every `.ko` from that tree, the module metadata (`Module.symvers`, `modules.builtin`, `modules.builtin.modinfo`, `modules.order`), the kernel image (`Image` for `zcu102_fmcs2`, `uImage` otherwise), and `BOOT.BIN` and the `.dtb` if they exist under `kernel_boot/`. It packs all of that into `kernel_modules.tar.gz` and `scp`s it, plus `populate_kernel_image_module_reboot.sh`, into `/root` on the board.
 
-If you also changed the FPGA or the device tree, generate the new `BOOT.BIN` first with `boot_bin_gen.sh` (see [Software Development Workflow](Software-Development-Workflow.md#updating-the-fpga-image-on-a-running-board)) so that this step picks it up. Otherwise the board keeps its existing `BOOT.BIN` and `.dtb`, which is what you want for a kernel-only change.
+If you also changed the FPGA or the device tree, generate the new `BOOT.BIN` first with `boot_bin_gen.sh` (see [FPGA Development](FPGA-Development.md#updating-the-fpga-image-on-a-running-board)) so that this step picks it up. Otherwise the board keeps its existing `BOOT.BIN` and `.dtb`, which is what you want for a kernel-only change.
 
 **4. Send the rebuilt driver.**
 

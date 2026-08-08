@@ -57,9 +57,21 @@ Run these from the `openwifi-hw` repo root unless noted.
    ./sdk_update.sh $BOARD_NAME $OPENWIFI_HW_IMG_DIR
    ```
 
-   This copies the FPGA image (`.xsa`, `.ltx`) and git info into `$OPENWIFI_HW_IMG_DIR` so the openwifi (software) build can pick it up (see [Software Development Workflow](Software-Development-Workflow.md#updating-the-fpga-image-on-a-running-board)).
+   This copies the FPGA image (`.xsa`, `.ltx`) and git info into `$OPENWIFI_HW_IMG_DIR` so the openwifi (software) build can pick it up (see [below](#updating-the-fpga-image-on-a-running-board)).
 
 Prebuilt outputs for each board live in the **openwifi-hw-img** repo under `boards/$BOARD_NAME/sdk/` (bitstream, ILA `.ltx`, init files) if you'd rather not synthesize.
+
+## Updating the FPGA image on a running board
+
+If you only want to swap the FPGA bitstream (just built, or taken from `openwifi-hw-img`) without a full rebuild:
+
+```bash
+cd openwifi/user_space
+./boot_bin_gen.sh $XILINX_DIR $BOARD_NAME $OPENWIFI_HW_IMG_DIR/boards/$BOARD_NAME/sdk/system_top.xsa
+scp ./system_top.bit.bin root@192.168.10.122:openwifi/
+```
+
+Once `system_top.bit.bin` is in the board's `openwifi/` directory, `wgd.sh` loads it before loading the driver (see [Reloading driver and FPGA without rebooting](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)).
 
 ## Modifying an IP core
 
@@ -101,7 +113,7 @@ When building the **top-level** project, pass the *same* macros to `create_ip_re
 
 (That example turns on ILA/debug in every core. Only `xpu`, `tx_intf`, `rx_intf`, `openofdm_tx`, `openofdm_rx`, and `side_ch` accept macros here.)
 
-Pair these FPGA macros with the driver's conditional-compile arguments (see [Software Development Workflow](Software-Development-Workflow.md#conditional-compilation)) to build matched driver+FPGA variants, then package them with `drv_and_fpga_package_gen.sh`.
+Pair these FPGA macros with the driver's conditional-compile arguments (see [Software Development Workflow](Software-Development-Workflow.md#conditional-compilation)) to build matched driver+FPGA variants, then package them with [`drv_and_fpga_package_gen.sh`](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting).
 
 ## Changing the baseband clock
 

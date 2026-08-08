@@ -1,6 +1,6 @@
 # Software Development Workflow
 
-This page covers the software side of openwifi development. FPGA rebuilds are on the [FPGA Development](FPGA-Development.md) page.
+This page covers the software side of openwifi development: rebuilding and deploying the driver, `sdrctl`, and the other `user_space/` tools. Building the FPGA bitstream and turning it into a loadable image are on the [FPGA Development](FPGA-Development.md) page. This page picks up at getting things onto the board.
 
 The prebuilt SD image may be older than the current repo, so **copy the latest `user_space/` files onto the board** before doing serious work, and rebuild the driver against the matching kernel.
 
@@ -30,7 +30,7 @@ Find the row that matches what you changed and follow its link to the full instr
 | **`side_ch_ctl` source** (`user_space/side_ch_ctl_src/`) | `scp` the source to the board, then **on the board**: `gcc -o side_ch_ctl side_ch_ctl.c` | Run it. If you also changed `side_ch.ko`, reload that like any other driver module ([details](side_ch_ctl-and-the-Side-Channel.md#building)) |
 | **`inject_80211` / `analyze_80211`** (`user_space/inject_80211/`) | `scp` the source to the board, then **on the board**: `make` | Run it ([usage](Operating-Modes.md#packet-injection-and-fuzzing)) |
 | **Helper scripts** (`user_space/*.sh`, `*.py`) | Nothing to compile. Copy them to the board with `scp`. The Python display scripts (`side_info_display.py`, `iq_capture.py`, and others) run on the PC instead | Run them |
-| **FPGA Verilog / IP cores** | On the PC: rebuild the bitstream ([FPGA Development](FPGA-Development.md)), then `boot_bin_gen.sh` and `scp system_top.bit.bin` to the board | `./wgd.sh`, no reboot needed ([details](#updating-the-fpga-image-on-a-running-board)) |
+| **FPGA Verilog / IP cores** | On the PC: rebuild the bitstream ([FPGA Development](FPGA-Development.md)), then `boot_bin_gen.sh` and `scp system_top.bit.bin` to the board | `./wgd.sh`, no reboot needed ([details](FPGA-Development.md#updating-the-fpga-image-on-a-running-board)) |
 | **Kernel config or device tree** | Rebuild on the PC, then transfer and populate on the board. Full step-by-step in [Updating a board to a newly built kernel](Boot-Kernel-Device-Tree.md#updating-a-board-to-a-newly-built-kernel), short form under [bulk helpers](#bulk-update-helpers) | Reboot. A kernel **version** change also needs the driver rebuilt and the populate script run twice |
 
 ### The driver iteration loop
@@ -87,25 +87,13 @@ For print-style debugging, add `printk` calls in the driver and watch them live 
 
 Passing extra arguments to `make_all.sh` turns them into `#define` macros in `pre_def.h`, so you can gate driver code blocks per build. Combined with the FPGA's equivalent Verilog-macro mechanism, this is how you produce feature variants. See [dynamic reloading](#reloading-driver-and-fpga-without-rebooting) for a clean way to keep several variants side by side.
 
-## Updating the FPGA image on a running board
-
-If you only want to swap the FPGA bitstream (built elsewhere, or taken from `openwifi-hw-img`) without a full rebuild:
-
-```bash
-cd openwifi/user_space
-./boot_bin_gen.sh $XILINX_DIR $BOARD_NAME $OPENWIFI_HW_IMG_DIR/boards/$BOARD_NAME/sdk/system_top.xsa
-scp ./system_top.bit.bin root@192.168.10.122:openwifi/
-```
-
-Once `system_top.bit.bin` is in the board's `openwifi/` directory, `wgd.sh` will load it before loading the driver.
-
 ## Reloading driver and FPGA without rebooting
 
 `wgd.sh` can reload the driver and/or FPGA live and switch between different builds with no reboot and no power cycle. Keep your on-board files current with `user_space/` to use it.
 
 **Driver only.** Ensure `system_top.bit.bin` is *not* in the directory. `wgd.sh` then loads just the `.ko` files.
 
-**Driver + FPGA.** Generate the reloadable bitstream and put it beside the driver files:
+**Driver + FPGA.** Generate the reloadable bitstream and put it beside the driver files (the `.xsa` input comes from the FPGA build, see [FPGA Development](FPGA-Development.md#updating-the-fpga-image-on-a-running-board)):
 
 ```bash
 cd openwifi/user_space
@@ -115,12 +103,6 @@ cd openwifi/user_space
 
 Then run `./wgd.sh` on the board as usual.
 
-**From a target directory.** Put a driver+FPGA set in its own directory and load it explicitly, so different versions live in different directories:
-
-```bash
-./wgd.sh $TARGET_DIR
-```
-
 **From a single package file (recommended).** `drv_and_fpga_package_gen.sh` also bundles everything into `drv_and_fpga.tar.gz` (driver `.ko`s, FPGA image, and related source). Rename it meaningfully per branch/variant and load it directly:
 
 ```bash
@@ -128,6 +110,12 @@ Then run `./wgd.sh` on the board as usual.
 ```
 
 This makes it easy to keep, share, and switch between variants. To build a variant, either work on a separate branch, or use conditional-compile arguments (driver `make_all.sh` extra args, FPGA Verilog macros) and rename the package to record which options are on. Note: `drv_and_fpga_package_gen.sh` calls `make_all.sh` without extra args by default, so if you rely on conditional-compile flags, add them there too.
+
+**From a target directory.** Put a driver+FPGA set in its own directory and load it explicitly, so different versions live in different directories:
+
+```bash
+./wgd.sh $TARGET_DIR
+```
 
 **Full `wgd.sh` usage** (also shown by `./wgd.sh -h`):
 
