@@ -12,30 +12,31 @@ A reorganized, plain-language guide to **openwifi**: a free and open-source, Lin
 </div>
 </div>
 
-Unlike a commercial Wi-Fi chip, every layer of openwifi is open and modifiable: the OFDM PHY runs in FPGA fabric, the real-time low MAC (CSMA/CA) runs in FPGA, the driver is a standard Linux SoftMAC driver, and everything above that is the ordinary Linux wireless stack (`hostapd`, `wpa_supplicant`, `iw`, Wireshark, and the rest). That openness makes it useful for wireless research, education, and experimentation.
+Unlike a commercial Wi-Fi chip, every layer of openwifi is open and modifiable: the OFDM PHY and the real-time low MAC (CSMA/CA) run in FPGA fabric, the driver is a standard Linux SoftMAC driver, and everything above that is the ordinary Linux wireless stack (`hostapd`, `wpa_supplicant`, `iw`, Wireshark, and the rest).
 
 !!! warning "Spectrum regulation notice"
     Transmitting over the air is regulated everywhere. It is *your* responsibility to comply with your local spectrum regulations. When in doubt, use coaxial cable with attenuators, or a shielded chamber, instead of antennas.
 
 ## What openwifi can do
 
-- **802.11a/g/n operation** at 20 MHz bandwidth, with the RF front end tunable anywhere from 70 MHz to 6 GHz (2 MHz mode for 802.11ah-style sub-GHz work and 10 MHz for 802.11p vehicular experiments are also possible).
+- **802.11a/g/n operation** at 20 MHz bandwidth, with the RF front end tunable from 70 MHz to 6 GHz (2 MHz mode for 802.11ah-style sub-GHz work and 10 MHz for 802.11p vehicular experiments are also possible).
 - **All the usual roles**: Access Point, client (station), ad-hoc, and monitor mode, all driven by the standard Linux tools.
 - **A real-time low MAC in FPGA**: DCF (CSMA/CA) meeting 802.11 SIFS timing (10 µs in 2.4 GHz, 16 µs in 5 GHz), hardware ACK generation, retransmission, RTS/CTS, and NAV, all configurable or defeatable for experiments.
 - **Research features** that a commercial chip does not provide: per-packet CSI extraction, raw IQ capture with dozens of trigger conditions, packet injection and fuzzing, a CSI fuzzer for privacy research, full-duplex self-reception ("Wi-Fi as radar"), and time-sliced FPGA transmit queues for network slicing.
-- **Solid performance** in its best configuration (802.11n with A-MPDU aggregation): roughly 40–50 Mbps TCP and ~50 Mbps UDP in iperf, EVM around −38 dB, and receiver sensitivity around −92 dBm at MCS0 / −73 dBm at MCS7 (measured with FMCOMMS2 at 2.4 GHz).
+- **Performance** in its best configuration (802.11n with A-MPDU aggregation): 40–50 Mbps TCP and ~50 Mbps UDP in iperf, EVM around −38 dB, and receiver sensitivity around −92 dBm at MCS0 / −73 dBm at MCS7 (measured with FMCOMMS2 at 2.4 GHz).
 
-Note: MIMO and 40 MHz bandwidth are *not* supported in the open-source release. 802.11ax and other advanced features are part of the commercial offering at [openwifi.tech](https://openwifi.tech).
+!!! note "Not in the open-source release"
+    MIMO and 40 MHz bandwidth are *not* supported in the open-source release. 802.11ax and other advanced features are part of the commercial offering at [openwifi.tech](https://openwifi.tech).
 
 ## The repositories
 
-The project is split across four repositories, because the driver and the FPGA design use completely different toolchains. The [Repositories guide](Repositories.md) explains why, and (most usefully) **where to look for whatever you need to change**.
+The project is split across four repositories, because the driver and the FPGA design use different toolchains. The [Repositories guide](Repositories.md) explains why, and **where to look for what you need to change**.
 
 | Repository | Contents |
 |---|---|
 | [openwifi](https://github.com/open-sdr/openwifi) | Linux kernel driver, user-space tools (`sdrctl`, capture scripts, demo scripts), SD-card boot files, documentation |
 | [openwifi-hw](https://github.com/open-sdr/openwifi-hw) | FPGA design: the openwifi [IP cores](FPGA-IP-Cores.md) plus board-level Vivado projects |
-| [openwifi-hw-img](https://github.com/open-sdr/openwifi-hw-img) | Pre-built FPGA bitstreams per board, so you can skip hours of synthesis |
+| [openwifi-hw-img](https://github.com/open-sdr/openwifi-hw-img) | Prebuilt FPGA bitstreams per board, so you can skip hours of synthesis |
 | [openofdm](https://github.com/open-sdr/openofdm) (`dot11zynq` branch, forked from [jhshi/openofdm](https://github.com/jhshi/openofdm)) | The 802.11 OFDM receiver that openwifi's `openofdm_rx` IP is based on |
 
 ## Where to go next
@@ -48,7 +49,7 @@ The project is split across four repositories, because the driver and the FPGA d
 
     ---
 
-    The four repos, why the project is split, and where to look for anything. The best first stop for onboarding.
+    The four repos, why the project is split, and where to look for anything.
 
     [:octicons-arrow-right-24: The Repositories](Repositories.md)
 

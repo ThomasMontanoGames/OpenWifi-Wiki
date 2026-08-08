@@ -1,10 +1,10 @@
 # Software Development Workflow
 
-This page covers the software side of openwifi development: rebuilding the driver, updating a running board without rebooting, rebuilding `sdrctl`, and building a full SD-card image from scratch. FPGA rebuilds are on the [FPGA Development](FPGA-Development.md) page.
+This page covers the software side of openwifi development. FPGA rebuilds are on the [FPGA Development](FPGA-Development.md) page.
 
 The prebuilt SD image may be older than the current repo, so **copy the latest `user_space/` files onto the board** before doing serious work, and rebuild the driver against the matching kernel.
 
-If you are in the middle of editing code and just want the steps, start with the [quick reference](#quick-reference-from-code-change-to-running-board) below and follow its links for detail.
+If you are in the middle of editing code and want the steps, start with the [quick reference](#quick-reference-from-code-change-to-running-board) below and follow its links for detail.
 
 ## Environment setup
 
@@ -17,13 +17,11 @@ export BOARD_NAME=zed_fmcs2                    # your board
 export ARCH_BIT=32                             # 32 for Zynq-7000, 64 for Zynq UltraScale+ (e.g. ZCU102)
 ```
 
-Throughout, **`ARCH_BIT`** is `32` for Zynq-7000 boards and `64` for Zynq UltraScale+ boards (e.g. the ZCU102).
-
 For the exact toolchain, kernel, and image versions these builds expect, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
 
 ## Quick reference: from code change to running board
 
-Keep this section open while you work. Find the row that matches what you changed. Each row links to the full instructions. The commands assume the usual setup: sources on your PC, the board reachable at `192.168.10.122`, and the [environment variables](#environment-setup) set.
+Find the row that matches what you changed and follow its link to the full instructions. The commands assume the usual setup: sources on your PC, the board reachable at `192.168.10.122`, and the [environment variables](#environment-setup) set.
 
 | You changed | Rebuild & deploy | Take effect |
 | --- | --- | --- |
@@ -82,7 +80,8 @@ For print-style debugging, add `printk` calls in the driver and watch them live 
 
 4. On the board, `./wgd.sh` loads the new driver (and reloads the FPGA image if `system_top.bit.bin` is present in the same directory).
 
-> **Symbol/version errors on load** usually mean the kernel in the SD image is older than the one your driver was built against. Fix it by putting the freshly built kernel image into the `BOOT` partition: `adi-linux/arch/arm/boot/uImage` (32-bit) or `adi-linux-64/arch/arm64/boot/Image` (64-bit).
+!!! warning "Symbol/version errors on load mean a kernel mismatch"
+    The kernel in the SD image is usually older than the one your driver was built against. Fix it by putting the freshly built kernel image into the `BOOT` partition: `adi-linux/arch/arm/boot/uImage` (32-bit) or `adi-linux-64/arch/arm64/boot/Image` (64-bit).
 
 ### Conditional compilation
 
@@ -90,7 +89,7 @@ Passing extra arguments to `make_all.sh` turns them into `#define` macros in `pr
 
 ## Updating the FPGA image on a running board
 
-If you just want to swap the FPGA bitstream (built elsewhere, or taken from `openwifi-hw-img`) without a full rebuild:
+If you only want to swap the FPGA bitstream (built elsewhere, or taken from `openwifi-hw-img`) without a full rebuild:
 
 ```bash
 cd openwifi/user_space
@@ -102,7 +101,7 @@ Once `system_top.bit.bin` is in the board's `openwifi/` directory, `wgd.sh` will
 
 ## Reloading driver and FPGA without rebooting
 
-This is the workflow that makes iteration fast. `wgd.sh` can reload the driver and/or FPGA live and switch between different builds with no reboot and no power cycle. Keep your on-board files current with `user_space/` to use it.
+`wgd.sh` can reload the driver and/or FPGA live and switch between different builds with no reboot and no power cycle. Keep your on-board files current with `user_space/` to use it.
 
 **Driver only.** Ensure `system_top.bit.bin` is *not* in the directory. `wgd.sh` then loads just the `.ko` files.
 
@@ -132,11 +131,11 @@ This makes it easy to keep, share, and switch between variants. To build a varia
 
 **Full `wgd.sh` usage** (also shown by `./wgd.sh -h`):
 
-- a numeric first argument sets `test_mode`
-- `remote` downloads the files and then loads them (optionally into a target directory)
-- a directory name loads from that directory
-- a `.tar.gz` file is unpacked and loaded
-- a trailing argument sets `test_mode`
+- no argument: load the driver `.ko` files and the FPGA image (if `system_top.bit.bin` exists) from the current directory, with `test_mode=0`
+- a numeric first argument is assigned to `test_mode` (loads everything from the current directory)
+- `remote` downloads the files and then loads them; an optional second argument names the target directory, an optional third sets `test_mode`
+- any other first argument that is not a `.tar.gz` file is treated as a directory to load from; an optional second argument sets `test_mode`
+- a `.tar.gz` file is unpacked and loaded from the unpacked directory; an optional second argument sets `test_mode`
 
 ### test_mode
 

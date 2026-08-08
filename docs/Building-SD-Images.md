@@ -8,7 +8,7 @@ openwifi boots from an SD card running one of two base operating systems, and yo
 !!! tip "You may not need to build anything"
     Prebuilt images exist for both. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
 
-This page is the step-by-step for building from scratch. It assumes you understand the [boot chain and device tree](Boot-Kernel-Device-Tree.md). For the driver/dev loop see [Software Development Workflow](Software-Development-Workflow.md).
+The builds below assume you understand the [boot chain and device tree](Boot-Kernel-Device-Tree.md). For the driver/dev loop see [Software Development Workflow](Software-Development-Workflow.md).
 
 ## Which one should I build?
 
@@ -16,7 +16,7 @@ This page is the step-by-step for building from scratch. It assumes you understa
 |---|---|---|
 | Feels like | A small Debian/Ubuntu box | A Wi-Fi router (LuCI web UI) |
 | Best for | Research, the app-note workflows, full apt tooling | Router use cases |
-| Build needs | Vivado 2022.2 + Vitis | Just Docker (no Vivado) |
+| Build needs | Vivado 2022.2 + Vitis | Docker only (no Vivado) |
 | openwifi tools | Built on the board | Packaged into the image (in `$PATH`) |
 
 ---
@@ -50,7 +50,7 @@ Mount the card's `BOOT` and `rootfs` partitions on your PC and make these edits.
 
 Add a static `eth0` to `rootfs/etc/network/interfaces`:
 
-```
+```text
 auto lo
 iface lo inet loopback
 auto eth0
@@ -64,13 +64,13 @@ broadcast 192.168.10.255
 
 Enable IP forwarding in `rootfs/etc/sysctl.conf`:
 
-```
+```text
 net.ipv4.ip_forward=1
 ```
 
 Speed up shutdown in `rootfs/etc/systemd/system.conf`:
 
-```
+```text
 DefaultTimeoutStopSec=2s
 ```
 
@@ -178,11 +178,11 @@ Connect a phone or laptop to the **"openwifi"** SSID. You should get a `192.168.
 - The Xilinx **Viterbi decoder halts after ~2 hours** (evaluation license). Reload the FPGA or power-cycle to recover.
 - The **ADRV9361-Z7035 has very low 5 GHz TX power**: keep nodes close on that board.
 
-You now have the same result as a prebuilt card, but built from scratch. See [Getting Started → Start the access point](Getting-Started.md#4-start-the-access-point) for more on the bring-up, and [Research Features](Research-Features.md#csi-channel-state-information) to start capturing CSI.
+See [Getting Started → Start the access point](Getting-Started.md#4-start-the-access-point) for more on the bring-up, and [Research Features](Research-Features.md#csi-channel-state-information) to start capturing CSI.
 
 !!! note "Faster paths"
     - **Prebuilt img:** flash the openwifi prebuilt `.img` (`dd bs=512 count=31116288 …`) and skip to step 4.
-    - **Move a working card to a new board:** just re-do the "configure the board files" step for the new `board_name` on an existing card.
+    - **Move a working card to a new board:** re-do the "configure the board files" step for the new `board_name` on an existing card.
 
 ---
 
@@ -211,7 +211,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
 2. Boot the board. After about a minute an **`openwrt-openwifi`** SSID appears on 2.4 GHz channel 1. Connecting gives you an IP but no internet yet.
 
-3. Give the board (and its clients) internet through your PC. Connect Ethernet (the board assigns your PC `192.168.10.1`), find your interface names with `ip addr`, then run (first argument is the PC's internet-facing interface, second is the board-facing one):
+3. Give the board (and its clients) internet through your PC. Connect Ethernet, and the board assigns your PC `192.168.10.1`. Find your interface names with `ip addr`, then run the script below. Its first argument is the PC's internet-facing interface, the second is the board-facing one:
 
     ```bash
     ./give_board_internet_access.sh wlan0 eth0
@@ -279,11 +279,11 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 7. **Flash** the resulting image with the same `dd` procedure as the quick start (mind the different output path). Exit the container with `Ctrl+D` first.
 
 !!! tip "Building for every board at once"
-    `doc/img_build_instruction/openwrt/build_all_images.sh` in the openwifi repo repeats steps 5 to 7 for every `*_defconfig` in `openwrt-openwifi/configs/`, so it produces the whole set of prebuilt images in one run. It runs each board's build inside the same Docker container, retries a failed build up to four times, and writes the results to `./output_images`.
+    `doc/img_build_instruction/openwrt/build_all_images.sh` in the openwifi repo repeats steps 5 to 7 for every `*_defconfig` in `openwrt-openwifi/configs/`, producing the whole set of prebuilt images in one run under `./output_images`.
 
 ### OpenWrt tips
 
-- **Userspace tools are pre-installed.** The openwifi package puts all `user_space` files under `/root/openwifi` (so the app-note scripts work), and installs the compiled tools (`sdrctl`, `inject_80211`, `analyze_80211`, `side_ch_ctl`) into `/usr/bin`: they're in `$PATH`, so no `./` or specific directory needed.
+- **Userspace tools are pre-installed.** The openwifi package puts all `user_space` files under `/root/openwifi` (so the app-note scripts work), and installs the compiled tools (`sdrctl`, `inject_80211`, `analyze_80211`, `side_ch_ctl`) into `/usr/bin`, so they're in `$PATH`.
 - **Kernel modules are packed in.** No manual copying is needed, and `insmod side_ch` works directly.
 - **SSH uses mDNS:** `ssh root@openwrt.lan`, no password by default.
 - The app-note [IQ and CSI workflows](Research-Features.md) work on OpenWrt with minor differences (e.g. `insmod side_ch iq_len_init=4095`, then `side_ch_ctl` and the host-side Python display scripts as usual).
@@ -292,13 +292,13 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
 To iterate on the openwifi source without rebuilding from git each time, mount local sources into the container. Add to the `docker run` line in `start_docker_openwrt_build.sh`:
 
-```
+```bash
 --volume "$(pwd)/openwifi:/openwifi" \
 ```
 
 then point the package feed at a local checkout by editing OpenWrt's `feeds.conf.default` to replace the git openwifi feed with:
 
-```
+```text
 src-link openwifi /openwrt-openwifi-packages-feed
 ```
 

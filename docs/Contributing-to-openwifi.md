@@ -1,10 +1,10 @@
 # Contributing to openwifi
 
-openwifi is an open project and welcomes contributions: driver fixes, FPGA improvements, new board support, and documentation. This page covers the one legal prerequisite (the CLA), how to set up a development environment, which repository a change belongs in, and where to reach the community. Each repo's own `CONTRIBUTING.md` is the authoritative source. For changes to this wiki rather than to openwifi, see [Contributing to this wiki](#contributing-to-this-wiki) at the end of this page.
+openwifi is an open project and welcomes contributions: driver fixes, FPGA improvements, new board support, and documentation. Each repo's own `CONTRIBUTING.md` is the authoritative source. For changes to this wiki rather than to openwifi, see [Contributing to this wiki](#contributing-to-this-wiki) at the end of this page.
 
 ## 1. Sign the CLA first
 
-Before your **first** contribution to any openwifi repository, you must sign a **Contributor License Agreement** (generated with the [Project Harmony](http://www.harmonyagreements.org/) framework) and email it to **`Filip.Louagie@UGent.be`**:
+Before your **first** contribution to any openwifi repository, you must sign a **CLA** (generated with the [Project Harmony](http://www.harmonyagreements.org/) framework) and email it to **`Filip.Louagie@UGent.be`**:
 
 - **Individual CLA**: for contributions you make personally.
 - **Entity CLA**: if you contribute on behalf of a company or organization.

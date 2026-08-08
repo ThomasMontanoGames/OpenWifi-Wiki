@@ -1,8 +1,8 @@
 # sdrctl and Runtime Control
 
-`sdrctl` is openwifi's own command-line tool for the things standard Linux Wi-Fi tools can't reach: FPGA registers, arbitrary TX/RX frequencies, TX attenuation, MAC-address-based time slicing, and more. It's implemented as an `nl80211` testmode command and reaches the driver (`openwifi_testmode_cmd()` in `sdrctl_intf.c`) through the normal `nl80211 → cfg80211 → mac80211` path.
+`sdrctl` is openwifi's own command-line tool for the things standard Linux Wi-Fi tools can't reach: FPGA registers, arbitrary TX/RX frequencies, TX attenuation, and MAC-address-based time slicing. It's implemented as an `nl80211` testmode command and reaches the driver (`openwifi_testmode_cmd()` in `sdrctl_intf.c`) through the normal `nl80211 → cfg80211 → mac80211` path.
 
-This page is both a tutorial for the common tasks and a reference for the register map. All commands run **on the board**, from the `openwifi` directory.
+All commands run **on the board**, from the `openwifi` directory.
 
 ## Command forms
 
@@ -20,7 +20,8 @@ sdrctl dev sdr0 get reg <module_name> <reg_idx>
 sdrctl dev sdr0 set reg <module_name> <reg_idx> <value>
 ```
 
-> ⚠️ Some registers are written by the driver in real time under mac80211's direction. If you set those by hand, Linux may overwrite them (or your value may destabilize things). When a table says "auto set by …", treat manual writes as experiment-only.
+!!! warning "Linux may overwrite registers you set by hand"
+    Some registers are written by the driver in real time under mac80211's direction. If you set those by hand, Linux may overwrite them (or your value may destabilize things). When a table says "auto set by …", treat manual writes as experiment-only.
 
 ## Module names
 
@@ -38,7 +39,7 @@ The convention throughout: FPGA register *N* for module `foo` is `slv_regN` in `
 
 ## Common runtime tasks (the "frequent tricks")
 
-These are the day-to-day knobs. Most have a convenience script in `user_space/`. The underlying `sdrctl` command is shown where useful.
+These are the day-to-day knobs, most with a convenience script in `user_space/` and the underlying `sdrctl` command shown where useful.
 
 ### TX power / attenuation
 
@@ -46,9 +47,10 @@ These are the day-to-day knobs. Most have a convenience script in `user_space/`.
 ./sdrctl dev sdr0 set reg rf 0 20000     # 20 dB attenuation (unit: dB×1000). Default 0 dB.
 ```
 
-For an initial attenuation at driver-load time, load with `insmod sdr.ko init_tx_att=20000` (you can edit the `insmod` line at the end of `wgd.sh`). To *increase* TX power beyond default you can raise `tx_intf` register 13 (digital IQ gain), though too much hurts EVM and long-packet quality, so tune carefully, or add an external PA.
+For an initial attenuation at driver-load time, load with `insmod sdr.ko init_tx_att=20000` (you can edit the `insmod` line at the end of `wgd.sh`). To *increase* TX power beyond default you can raise `tx_intf` register 13 (digital IQ gain), though too much hurts EVM and long-packet quality, or add an external PA.
 
-> **Cable-test caution:** don't connect two boards by cable *during* setup. AD9361 tuning can emit strong TX that damages the other board's RX. Bring both sides up first, apply attenuation, then connect the cable.
+!!! warning "Do not connect two boards by cable during setup"
+    AD9361 tuning can emit strong TX that damages the other board's RX. Bring both sides up first, apply attenuation, then connect the cable.
 
 ### TX rate / MCS override
 
@@ -134,7 +136,7 @@ Change only the bits you mean to, because other bits of this register have other
 ./sdrctl dev sdr0 set reg xpu 11 25     # 11001: keep the retx setting AND disable ACK TX
 ```
 
-The cleanest place to cap retransmissions is actually the driver, via `retry_limit_raw` (from which `retry_limit_hw_value` is derived) in `openwifi_tx()`.
+The cleanest place to cap retransmissions is the driver, via `retry_limit_raw` (from which `retry_limit_hw_value` is derived) in `openwifi_tx()`.
 
 ### TX LO / RF-port control
 
@@ -282,7 +284,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 | 1 | Pilot scrambler initial state (low 7 bits, default 127) |
 | 2 | Data scrambler initial state (low 7 bits, default 127) |
 
-### `xpu` (low MAC): the big one
+### `xpu` (low MAC)
 
 | reg | Meaning |
 |---|---|

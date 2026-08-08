@@ -197,7 +197,9 @@ mkdocs serve
 
 `--strict` fails on broken internal links and missing anchors, and this is what
 CI runs. Always build with `--strict` before committing a change that touches
-links, anchors, or the nav.
+links, anchors, or the nav. CI additionally fails the build on any code fence
+without a language tag (an awk check in `.github/workflows/build-check.yml`),
+which MkDocs itself does not check.
 
 On the maintainer's Windows machine, MkDocs is not on `PATH` and
 `python -m mkdocs` resolves to the wrong interpreter. Use the `py` launcher

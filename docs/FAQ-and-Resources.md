@@ -4,7 +4,7 @@
 
 ### Is openwifi a real Wi-Fi chip?
 
-It's a full-stack Wi-Fi *design* that runs on FPGA-based SDR hardware, not (yet) a fabricated ASIC. Functionally the FPGA behaves like a Wi-Fi chip: it presents a standard Linux Wi-Fi interface and interoperates with commercial devices. The difference is that every layer is open and modifiable.
+It's a full-stack Wi-Fi design that runs on FPGA-based SDR hardware, not (yet) a fabricated ASIC. Functionally the FPGA behaves like a Wi-Fi chip: it presents a standard Linux Wi-Fi interface and interoperates with commercial devices. The difference is that every layer is open and modifiable.
 
 ### Which 802.11 standards does it support?
 
@@ -16,11 +16,11 @@ Not in the open-source release. openwifi's 11n implements 52 subcarriers, 5/6 co
 
 ### Why won't my 2.4 GHz phone connect, but 5 GHz works?
 
-openwifi is OFDM-only and not backward-compatible with 802.11b, which makes 2.4 GHz association fail. Suppress 11b rates on both ends, or just use 5 GHz. Full details: [Operating Modes → About 802.11b](Operating-Modes.md#about-80211b).
+openwifi is OFDM-only and not backward-compatible with 802.11b, which makes 2.4 GHz association fail. Suppress 11b rates on both ends, or use 5 GHz. Full details: [Operating Modes → About 802.11b](Operating-Modes.md#about-80211b).
 
 ### Can it work outside normal Wi-Fi frequencies?
 
-Yes. The AD9361 tunes 70 MHz–6 GHz. Bring the system up on the nearest legal channel, lock it, then override the RF frequency. See [sdrctl → arbitrary tuning](sdrctl-and-Runtime-Control.md#frequency-restrict-and-arbitrary-tuning). You can also run narrower bandwidths (2 MHz for sub-GHz 802.11ah-style, 10 MHz for 802.11p vehicular). **Mind your local spectrum regulations.**
+Yes. The AD9361 tunes 70 MHz–6 GHz. Bring the system up on the nearest legal channel, lock it, then override the RF frequency. See [sdrctl → arbitrary tuning](sdrctl-and-Runtime-Control.md#frequency-restrict-and-arbitrary-tuning). You can also run narrower bandwidths (2 MHz for sub-GHz 802.11ah-style, 10 MHz for 802.11p vehicular). Mind your local spectrum regulations.
 
 ### My receiver stops working after about two hours. Broken?
 
@@ -28,7 +28,7 @@ No. That's the Xilinx Viterbi decoder evaluation license halting. Reload the FPG
 
 ### Do I need a paid Vivado license?
 
-Only for some boards. Boards with the Zynq-7020 FPGA (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi, and the community 7020 boards) build under the free Vivado tier. ZC706, ZCU102, ADRV9361-Z7035, and RFSoC4x2 need a license to rebuild the FPGA. Either way, the prebuilt images need no license to *run*.
+Only for some boards. Boards with the Zynq-7020 FPGA (ZedBoard, ADRV9364-Z7020, ZC702, `antsdr`, `sdrpi`, and the community 7020 boards) build under the free Vivado tier. ZC706, ZCU102, ADRV9361-Z7035, and RFSoC4x2 need a license to rebuild the FPGA. Either way, the prebuilt images need no license to *run*.
 
 ### I don't have any hardware. Can I still try it?
 
@@ -72,7 +72,7 @@ You can also cite the code base:
 
 ## Selected publications
 
-openwifi is used in a large body of research across several themes. A full, categorized list (Feature/System, TSN/Real-Time, CSI Sensing/Security, Wi-Fi & Cellular 5G/6G) is maintained in [`doc/publications.md`](https://github.com/open-sdr/openwifi/blob/master/doc/publications.md). Highlights:
+A categorized list of research using openwifi (Feature/System, TSN/Real-Time, CSI Sensing/Security, Wi-Fi & Cellular 5G/6G) is in [`doc/publications.md`](https://github.com/open-sdr/openwifi/blob/master/doc/publications.md). Highlights:
 
 - **The founding paper:** Jiao et al., *openwifi: a free and open-source IEEE802.11 SDR implementation on SoC*, VTC2020-Spring.
 - **CSI sensing & privacy:** the CSI fuzzer work (ACM WiSec 2021) and *Privacy Protection in WiFi Sensing via CSI Fuzzing*.

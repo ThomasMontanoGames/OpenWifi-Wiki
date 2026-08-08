@@ -1,8 +1,8 @@
 # Wi-Fi 4 and Wi-Fi 6 Features
 
-The open-source openwifi release implements 802.11a/g plus a **single-stream, 20 MHz subset of 802.11n (Wi-Fi 4)**. Wi-Fi 5 (802.11ac) is skipped entirely, and Wi-Fi 6 (802.11ax) exists only as a commercial offering. This page explains what that means in practice: which Wi-Fi 4 features you actually get, how to switch them on and check that they're working, and where Wi-Fi 6 stands if you need it.
+The open-source openwifi release implements 802.11a/g plus a **single-stream, 20 MHz subset of 802.11n (Wi-Fi 4)**. Wi-Fi 5 (802.11ac) is skipped entirely, and Wi-Fi 6 (802.11ax) exists only as a commercial offering.
 
-The [Architecture page](Architecture.md#what-openwifi-implements-of-80211agn) covers the same feature set from the design side (with the throughput derivation and diagrams). This page is the usage side. If Wi-Fi itself is new to you, start with the primer below. If you know 802.11, skip straight to [the timeline](#where-openwifi-sits-in-the-wi-fi-timeline).
+The [Architecture page](Architecture.md#what-openwifi-implements-of-80211agn) covers the same feature set from the design side (with the throughput derivation and diagrams), and this page is the usage side. If Wi-Fi itself is new to you, start with the primer below. If you know 802.11, skip straight to [the timeline](#where-openwifi-sits-in-the-wi-fi-timeline).
 
 ## A short 802.11 primer
 
@@ -62,7 +62,7 @@ This section is for people who know RF and digital modulation but haven't worked
 <figcaption>Left: through Wi-Fi 5, every transmission occupies the whole channel and stations take turns through contention. Right: Wi-Fi 6 OFDMA assigns resource units to several stations within one transmission, and a single station can still get the full channel.</figcaption>
 </figure>
 
-**Features are negotiated, not just implemented.** Stations advertise what they support in capability fields inside management frames (beacons, probe responses, association frames). A feature is only used on a link when *both* ends advertise it. Keep this in mind throughout the Wi-Fi 4 section: some things exist in openwifi's FPGA but sit idle until you tell the driver to advertise them, short guard interval being the main example.
+**Features are negotiated, not just implemented.** Stations advertise what they support in capability fields inside management frames (beacons, probe responses, association frames). A feature is only used on a link when *both* ends advertise it. Some things exist in openwifi's FPGA but sit idle until you tell the driver to advertise them, short guard interval being the main example.
 
 ## Where openwifi sits in the Wi-Fi timeline
 
@@ -85,7 +85,7 @@ Wi-Fi 6 is different. It reworks the OFDM numerology and adds OFDMA, which subdi
 
 ## Wi-Fi 4 (802.11n) in the open-source release
 
-802.11n's formal name for its feature set is **HT, high throughput**, and that is the label used in practice: driver logs mark 802.11n frames `ht1` and legacy 11a/g frames `ht0`, tools take `-m n` or "HT" flags, and capability fields are called "HT capabilities". The amendment added five PHY improvements and frame aggregation at the MAC. Here is each one with its openwifi status and the knob that controls it:
+802.11n's formal name for its feature set is **HT, high throughput**, and that is the label used in practice: driver logs mark 802.11n frames `ht1` and legacy 11a/g frames `ht0`, tools take `-m n` or "HT" flags, and capability fields are called "HT capabilities". The amendment added five PHY improvements and frame aggregation at the MAC:
 
 | 802.11n feature | What it does | In openwifi? | How you control it |
 |---|---|---|---|
@@ -122,7 +122,7 @@ By default Linux's `minstrel_ht` rate control walks this table automatically bas
 
 Everything above (MCS, guard interval, aggregation) is a property of one **PPDU**: the complete PHY frame openwifi's FPGA puts on the air. A PPDU is a PHY *preamble* followed by a *Data field*, and it does not travel alone: the transmitter first wins the channel through DIFS-plus-backoff contention, and after a fixed SIFS gap the receiver answers. The figure below walks down through those three levels.
 
-The key thing to read off it is where the fixed overhead described in the primer actually lives. Every generation keeps the same **legacy preamble** (L-STF, L-LTF, L-SIG, ~20 µs) so that any nearby 802.11a/g device can still detect the frame and defer. 802.11n then adds ~8 µs of HT training and 802.11ax ~16 µs of HE training on top. That preamble, the SIFS, and the acknowledgement are paid once per PPDU no matter how much data rides inside it, which is why packing many MPDUs into one Data field as an A-MPDU (bottom row) saves so much.
+Every generation keeps the same **legacy preamble** (L-STF, L-LTF, L-SIG, ~20 µs) so that any nearby 802.11a/g device can still detect the frame and defer. 802.11n then adds ~8 µs of HT training and 802.11ax ~16 µs of HE training on top. That preamble, the SIFS, and the acknowledgement are paid once per PPDU no matter how much data rides inside it, which is why packing many MPDUs into one Data field as an A-MPDU (bottom row) saves so much.
 
 <figure>
 <svg viewBox="0 0 920 462" role="img" aria-label="Three levels of an openwifi transmission. Top: channel access, where a PPDU is preceded by DIFS and backoff and followed after a SIFS gap by a Block ACK. Middle: the PPDU field structure for 802.11a/g, 802.11n and 802.11ax, all sharing the same legacy preamble (L-STF, L-LTF, L-SIG) and then adding HT or HE training fields before the Data field. Bottom: the Data field is an A-MPDU of several MPDU subframes, each made of an MPDU delimiter, MAC header, frame body and FCS, acknowledged together by one Block ACK." style="width:100%;height:auto;max-width:1080px;font-family:inherit;font-size:13px">
@@ -240,7 +240,7 @@ The `1` becomes the `test_mode` module parameter of `sdr.ko`. With bit 0 set, th
 
 ### Short guard interval
 
-The guard interval is the cyclic prefix between OFDM symbols. It exists to absorb multipath: as long as all significant echoes arrive within the GI, they cause no inter-symbol interference. 802.11n's short GI halves it from 800 to 400 ns, trading multipath margin for about 11% more throughput.[^std] That trade is usually safe on short, clean links (a lab bench, a cabled setup) and riskier in reflective environments.
+802.11n's short GI halves the guard interval from 800 to 400 ns, trading multipath margin for about 11% more throughput.[^std] That trade is usually safe on short, clean links (a lab bench, a cabled setup) and riskier in reflective environments.
 
 <figure markdown>
 ![800 ns normal vs 400 ns short guard interval](assets/img/guard-interval.png){ width="650" }
@@ -254,7 +254,7 @@ openwifi's PHY handles 400 ns short-GI frames in both directions, and short GI i
 ./wgd.sh 3        # bits 0+1: aggregation AND short GI
 ```
 
-Note that the written documentation only describes bit 0. Bit 1 comes straight from the driver source (`test_mode&2` in `sdr.c`), so treat it as a code-level switch that may move.[^sdrc]
+The written documentation only describes bit 0. Bit 1 comes straight from the driver source (`test_mode&2` in `sdr.c`), so treat it as a code-level switch that may move.[^sdrc]
 
 You can also use short GI without any capability negotiation:
 
@@ -281,7 +281,7 @@ In monitor mode, `inject_80211 -m n -r <0..7>` selects the MCS per injected fram
 
 The quickest way to see whether HT, aggregation, and short GI are really in use is the driver's RX print in `dmesg` (enable it via the dmesg print control, see [Troubleshooting → driver dmesg logging](Troubleshooting.md#driver-dmesg-logging)):
 
-```
+```text
 sdr,sdr openwifi_rx: 270B ht1aggr1/0 sgi1 650M FC0088 ...
 ```
 

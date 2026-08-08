@@ -10,7 +10,7 @@ A few reminders that apply to every mode:
 - The **ADRV9361-Z7035 has very low 5 GHz TX power**, so keep nodes close on that board.
 - Any ssh session below can instead be a USB-UART serial console.
 
-## Access Point
+## Access point
 
 The `fosdem.sh` demo already does this: it runs `hostapd` with `hostapd-openwifi.conf` (SSID "openwifi"), a DHCP server, and a webserver. To do it by hand or understand the pieces:
 
@@ -21,7 +21,7 @@ cd openwifi
 cat /proc/interrupts        # run a few times: "sdr,tx_itrpt1" count should keep growing
 ```
 
-The growing TX-interrupt count is the AP transmitting its periodic beacon. The script runs stock `hostapd`. Edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
+The script runs stock `hostapd`. Edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
 
 ## Client (station)
 
@@ -38,7 +38,7 @@ wpa_supplicant -i sdr0 -c wpa-openwifi.conf
 
 Adjust the SSID/passphrase in the config file for your target network (`wpa-openwifi.conf` for an openwifi AP, or edit `wpa-connect.conf` for a different network). A successful association prints something like:
 
-```
+```text
 sdr0: SME: Trying to authenticate with 66:55:44:33:22:8c (SSID='openwifi' freq=5220 MHz)
 sdr0: Associated with 66:55:44:33:22:8c
 sdr0: CTRL-EVENT-CONNECTED - Connection to 66:55:44:33:22:8c completed
@@ -69,7 +69,7 @@ iwconfig sdr0
 
 Look for a randomly generated Cell ID in the `iwconfig` output:
 
-```
+```text
 sdr0  IEEE 802.11  ESSID:"sdr-ad-hoc"
       Mode:Ad-Hoc  Frequency:5.22 GHz  Cell: 92:CA:14:27:1E:B0
 ```
@@ -101,7 +101,7 @@ iw dev sdr0 interface add mon0 type monitor && ifconfig mon0 up
 
 ## Packet injection and fuzzing
 
-Because the whole PHY is open, openwifi is a strong platform for physical-layer testing and fuzzing: you can craft frames and control FPGA behavior directly, rather than measuring through many stack layers as `ping`/`iperf` force you to. openwifi ships an `inject_80211` tool (adapted from *packetspammer*).
+Because the whole PHY is open, you can craft frames and control FPGA behavior directly for physical-layer testing and fuzzing, rather than measuring through many stack layers as `ping`/`iperf` force you to. openwifi ships an `inject_80211` tool (adapted from packetspammer).
 
 **Build it on the board:**
 
@@ -136,7 +136,7 @@ Watch them arrive on any other device sniffing channel 11.
 | `-s` | Payload size (bytes) |
 | `-d` | Inter-packet delay (µs) |
 
-To customize full frame contents, edit the `ieee_hdr_*` byte arrays in `inject_80211.c` (note the byte/bit ordering isn't always intuitive versus the standard).
+To customize full frame contents, edit the `ieee_hdr_*` byte arrays in `inject_80211.c`. The byte/bit ordering is not always intuitive versus the standard.
 
 **Controlling ACK behavior for injection.** Even in monitor mode, the FPGA will still auto-transmit an ACK when it receives a matching data frame. To stop that (usually what you want when injecting/fuzzing), disable hardware ACK TX:
 
@@ -156,7 +156,7 @@ tcpdump -i mon0 -w trace.pcap 'wlan addr1 ff:ff:ff:ff:ff:ff and wlan addr2 66:55
 analyze_80211 trace.pcap
 ```
 
-(The addresses `ff:ff:ff:ff:ff:ff` / `66:55:44:33:22:11` are the injector's defaults.) There's also `owfuzz`, a third-party 802.11 protocol fuzzer built on openwifi, if you want a ready-made fuzzing framework.
+(The addresses `ff:ff:ff:ff:ff:ff` / `66:55:44:33:22:11` are the injector's defaults.) For a ready-made fuzzing framework, see `owfuzz`, a third-party 802.11 protocol fuzzer built on openwifi.
 
 ## About 802.11b
 

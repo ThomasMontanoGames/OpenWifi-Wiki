@@ -2,7 +2,7 @@
 
 openwifi runs **stock** `hostapd` and `wpa_supplicant`, the same binaries Ubuntu or Debian install for any Wi-Fi card. Nothing in them knows that the radio underneath is an FPGA. That is the point of the design, and it is also the thing that trips people up: when a link fails to come up, it is rarely obvious whether the daemon, the kernel, the driver, or the PHY is at fault.
 
-This page explains what the two daemons do, how they reach openwifi (which is never directly), and the cases where you do have to edit their configuration or build a patched version. For the mode-by-mode command sequences, see [Operating Modes](Operating-Modes.md).
+For the mode-by-mode command sequences, see [Operating Modes](Operating-Modes.md).
 
 ## What each daemon does
 
@@ -16,7 +16,7 @@ Both are user-space programs that implement the parts of 802.11 that are too slo
 | Runs | The authenticator half of the WPA handshake | The supplicant half of the WPA handshake |
 | Decides | Which SSID, channel, rates, and capabilities to advertise | Which network to join, and with which credentials |
 
-The division to keep in mind is that a daemon is busy for the first second or so of a connection and then goes quiet. Once association and key exchange finish, every data frame goes from your application down through the kernel network stack and out through the driver without the daemon being involved at all. If `ping` is slow or lossy on an associated link, the daemon is almost certainly not the cause. If association never completes, it usually is worth reading its output.
+A daemon is busy for the first second or so of a connection and then goes quiet. If `ping` is slow or lossy on an associated link, the daemon is almost certainly not the cause. If association never completes, read the daemon's output first.
 
 ## How they reach openwifi
 
@@ -78,11 +78,11 @@ They do not talk to openwifi, and they cannot. A daemon speaks the generic **nl8
 <figcaption>Two separate paths into <code>mac80211</code>. The daemons (left) use nl80211 and are active only while a link is being set up or torn down. Applications (right) use ordinary sockets, and their traffic reaches the driver without any daemon involvement. Everything above the driver box is generic Linux.</figcaption>
 </figure>
 
-Four consequences follow from this, and each one answers a question that comes up regularly.
+Four consequences follow from this.
 
 **You do not need an openwifi build of either daemon.** `apt-get install hostapd` is what the [SD image build](Building-SD-Images.md) does, and it is enough. The one exception is the 11b-suppressing `wpa_supplicant` described below, and that patch is about rate advertisement, not about openwifi.
 
-**The daemons cannot see or set openwifi's own knobs.** TX power, RX gain, CCA threshold, ACK behavior, and the FPGA registers are reached through a completely separate channel, `sdrctl`, which uses an nl80211 *testmode* command. See [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md). So a config file will never contain an openwifi register setting, and `sdrctl` will never change an SSID.
+**The daemons cannot see or set openwifi's own settings.** TX power, RX gain, CCA threshold, ACK behavior, and the FPGA registers are reached through a completely separate channel, `sdrctl`, which uses an nl80211 *testmode* command. See [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md). So a config file will never contain an openwifi register setting, and `sdrctl` will never change an SSID.
 
 **hostapd does not transmit beacons.** It hands `mac80211` the beacon contents, and `mac80211` plus the driver put a beacon on the air on a timer. That is why the beacon check in the [AP walkthrough](Operating-Modes.md#access-point) watches the TX interrupt count in `/proc/interrupts` rather than anything hostapd prints.
 
@@ -122,7 +122,7 @@ Staying in 5 GHz sidesteps the whole problem, which is why the demo defaults to 
 
 **Forcing legacy 802.11a/g.** Use `fosdem-11ag.sh`, or set `ieee80211n=0` in the hostapd config yourself. Useful when you are trying to tell an 11n problem apart from an RF problem. The 11n side is covered in [Wi-Fi 4 and Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md).
 
-Note that A-MPDU aggregation is **not** a hostapd setting. It is enabled when the driver loads, with `./wgd.sh 1`. See [Turning on A-MPDU aggregation](Wi-Fi-4-and-Wi-Fi-6.md#turning-on-a-mpdu-aggregation).
+A-MPDU aggregation is **not** a hostapd setting. It is enabled when the driver loads, with `./wgd.sh 1`. See [Turning on A-MPDU aggregation](Wi-Fi-4-and-Wi-Fi-6.md#turning-on-a-mpdu-aggregation).
 
 ## Debugging a link that will not come up
 
@@ -141,6 +141,6 @@ Read the output against these three cases.
 
 If a config file sets `ctrl_interface`, you can also attach `wpa_cli` or `hostapd_cli` to a running daemon to inspect state and issue commands without restarting it.
 
-Two openwifi-specific traps are worth knowing. Reloading the driver destroys and recreates `sdr0`, so any daemon that was running is now attached to nothing and has to be restarted, as noted in the [driver iteration loop](Software-Development-Workflow.md#the-driver-iteration-loop). And NetworkManager will fight `wpa_supplicant` for control of the interface, which is why the client walkthrough starts with `service network-manager stop`.
+Two openwifi-specific traps: reloading the driver destroys and recreates `sdr0`, so any daemon that was running is now attached to nothing and has to be restarted, as noted in the [driver iteration loop](Software-Development-Workflow.md#the-driver-iteration-loop). And NetworkManager will fight `wpa_supplicant` for control of the interface, which is why the client walkthrough starts with `service network-manager stop`.
 
 For anything below the daemon, the driver's own logging is on the [Troubleshooting](Troubleshooting.md#driver-dmesg-logging) page.

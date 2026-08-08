@@ -1,14 +1,12 @@
 # FPGA Development
 
-This page covers building and modifying the FPGA design in the [openwifi-hw](https://github.com/open-sdr/openwifi-hw) repository: full bitstream builds, editing and simulating individual IP cores, conditional compilation, changing the baseband clock, migrating to new Vivado/ADI releases, and porting to a new board.
+This page covers building and modifying the FPGA design in the [openwifi-hw](https://github.com/open-sdr/openwifi-hw) repository.
 
 The design is built **on top of the [Analog Devices HDL reference designs](https://github.com/analogdevicesinc/hdl)** (see the [FPGA overview](FPGA/index.md) for how that fits together and where the [IP Cores](FPGA-IP-Cores.md) reference picks up). For anything that isn't openwifi-specific, the ADI wiki is often the fastest source of answers.
 
 ## Prerequisites
 
-First set up the shared host toolchain: see [Environment Setup](Development-Environment-Setup.md) (Vivado 2022.2 with Vitis, Ubuntu packages such as `libtinfo5`, and the `XILINX_DIR` and `BOARD_NAME` environment variables). FPGA builds additionally need:
-
-- The **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado. (This eval license is why a running board's decoder halts after ~2 hours, see [Troubleshooting](Troubleshooting.md).)
+First set up the shared host toolchain: see [Environment Setup](Development-Environment-Setup.md) (Vivado 2022.2 with Vitis, Ubuntu packages such as `libtinfo5`, and the `XILINX_DIR` and `BOARD_NAME` environment variables). FPGA builds additionally need the **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado (this eval license is why a running board's decoder halts after ~2 hours, see [Troubleshooting](Troubleshooting.md)).
 
 Set `export XILINX_DIR=/opt/Xilinx` and `export BOARD_NAME=<your board>` before building. If the software and FPGA repos disagree on the Vivado version, match the one the repo README states at the time you build (see [Environment Setup](Development-Environment-Setup.md#xilinx-toolchain-vivado-vitis)).
 
@@ -44,15 +42,13 @@ Run these from the `openwifi-hw` repo root unless noted.
 
    If Vitis HLS errors with `'2xxxxxxxxx' is an invalid argument. Please specify an integer value`, apply the fix in [Xilinx article 76960](https://support.xilinx.com/s/article/76960).
 
-5. **In Vivado**, open the project and generate the bitstream:
+5. **In Vivado** (optional, for GUI iteration): the previous `create_ip_repo.sh` step already invoked this automatically. To do it by hand, open the project and generate the bitstream:
 
-   ```
+   ```tcl
    source ../openwifi.tcl
    # then in the GUI: Generate Bitstream
    # then: File → Export → Export Hardware → Include bitstream → Finish
    ```
-
-   (The previous `create_ip_repo.sh` step invokes this automatically. The manual steps are for when you're iterating in the GUI.)
 
 6. **Stash the outputs** where the software build can find them:
 
@@ -124,7 +120,16 @@ git checkout dot11zynq_hls
 
 Continue the build. Before generating the bitstream, select `openofdm_rx` under *IP Status* and click *Upgrade Selected*.
 
-**To modify the HLS code:** run `./get_ip_openofdm_rx.sh`, check out `dot11zynq_hls`, then in Vitis HLS create a project importing the source files (except `*_test.cpp`) from the [`ch_gain_cal`](https://github.com/open-sdr/openofdm/tree/dot11zynq_hls/hls/ch_gain_cal) or [`equalizer`](https://github.com/open-sdr/openofdm/tree/dot11zynq_hls/hls/equalizer) folder, choosing that module as top level and its `*_test.cpp` as testbench, and selecting the FPGA part for your board. After C-sim and co-sim pass, *Export RTL* produces a ZIP whose `hdl/verilog` folder replaces the corresponding folder under `openwifi-hw/ip/openofdm_rx/hls/.../hdl/verilog/`. Update `openofdm_rx.tcl` to include the new files ([example](https://github.com/open-sdr/openofdm/blob/dot11zynq_hls/openofdm_rx.tcl#L268)). If you changed the top-level function arguments, wire them up in [`dot11.v`](https://github.com/open-sdr/openofdm/blob/dot11zynq_hls/verilog/dot11.v). Then resume the normal build from "generate ip_repo." Background: the [FCCM 2023 poster](https://arxiv.org/abs/2305.13351).
+**To modify the HLS code:**
+
+1. Run `./get_ip_openofdm_rx.sh` and check out `dot11zynq_hls`.
+2. In Vitis HLS, create a project importing the source files (except `*_test.cpp`) from the [`ch_gain_cal`](https://github.com/open-sdr/openofdm/tree/dot11zynq_hls/hls/ch_gain_cal) or [`equalizer`](https://github.com/open-sdr/openofdm/tree/dot11zynq_hls/hls/equalizer) folder. Choose that module as top level and its `*_test.cpp` as testbench, and select the FPGA part for your board.
+3. Run C-sim and co-sim. When they pass, *Export RTL* produces a ZIP whose `hdl/verilog` folder replaces the corresponding folder under `openwifi-hw/ip/openofdm_rx/hls/.../hdl/verilog/`.
+4. Update `openofdm_rx.tcl` to include the new files ([example](https://github.com/open-sdr/openofdm/blob/dot11zynq_hls/openofdm_rx.tcl#L268)).
+5. If you changed the top-level function arguments, wire them up in [`dot11.v`](https://github.com/open-sdr/openofdm/blob/dot11zynq_hls/verilog/dot11.v).
+6. Resume the normal build from "generate ip_repo".
+
+Background: the [FCCM 2023 poster](https://arxiv.org/abs/2305.13351).
 
 ## Migrating to a new Vivado / ADI release
 

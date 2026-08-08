@@ -1,12 +1,10 @@
 # The Linux Driver
 
-This is a reference for the **openwifi Linux driver**, the code in [`openwifi/driver/`](https://github.com/open-sdr/openwifi/tree/master/driver) that sits between Linux `mac80211` and the FPGA. If [Architecture](Architecture.md) is the map of how Linux, the driver, and the FPGA fit together, and [FPGA IP Cores](FPGA-IP-Cores.md) zooms into the FPGA half, this page zooms into the software half: which kernel modules exist, how the driver finds its hardware at boot, how a packet moves through the transmit and receive rings, and where the register definitions live.
-
-This is the material you want when you are about to modify the driver, when you are chasing a load-order problem, or when you want to know what `sdr.ko` is actually doing between a `mac80211` callback and an AXI register write. For rebuilding and deploying the driver, see [Software Development Workflow](Software-Development-Workflow.md).
+This is a reference for the **openwifi Linux driver**, the code in [`openwifi/driver/`](https://github.com/open-sdr/openwifi/tree/master/driver) that sits between Linux `mac80211` and the FPGA: which kernel modules exist, how the driver finds its hardware at boot, how a packet moves through the transmit and receive rings, and where the register definitions live. For rebuilding and deploying the driver, see [Software Development Workflow](Software-Development-Workflow.md).
 
 ## One driver, six kernel modules
 
-The most common early surprise is that openwifi is not a single kernel module. `sdr.ko` is the main driver, and it depends on five small per-core modules that each wrap register access to one FPGA core. This is why [`wgd.sh`](Software-Development-Workflow.md) inserts a list of modules rather than just one, and why load order matters.
+openwifi is not a single kernel module. `sdr.ko` is the main driver, and it depends on five small per-core modules that each wrap register access to one FPGA core. This is why [`wgd.sh`](Software-Development-Workflow.md) inserts a list of modules rather than just one, and why load order matters.
 
 Each per-core module binds to its own device-tree node through its own `compatible` string and exports an API struct that `sdr.ko` calls into. Apart from `sdr.ko` itself, every module is a thin wrapper around register access to one core, so the last column below lists what those registers control.
 
@@ -27,7 +25,7 @@ The top-level `driver/Makefile` builds all six in one line:
 obj-m += sdr.o openofdm_rx/openofdm_rx.o openofdm_tx/openofdm_tx.o tx_intf/tx_intf.o rx_intf/rx_intf.o xpu/xpu.o
 ```
 
-**`side_ch.ko` is deliberately not in that list.** It has its own `make_driver.sh` and is built and loaded separately, because you load it on demand for research capture rather than always running it. See [FPGA IP Cores](FPGA-IP-Cores.md#side_ch-the-csi-iq-capture-side-channel) and [Research Features](Research-Features.md).
+`side_ch.ko` is **deliberately not in that list**. It has its own `make_driver.sh` and is built and loaded separately, because you load it on demand for research capture rather than always running it. See [FPGA IP Cores](FPGA-IP-Cores.md#side_ch-the-csi-iq-capture-side-channel) and [Research Features](Research-Features.md).
 
 !!! note "`driver/xilinx_dma/` is a historical leftover"
     You will find an `xilinx_dma` directory in the driver tree. Its own README says openwifi no longer maintains a modified Xilinx DMA driver and that the stock in-kernel one is used instead. Do not treat it as a live component.
@@ -49,7 +47,7 @@ The driver also takes two module parameters worth knowing: `test_mode` (bit 0 en
 
 ## The mac80211 callback surface
 
-`mac80211` defines a set of callbacks (`ieee80211_ops`) that every SoftMAC driver implements. That shared contract is why one kernel can drive Wi-Fi chips from many vendors. `sdr.c` implements the relevant subset in `openwifi_ops`, and each callback turns into FPGA register writes or DMA activity.
+`mac80211` defines a set of callbacks (`ieee80211_ops`) that every SoftMAC driver implements. `sdr.c` implements the relevant subset in `openwifi_ops`, and each callback turns into FPGA register writes or DMA activity.
 
 | Callback | When Linux calls it |
 |---|---|
@@ -111,7 +109,7 @@ Receive does not use a descriptor ring in the same way. The driver allocates a *
 
 The rate field at offset 14 is packed. The low 5 bits are the rate index (valid range 8 to 23), where bit 4 doubles as the HT flag, so an index of 16 or above means 802.11n. Bit 5 is short guard interval, bit 6 is A-MPDU aggregation, bit 7 marks the last subframe of an aggregate, and the high byte carries the measured phase offset.
 
-**The FCS-OK bit is not in the header.** It is the top bit (`0x80`) of the *last byte of the frame payload*, at offset `16 + len - 1`. This is easy to miss when writing a custom parser.
+The FCS-OK bit is **not in the header**. It is the top bit (`0x80`) of the *last byte of the frame payload*, at offset `16 + len - 1`. This is easy to miss when writing a custom parser.
 
 The driver then converts `rssi_half_db` into dBm using the per-band and per-channel `rssi_correction` value, and hands the frame plus its metadata to Linux with `ieee80211_rx_irqsafe()`. The packet-exist flag at offset 10 is how the handler knows whether a slot actually holds a new packet, since the FPGA writes into the buffer asynchronously.
 

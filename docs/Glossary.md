@@ -1,6 +1,6 @@
 # Glossary
 
-openwifi sits at the intersection of Wi-Fi (802.11), FPGA/SoC design, and the Linux wireless stack, so the documentation is dense with acronyms from all three worlds. This page defines the terms used across the wiki, with openwifi-specific context where it helps. Use your browser's search, or the site search, to jump to a term.
+openwifi sits at the intersection of Wi-Fi (802.11), FPGA/SoC design, and the Linux wireless stack, so the documentation is dense with acronyms from all three worlds. This page defines the terms used across the wiki. Use your browser's search, or the site search, to jump to a term.
 
 A-MPDU
 :   Aggregated MAC Protocol Data Unit. An 802.11n frame-aggregation method that packs several MPDUs (each with its own header/CRC) into one transmission, so a single error costs only one retransmission. openwifi supports this experimentally (`./wgd.sh 1`). See [Architecture](Architecture.md#what-openwifi-implements-of-80211agn).
@@ -138,7 +138,7 @@ ILA
 :   Integrated Logic Analyzer: a Xilinx debug core inserted into the FPGA to observe internal signals in real time. openwifi can build with ILA cores enabled. See [FPGA Development](FPGA-Development.md#debugging-on-hardware).
 
 IQ samples
-:   In-phase/Quadrature samples: the complex representation of a baseband signal. openwifi can capture raw IQ (with rich triggering) via the side channel.
+:   In-phase/Quadrature samples: the complex representation of a baseband signal. openwifi can capture raw IQ via the side channel.
 
 Kuiper (ADI Kuiper)
 :   Analog Devices' Debian/Ubuntu-based Linux distribution for its SDR platforms, and the classic openwifi runtime environment (the alternative is OpenWrt). See [Building SD Images](Building-SD-Images.md).

@@ -1,8 +1,8 @@
 # Application Notes
 
-openwifi ships a set of **application notes** in [`openwifi/doc/app_notes/`](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/README.md): short, task-focused write-ups for specific scenarios and modes. Their material is spread across the thematic wiki pages (Operating Modes, Research Features, sdrctl, and so on), and this page indexes every note in one place.
+openwifi ships a set of **application notes** in [`openwifi/doc/app_notes/`](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/README.md): short, task-focused write-ups for specific scenarios and modes. Their material is spread across the thematic wiki pages ([Operating Modes](Operating-Modes.md), [Research Features](Research-Features.md), [sdrctl](sdrctl-and-Runtime-Control.md), and so on), and this page indexes every note in one place.
 
-Each entry below expands to a short summary and the note's key figures. Use **Read more** to jump to the fuller treatment in context, or **Original note** to open the app note on GitHub.
+Each entry below expands to a short summary and the note's key figures. Use **Read more** to jump to the full section on that topic, or **Original note** to open the app note on GitHub.
 
 ## Getting on the air: two-SDR links
 
@@ -36,7 +36,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![CSI radar waterfall](assets/img/csi-screen-shot-radar-matlab.jpg)
 
 ??? note "CSI fuzzer"
-    Inject a controlled *artificial* channel response at the transmitter so an eavesdropper's CSI-based sensing is corrupted while normal communication continues. Backed by peer-reviewed privacy research. Includes commands to sweep and apply fuzzer parameters and to watch the effect via self-monitoring.
+    Inject a controlled *artificial* channel response at the transmitter so an eavesdropper's CSI-based sensing is corrupted while normal communication continues. Includes commands to sweep and apply fuzzer parameters and to watch the effect via self-monitoring.
 
     [Read more →](Research-Features.md#csi-fuzzer-privacy-protection) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/csi_fuzzer.md)
 
@@ -56,7 +56,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![Live IQ display](assets/img/iq-screen-shot.jpg)
 
 ??? note "ACK timing verification by IQ capture"
-    Trigger IQ capture on the ACK-send event to directly measure the Rx-ACK-GAP and Tx-ACK-GAP against the ~16 µs SIFS, across MCS and packet lengths. The technique is precise enough to have caught real AGC-related timing bugs.
+    Trigger IQ capture on the ACK-send event to directly measure the Rx-ACK-GAP and Tx-ACK-GAP against the ~16 µs SIFS, across MCS and packet lengths.
 
     [Read more →](Research-Features.md#ack-timing-measurement) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_ack_timing.md)
 
@@ -72,7 +72,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![Dual-antenna capture: rx0 vs rx1](assets/img/iq_2ant-screen-shot.jpg)
 
 ??? note "Wi-Fi packet, CSI and IQ self-loopback test"
-    Verify the TX→RX path end-to-end at the packet, CSI, and IQ level, either over the air (antennas close together) or entirely inside the FPGA. The FPGA-internal loopback provides an ideal, distortion-free "golden" reference.
+    Verify the TX→RX path end-to-end at the packet, CSI, and IQ level, either over the air (antennas close together) or entirely inside the FPGA. The FPGA-internal loopback provides a distortion-free "golden" reference.
 
     [Read more →](Research-Features.md#self-loopback-testing) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/packet-iq-self-loopback-test.md)
 

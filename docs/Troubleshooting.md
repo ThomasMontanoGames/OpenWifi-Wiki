@@ -10,7 +10,7 @@ Delete `/etc/network/interfaces.new` from the SD card's `rootfs` partition (on y
 
 ### No UART console device appears
 
-On antsdr e200 and similar CH341 adapters, try `sudo apt remove brltty`, since brltty grabs the CH341 device. (Reference: the [CH341SER notes](https://github.com/juliagoda/CH341SER).)
+On ANTSDR-E200 and similar CH341 adapters, try `sudo apt remove brltty`, since brltty grabs the CH341 device. (Reference: the [CH341SER notes](https://github.com/juliagoda/CH341SER).)
 
 ### `EXT4-fs error (device mmcblk0p2)` on first boot
 
@@ -20,7 +20,7 @@ Seen on neptunesdr. The flashing tool is suspect, so re-flash with a different o
 
 The same SD card boots on some ZCU102 units but not others. The SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed:
 
-```
+```text
 xlnx,has-cd = <0x1>;
 xlnx,has-power = <0x0>;
 xlnx,has-wp = <0x1>;
@@ -37,14 +37,14 @@ max-frequency = <19000000>;
 
 The on-board SPI flash holds some config (kernel file, AD9361 crystal frequency `ad9361_ext_refclk=0x2625a8b`). Interrupt boot in the UART console (press Enter before Linux loads) and reset the environment:
 
-```
+```console
 Zynq> env default -a
 Zynq> saveenv
 ```
 
 ### Wrong memory size on ADRV9361-Z7035 SoM
 
-Linux sees half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild u-boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) (`make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf`) and regenerate `BOOT.BIN`.
+Linux sees half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild U-Boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) (`make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf`) and regenerate `BOOT.BIN`.
 
 ## Client / link problems
 
@@ -77,7 +77,13 @@ Set `nameserver 8.8.8.8` in `/etc/resolv.conf` on the board.
 
 ### FMCOMMS board causes a Linux crash (bad/empty EEPROM)
 
-Some FMCOMMS2/3/4 boards ship with a wrong or empty FRU EEPROM, which crashes some platforms (notably ZCU102). Reprogram it with [fru_tools](https://github.com/analogdevicesinc/fru_tools): boot the FMCOMMS board on a platform that *does* come up (e.g. a 32-bit zed/zc706/zc702), build `fru_tools`, locate the EEPROM (`find /sys -name eeprom`), confirm the mismatch with `fru-dump -i <eeprom> -b`, then write the correct master file, e.g.:
+Some FMCOMMS2/3/4 boards ship with a wrong or empty FRU EEPROM, which crashes some platforms (notably ZCU102). Reprogram it with [fru_tools](https://github.com/analogdevicesinc/fru_tools):
+
+1. Boot the FMCOMMS board on a platform that *does* come up (e.g. a 32-bit zed/zc706/zc702).
+2. Build `fru_tools`.
+3. Locate the EEPROM with `find /sys -name eeprom`.
+4. Confirm the mismatch with `fru-dump -i <eeprom> -b`.
+5. Write the correct master file, e.g.:
 
 ```bash
 fru-dump -i ./masterfiles/AD-FMCOMMS4-EBZ-FRU.bin -o /sys/.../0-0050/eeprom
@@ -87,11 +93,11 @@ Reboot and re-read to confirm.
 
 ### `Unsupported PRODUCT_ID 0xFF` at AD9361 probe
 
-Same root cause as the bad/empty EEPROM above. See the fru_tools references.
+Same root cause as the [bad/empty EEPROM](#fmcomms-board-causes-a-linux-crash-badempty-eeprom) above, and the same `fru_tools` fix applies.
 
 ### `Unsupported PRODUCT_ID 0x00` at AD9361 probe
 
-A different failure from the `0xFF` case above. `0x00` means the AD9361 / FMCOMMS front end **did not power up correctly**: the driver is reading back all-zeros because the chip isn't alive, not because of a bad EEPROM. Check the board's power: that the FMCOMMS card is fully seated, that its supply rails are up, and that the carrier is delivering enough current to the front end. Once the RF board powers up properly, the probe reads the correct PRODUCT_ID.
+A different failure from the `0xFF` case above. `0x00` means the AD9361 / FMCOMMS front end **did not power up correctly**: the driver is reading back all-zeros because the chip isn't alive, not because of a bad EEPROM. Check the board's power: that the FMCOMMS card is fully seated, that its supply rails are up, and that the carrier is delivering enough current to the front end.
 
 ### ZCU102 kernel panic (RTC / capacitor & current load)
 
@@ -112,7 +118,7 @@ apt --autoremove purge rsyslog
 
 Then add to `/etc/systemd/journald.conf`:
 
-```
+```ini
 SystemMaxUse=64M
 Storage=volatile
 RuntimeMaxUse=64M
@@ -150,7 +156,7 @@ The default is `libtinfo6`. Install `libtinfo5` manually (see [Environment Setup
 
 ### No UART output on ZCU102 under OpenWrt
 
-Support was validated only on **ZCU102 HW Rev 1.1**, and even then some 4 GB SODIMM modules fail with the U-Boot SPL bootflow. Known-good module: `MTA8ATF51264HZ-2G6B1`. Known-failing: `MTA4ATF51264HZ-2G6E1`. The robust fix is to use the **Zynq FSBL instead of U-Boot SPL** (FSBL reads the module's SPD EEPROM and configures DDR correctly), via the repo's `build_zynqmp_boot_bin.sh` or by generating `boot.bin` yourself with OpenWrt-built components. Full analysis is in the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md#no-uart-output-on-zcu102).
+Support was validated only on **ZCU102 HW Rev 1.1**, and even then some 4 GB SODIMM modules fail with the U-Boot SPL bootflow. Known-good module: `MTA8ATF51264HZ-2G6B1`. Known-failing: `MTA4ATF51264HZ-2G6E1`. The fix is to use the **Zynq FSBL instead of U-Boot SPL** (FSBL reads the module's SPD EEPROM and configures DDR correctly), via the repo's `build_zynqmp_boot_bin.sh` or by generating `boot.bin` yourself with OpenWrt-built components. Full analysis is in the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md#no-uart-output-on-zcu102).
 
 ## Debugging tools
 
@@ -163,11 +169,20 @@ Turn on per-event driver prints (then read them with `dmesg`):
 ./sdrctl dev sdr0 set reg drv_rx 7 X
 ```
 
-`X` is a bitmask: bit0 = errors, bit1 = regular unicast messages (`openwifi_tx`/`openwifi_tx_interrupt`/`openwifi_rx_interrupt`), bit2 = broadcast messages, bit3 = queue stop/wake messages. So `3` = errors + unicast, and `1` = errors only. Search `printk` in `sdr.c` to see every print point.
+`X` is a bitmask:
+
+| Bit | Meaning |
+|---|---|
+| 0 | Errors |
+| 1 | Regular unicast messages (`openwifi_tx`/`openwifi_tx_interrupt`/`openwifi_rx_interrupt`) |
+| 2 | Broadcast messages |
+| 3 | Queue stop/wake messages |
+
+So `3` = errors + unicast, and `1` = errors only. Search `printk` in `sdr.c` to see every print point.
 
 **Reading a TX print:**
 
-```
+```text
 openwifi_tx: 70B RC0 10M FC0040 DI0000 ADDRffff.../6655443322aa/ffff... flag4001201e QoS00 SC20_1 retr1 ack0 prio0 q0 wr19 rd18
 ```
 
@@ -183,7 +198,7 @@ openwifi_tx: 70B RC0 10M FC0040 DI0000 ADDRffff.../6655443322aa/ffff... flag4001
 
 **Reading a TX-interrupt print:**
 
-```
+```text
 openwifi_tx_interrupt: tx_result [nof_retx 1 pass 1] SC20 prio0 q0 wr20 rd19 num_slot0 cw0 hwq len... no_room_flag0
 ```
 
@@ -196,7 +211,7 @@ openwifi_tx_interrupt: tx_result [nof_retx 1 pass 1] SC20 prio0 q0 wr20 rd19 num
 
 **Reading an RX print:**
 
-```
+```text
 openwifi_rx: 270B ht0aggr0/0 sgi0 240M FC0080 DI0000 ADDR.../00c88b113f5f/00c88b113f5f SC2133 fcs1 buf_idx10 -78dBm
 ```
 

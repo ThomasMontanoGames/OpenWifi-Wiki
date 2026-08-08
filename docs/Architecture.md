@@ -1,6 +1,6 @@
 # Architecture Overview
 
-This page explains how openwifi is put together. Read it before you start modifying code. Almost every "how do I…" question becomes obvious once you understand the split between Linux, the driver, and the FPGA. (For *where* each part lives in the source tree, see [The Repositories](Repositories.md), for the driver internals [The Linux Driver](Driver-Architecture.md), and for the FPGA cores in depth [FPGA IP Cores](FPGA-IP-Cores.md).)
+This page explains how openwifi is put together: the split between Linux, the driver, and the FPGA. Read it before you start modifying code. For where each part lives in the source tree, see [The Repositories](Repositories.md). The driver internals are in [The Linux Driver](Driver-Architecture.md), and the FPGA cores in [FPGA IP Cores](FPGA-IP-Cores.md).
 
 ![openwifi software and FPGA module composition](assets/img/openwifi-detail.jpg)
 
@@ -100,15 +100,15 @@ Because it registers a normal Linux network interface (`sdr0`), every tool that 
 
 The Linux `mac80211` subsystem defines a set of callbacks (`ieee80211_ops`) that every SoftMAC driver implements. That shared contract is why one kernel can drive Wi-Fi chips from dozens of vendors. openwifi's `sdr.c` implements the relevant subset: `tx` to send a frame, `start` / `stop` when the NIC goes up or down, `config` on a channel change, `get_tsf` / `set_tsf` for the hardware timer, `testmode_cmd` for [sdrctl](sdrctl-and-Runtime-Control.md), and around a dozen more. The [full callback table is on the driver page](Driver-Architecture.md#the-mac80211-callback-surface).
 
-When Linux invokes one of these, `sdr.c` does the work by driving the FPGA. It leans on per-block helper "sub-drivers" (`tx_intf_api`, `rx_intf_api`, `openofdm_tx_api`, `openofdm_rx_api`, and `xpu_api`), each of which wraps register access to one FPGA module. These are compiled as separate kernel modules (`tx_intf.ko`, `rx_intf.ko`, …) that `sdr.ko` binds to at load time, which is why `wgd.sh` inserts all of them.
+When Linux invokes one of these, `sdr.c` does the work by driving the FPGA. It uses per-block helper "sub-drivers" (`tx_intf_api`, `rx_intf_api`, `openofdm_tx_api`, `openofdm_rx_api`, and `xpu_api`), each of which wraps register access to one FPGA module. These are compiled as separate kernel modules (`tx_intf.ko`, `rx_intf.ko`, …) that `sdr.ko` binds to at load time, which is why `wgd.sh` inserts all of them.
 
-Two facts shape everything else. The first is that openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`, and the device tree is what tells Linux the AXI addresses and interrupts of every FPGA block, which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise. The second is that the AD9361 RF chip is driven by the standard Analog Devices IIO driver rather than by openwifi: the driver finds it on the SPI bus at probe time and calls into it (`ad9361_set_tx_atten`, `ad9361_do_calib_run`), which is why some patches to the ADI kernel are needed (see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver)).
+openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`, and the device tree is what tells Linux the AXI addresses and interrupts of every FPGA block, which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise. Separately, the AD9361 RF chip is driven by the standard Analog Devices IIO driver rather than by openwifi: the driver finds it on the SPI bus at probe time and calls into it (`ad9361_set_tx_atten`, `ad9361_do_calib_run`), which is why some patches to the ADI kernel are needed (see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver)).
 
 For the probe sequence, board auto-detection, the TX rings and RX cyclic buffer, the received-packet metadata format, and the register category encoding, see [The Linux Driver](Driver-Architecture.md).
 
 ## The FPGA modules
 
-The FPGA design decomposes into modules whose names match their source files (in `openwifi-hw/ip/`). Understanding these five names unlocks most of the register documentation:
+The FPGA design decomposes into modules whose names match their source files (in `openwifi-hw/ip/`). These five names cover most of the register documentation:
 
 - **`openofdm_tx`**: the OFDM transmitter. Turns a MAC frame into baseband IQ samples (PHY header, pilots, scrambling, modulation). Based on original openwifi work.
 - **`openofdm_rx`**: the OFDM receiver. Detects the preamble, synchronizes, estimates the channel, equalizes, and decodes (including a Xilinx Viterbi decoder). Derived from the [openofdm](https://github.com/open-sdr/openofdm) project (originally by [jhshi](https://github.com/jhshi/openofdm), with openwifi's improvements on the `dot11zynq` branch).
@@ -126,7 +126,7 @@ openwifi's FPGA design is built **on top of the [Analog Devices HDL reference de
 
 ## Packet flow at a glance
 
-Before the step-by-step walkthroughs, here is the whole packet path in one picture. The transmit lane runs left to right from Linux out to the antenna, and the receive lane runs back. Note where the two interface cores sit: `tx_intf` and `rx_intf` are the cores that touch the AD9361 converters, and the OFDM cores hang off them rather than sitting between them and the radio.
+The transmit lane runs left to right from Linux out to the antenna, and the receive lane runs back. Note where the two interface cores sit: `tx_intf` and `rx_intf` are the cores that touch the AD9361 converters, and the OFDM cores hang off them rather than sitting between them and the radio.
 
 <figure>
 <svg viewBox="0 0 920 400" role="img" aria-label="openwifi packet flow. Transmit lane: Linux mac80211 to openwifi_tx to tx_intf (four TX queues) to the DAC and the AD9361. openofdm_tx sits above tx_intf, which hands it the frame bytes and gets modulated IQ back. Receive lane: the AD9361 through the ADC to rx_intf, then to the openwifi rx interrupt and back up to Linux. openofdm_rx sits below rx_intf, which hands it the ADC IQ and gets decoded bytes back." style="width:100%;height:auto;max-width:1000px;font-family:inherit;font-size:13px">
@@ -233,9 +233,9 @@ The 64-bit TSF (Timing Synchronization Function) timer is defined by the 802.11 
 
 ## RF and baseband: the frequency/clock design
 
-openwifi drives the AD9361 in **FDD mode with identical TX and RX frequencies**, and controls the AD9361 TX chain in real time over an FPGA SPI link (`openwifi-hw/ip/xpu/src/spi.v`). The TX local oscillator (or an RF switch) is turned **on just before** a transmit packet and **off just after** it. Two consequences follow:
+openwifi drives the AD9361 in **FDD mode with identical TX and RX frequencies**, and controls the AD9361 TX chain in real time over an FPGA SPI link (`openwifi-hw/ip/xpu/src/spi.v`). The TX local oscillator (or an RF switch) is turned **on just before** a transmit packet and **off just after** it, with two consequences:
 
-- **No LO leakage during receive**, so the receiver isn't self-interfered, which enables full-duplex self-reception (the basis of the CSI radar and loopback features).
+- **No LO leakage during receive**, so the receiver does not interfere with itself, which enables full-duplex self-reception (the basis of the CSI radar and loopback features).
 - **Fast TX/RX turnaround** (~0.6 µs), which is what makes the tight SIFS and hardware ACK timing achievable (SIFS is 10 µs in 2.4 GHz and 16 µs in 5 GHz).
 
 The AD9361↔FPGA IQ rate is 40 Msps, decimated/interpolated inside the FPGA to the 20 Msps the Wi-Fi baseband uses. The **FPGA baseband clock is derived from the AD9361 clock**, so RF and baseband never drift relative to each other. This design (replacing the older "offset tuning" approach) is what gives openwifi its good EVM, spectral mask conformance, sensitivity, and RSSI accuracy.
@@ -250,7 +250,7 @@ The configuration points of this RF/digital chain are spread across the AD9361 r
 
 ## What openwifi implements of 802.11a/g/n
 
-openwifi implements 802.11a/g (legacy OFDM) and a **single-stream 20 MHz subset of 802.11n (Wi-Fi 4)**. Understanding which 11n improvements it does and doesn't have explains its performance envelope. 802.11n added five PHY improvements on top of 802.11a/g's 54 Mbps ceiling:
+openwifi implements 802.11a/g (legacy OFDM) and a **single-stream 20 MHz subset of 802.11n (Wi-Fi 4)**. Which 11n improvements it does and doesn't have sets its performance envelope. 802.11n added five PHY improvements on top of 802.11a/g's 54 Mbps ceiling:
 
 | 802.11n improvement | Effect | openwifi? |
 |---|---|---|

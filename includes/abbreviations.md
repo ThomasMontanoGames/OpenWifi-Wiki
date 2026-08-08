@@ -1,3 +1,7 @@
+<!-- Hover-tooltip definitions auto-appended to every page. Longer prose
+     glosses for the same terms live in docs/Glossary.md. When you add or
+     reword a term, check both places. -->
+
 *[A-MPDU]: Aggregated MAC Protocol Data Unit: an 802.11n frame-aggregation method (experimental in openwifi).
 *[A-MSDU]: Aggregated MAC Service Data Unit: the other 802.11n aggregation method (not supported by openwifi).
 *[AD9361]: Analog Devices RF transceiver chip openwifi uses as its radio front end (70 MHz to 6 GHz).
@@ -25,17 +29,21 @@
 *[MU-MIMO]: Multi-User MIMO: serving several stations at once on the same subcarriers via spatial streams (optional in 802.11ax).
 *[CSI]: Channel State Information: the per-subcarrier channel response the receiver estimates.
 *[CSMA/CA]: Carrier-Sense Multiple Access with Collision Avoidance: the 802.11 channel-access method (the DCF).
+*[CLA]: Contributor License Agreement: the one-time legal prerequisite for contributing to openwifi.
 *[CW]: Contention Window: the range CSMA/CA picks a random backoff from (CWmin/CWmax configurable).
 *[CWmin]: Minimum contention window for CSMA/CA backoff.
 *[CWmax]: Maximum contention window for CSMA/CA backoff.
 *[DCF]: Distributed Coordination Function: the standard's CSMA/CA-based channel-access method.
 *[DCM]: Dual Carrier Modulation: an optional 802.11ax mode that duplicates data across subcarrier pairs for robustness.
 *[DCXO]: Digitally-Controlled Crystal Oscillator: the AD9361's tunable reference crystal.
+*[DHCP]: Dynamic Host Configuration Protocol: assigns IP addresses on a network.
+*[DDR]: Double Data Rate SDRAM: the board's main memory, initialized by the FSBL at boot.
 *[DTB]: Device Tree Blob: the compiled description of the board's hardware for Linux.
 *[DTS]: Device Tree Source: the human-readable device-tree description.
 *[DTSO]: Device Tree Source Overlay: an overlay layered onto a stock board device tree.
 *[DIFS]: DCF Interframe Space: the idle time a station waits before starting contention.
 *[DMA]: Direct Memory Access: moves packets/samples between FPGA and memory without CPU copying.
+*[EEPROM]: Electrically Erasable Programmable Read-Only Memory: the small non-volatile chip holding board identification (FRU) data.
 *[EIFS]: Extended Interframe Space: a longer wait used after a reception error.
 *[ERP]: Extended Rate PHY: the 802.11g amendment that brought OFDM to 2.4 GHz.
 *[EVM]: Error Vector Magnitude: a measure of modulation accuracy (lower is better).
@@ -43,6 +51,7 @@
 *[FDD]: Frequency Division Duplex: openwifi drives the AD9361 in FDD but with identical TX/RX frequencies.
 *[FEC]: Forward Error Correction: the convolutional coding used by 802.11 OFDM, decoded by Viterbi.
 *[FFT]: Fast Fourier Transform: the receiver operation that recovers OFDM subcarriers.
+*[FIFO]: First In, First Out: a hardware queue buffer between FPGA cores.
 *[IFFT]: Inverse Fast Fourier Transform: builds the OFDM time-domain signal from subcarriers.
 *[FMC]: FPGA Mezzanine Card: a standard connector/daughter-card form factor.
 *[FMCOMMS2]: Analog Devices FMC daughter-card carrying the AD9361.
@@ -54,6 +63,7 @@
 *[FSM]: Finite State Machine: sequential logic that steps through a fixed set of states (e.g. the side channel's capture FSM).
 *[GEM]: Gigabit Ethernet MAC: the Zynq PS-side Ethernet controller.
 *[GI]: Guard Interval: the cyclic-prefix gap between OFDM symbols that absorbs multipath.
+*[GPIO]: General-Purpose Input/Output: software-controllable pins (board LEDs, RF-switch control).
 *[HLS]: High-Level Synthesis: generating FPGA logic from C++ (via Vitis HLS).
 *[hostapd]: The standard Linux daemon that turns a Wi-Fi interface into an access point.
 *[HE]: High Efficiency: the 802.11ax (Wi-Fi 6) feature set (not in the open-source release).
@@ -70,6 +80,7 @@
 *[IIO]: Industrial I/O: the Linux subsystem used to control the AD9361 via sysfs.
 *[ILA]: Integrated Logic Analyzer: a Xilinx debug core for observing internal FPGA signals.
 *[IQ]: In-phase/Quadrature: the complex representation of a baseband signal.
+*[JTAG]: Joint Test Action Group: the debug and programming interface for the SoC and FPGA.
 *[Kuiper]: Analog Devices' Debian/Ubuntu-based Linux distribution for its SDR platforms.
 *[LBT]: Listen Before Talk: the regulatory term for carrier sensing before transmitting.
 *[LDPC]: Low-Density Parity-Check: the high-performance FEC 802.11ax uses in place of convolutional coding in many cases.
@@ -92,20 +103,25 @@
 *[PHY]: The physical layer: modulation, coding, and RF (openofdm cores plus the AD9361).
 *[PL]: Programmable Logic: the FPGA-fabric half of a Xilinx Zynq SoC.
 *[PS]: Processing System: the ARM-core half of a Xilinx Zynq SoC.
+*[PMU]: Platform Management Unit: the ZynqMP processor that runs the PMUFW (power and reset management).
 *[PMUFW]: Platform Management Unit Firmware: a ZynqMP-specific boot component (ZCU102).
 *[PPS]: Pulse Per Second: a once-a-second timing signal (typically from GPS).
+*[QSPI]: Quad SPI: the flash interface some boards can boot from.
 *[RSSI]: Received Signal Strength Indicator: an estimate of received power (per-packet in openwifi).
+*[RTC]: Real-Time Clock: keeps wall-clock time across reboots.
 *[RTS/CTS]: Request To Send / Clear To Send: the 802.11 handshake that reserves the channel via the NAV.
 *[RU]: Resource Unit: a group of OFDMA subcarriers assigned to one station in 802.11ax (not in the open-source release).
 *[SDR]: Software-Defined Radio: signal processing done in software/logic rather than fixed hardware.
 *[side_ch]: openwifi's FPGA capture engine, tapping IQ and demodulator results independently of the packet path.
 *[SIFS]: Short Interframe Space: the brief gap before an ACK (10 us at 2.4 GHz, 16 us at 5 GHz).
+*[SMA]: SubMiniature version A: the coaxial RF connector used for antennas and conducted-test cables.
 *[SoftMAC]: A Wi-Fi design where the upper MAC runs in host software (Linux mac80211).
 *[SoC]: System on Chip: openwifi runs on Xilinx Zynq / Zynq UltraScale+ SoCs.
 *[SODIMM]: Small Outline DIMM: the pluggable DRAM module used on some boards.
 *[SoM]: System on Module: a small board carrying the SoC, RAM, and support circuitry.
 *[SPI]: Serial Peripheral Interface: openwifi drives the AD9361's TX chain over an FPGA-generated SPI link.
 *[SPL]: Secondary Program Loader: U-Boot's first-stage loader.
+*[SSID]: Service Set Identifier: the Wi-Fi network name.
 *[STA]: Station: any 802.11 device (a client, or an AP), the standard's term for a participant on the link.
 *[STF]: Short Training Field: preamble symbols used for packet detection and synchronization.
 *[STBC]: Space-Time Block Coding: an optional transmit-diversity scheme spreading data across space and time.
@@ -115,6 +131,7 @@
 *[TWT]: Target Wake Time: the 802.11ax scheduled power-saving mechanism.
 *[UART]: Universal Asynchronous Receiver/Transmitter: the serial console.
 *[U-Boot]: The bootloader that loads the Linux kernel on the board.
+*[UDP]: User Datagram Protocol: the connectionless IP transport (side-channel streaming, iperf tests).
 *[UHD]: USRP Hardware Driver: Ettus/NI's SDR driver framework (unrelated to openwifi's Wi-Fi operation).
 *[VCXO]: Voltage-Controlled Crystal Oscillator: a tunable reference clock on some boards.
 *[VDMA]: Video DMA: a Xilinx AXI DMA variant openwifi doesn't use (but one kernel patch works around it).

@@ -40,4 +40,15 @@ jobs:
           python-version: "3.x"
           cache: pip
       - run: pip install -r requirements.txt
+      # CLAUDE.md requires a language tag on every code fence. MkDocs does not
+      # check this, so fail the build on any bare ``` opening fence (closing
+      # fences are bare by definition; the awk tracks open/close state).
+      - name: Check code fences carry a language tag
+        run: |
+          bad=$(awk '/^[ \t]*```/{ if (inblock) { inblock=0; next } inblock=1; if ($0 ~ /^[ \t]*```[ \t]*$/) print FILENAME": line "FNR }' docs/*.md docs/*/*.md includes/*.md)
+          if [ -n "$bad" ]; then
+            echo "Code fences without a language tag:"
+            echo "$bad"
+            exit 1
+          fi
       - run: mkdocs build --strict

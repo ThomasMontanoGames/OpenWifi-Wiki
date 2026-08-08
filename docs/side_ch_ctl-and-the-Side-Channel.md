@@ -4,7 +4,7 @@
 
 It is the sibling of [`sdrctl`](sdrctl-and-Runtime-Control.md), but it takes a different route into the hardware. Where `sdrctl` reaches `sdr.ko` through Linux's `nl80211` testmode path, `side_ch_ctl` talks over a plain netlink socket to **`side_ch.ko`**, a separate kernel module that owns the `side_ch` core's 32 registers and its DMA channel. The two tools are independent: `sdrctl` can't see side-channel registers, and `side_ch_ctl` can't see the FPGA modules `sdrctl` reaches.
 
-This page is the tool and register reference. For the workflows that *use* it, CSI, CSI radar, the CSI fuzzer, IQ capture, and loopback testing, see [Research Features](Research-Features.md).
+This page is the tool and register reference. For the workflows that use it, CSI, CSI radar, the CSI fuzzer, IQ capture, and loopback testing, see [Research Features](Research-Features.md).
 
 ## How the pieces fit
 
@@ -51,13 +51,14 @@ insmod side_ch.ko iq_len_init=8187   # IQ mode, 8187 samples per trigger
 rmmod side_ch                        # unload
 ```
 
-> ⚠️ **Set `num_eq` and `iq_len` at `insmod` time, not by writing registers.** The driver computes how many 64-bit symbols one capture occupies from the *module parameters*, while registers 4 and 12 tell the *FPGA* the same thing. Writing those registers by hand moves the FPGA's idea of the capture size without moving the driver's, and the framing desynchronizes. Reload the module instead.
+!!! warning "Set `num_eq` and `iq_len` at `insmod` time, not by writing registers"
+    The driver computes how many 64-bit symbols one capture occupies from the module parameters, while registers 4 and 12 tell the FPGA the same thing. Writing those registers by hand moves the FPGA's idea of the capture size without moving the driver's, and the framing desynchronizes. Reload the module instead.
 
-The driver clamps `iq_len_init` to **8187** (one UDP datagram holds 65507 bytes, and `(65507/8) - 1 = 8187` leaves one symbol for the timestamp). It does *not* know about small-BRAM boards, so on Zynq-7020 that clamp is too generous (see below).
+The driver clamps `iq_len_init` to **8187** (derived below). It does not know about small-BRAM boards, so on Zynq-7020 that clamp is too generous (see below).
 
 ### What `insmod` leaves behind
 
-`dev_probe()` arms the core for you, so the defaults are already sensible: capture-everything matching (register 1 = `0x0001`), `num_eq` loaded into register 4, and in IQ mode the capture enabled (register 3 = 1) with a `pre_trigger_len` of 8190 and the FCS trigger selected (register 8 = 0). It then pulses a full reset via register 0. In CSI mode it leaves the trigger register pointing at an RSSI condition that can never fire, since CSI capture doesn't use it.
+`dev_probe()` arms the core with working defaults: capture-everything matching (register 1 = `0x0001`), `num_eq` loaded into register 4, and in IQ mode the capture enabled (register 3 = 1) with a `pre_trigger_len` of 8190 and the FCS trigger selected (register 8 = 0). It then pulses a full reset via register 0. In CSI mode it leaves the trigger register pointing at an RSSI condition that can never fire, since CSI capture doesn't use it.
 
 ### Small-BRAM boards
 
@@ -102,7 +103,7 @@ The fields run left to right, butted up against each other:
 
 For `g`, everything after the `g` is the poll interval in milliseconds. `g` runs until you press Ctrl+C.
 
-So the commands scattered through the recipes decompose like this:
+So the commands scattered through [the recipes](Research-Features.md) decompose like this:
 
 | Command | Reads as |
 |---|---|
@@ -117,12 +118,13 @@ Both radixes work on every register, so the choice is only about readability. Th
 ### What the parser accepts
 
 - **Lowercase only.** `WH3D987` is rejected. The uppercase branches exist in `side_ch_ctl.c` but are commented out.
-- **The register index must be 0–31**, else you get `Invalid register index (should be 0~31)!`. `side_ch.ko` does *not* re-check this, so this check is the only protection against a write past the register file.
+- **The register index must be 0–31**, else you get `Invalid register index (should be 0~31)!`. `side_ch.ko` does not re-check this, so this check is the only protection against a write past the register file.
 - **The whole string must be 1–31 characters.**
 - **A malformed `g` interval falls back to 100 ms** with a warning instead of failing, so a typo like `gfoo` polls at the default rather than exiting.
 - A read needs at least 3 characters, a write at least 5 (`wh3d9` is the shortest legal write).
 
-> The register-type letter (`h` hardware, `s` software) is parsed and sent to the kernel, but `side_ch.ko` ignores it and touches the same register either way: `rh20` and `rs20` are identical. Use `h`. The distinction is vestigial.
+!!! note "The `h`/`s` register-type letter makes no difference"
+    The register-type letter (`h` hardware, `s` software) is parsed and sent to the kernel, but `side_ch.ko` ignores it and touches the same register either way: `rh20` and `rs20` are identical. Use `h`. The distinction is vestigial.
 
 ### Extra arguments
 
@@ -133,13 +135,13 @@ Two flags that appear in no app note:
 ./side_ch_ctl rh20 1                # "value only": print just the number
 ```
 
-`-s` sets the UDP destination. It defaults to **192.168.10.1**, and the port is fixed at **4000**. Any *other* extra argument turns on value-only mode, which drops the `parse:`/`tx:`/`rx:` lines and prints the bare value. That's what you want when reading a register from a script. (The `1` above is just a convention, any extra argument works.)
+`-s` sets the UDP destination. It defaults to **192.168.10.1**, and the port is fixed at **4000**. Any other extra argument turns on value-only mode, which drops the `parse:`/`tx:`/`rx:` lines and prints the bare value. That's what you want when reading a register from a script. (The `1` above is a convention, any extra argument works.)
 
 ## What `g` actually does
 
-Each poll is one round trip: the driver reads register 20 (how many symbols are sitting in the FIFO), rounds *down* to a whole number of captures, writes register 2 to kick off the DMA, and waits up to 100 ms for it to complete. `side_ch_ctl` then forwards the result to your PC over UDP, and prints a progress line every 64 polls:
+Each poll is one round trip: the driver reads register 20 (how many symbols are sitting in the FIFO), rounds down to a whole number of captures, writes register 2 to kick off the DMA, and waits up to 100 ms for it to complete. `side_ch_ctl` then forwards the result to your PC over UDP, and prints a progress line every 64 polls:
 
-```
+```text
 loop 64 side info count 61
 loop 128 side info count 99
 ```
@@ -161,7 +163,7 @@ The FPGA only queues a capture when the FIFO has room for all of it. When room i
 
 ## Register reference
 
-These are the `side_ch` core's `slv_regN` in `side_ch.v`. Several registers **mean different things in CSI mode and IQ mode**, because the two modes reuse the same bits. The table calls that out. Registers 13–18 and 23–25 are not connected in the current build.
+These are the `side_ch` core's `slv_regN` in `side_ch.v`. Several registers **mean different things in CSI mode and IQ mode**, because the two modes reuse the same bits. Registers 13–18 and 23–25 are not connected in the current build.
 
 ### Configuration
 
@@ -180,11 +182,12 @@ These are the `side_ch` core's `slv_regN` in `side_ch.v`. Several registers **me
 | 8 | IQ | bits4-0 trigger select, 0–31. See [the trigger table](#trigger-reference-register-8). |
 | 9 | IQ | bits15-0 threshold, doing double duty: RSSI in `rssi_half_db` (bits10-0, read as a signed value, so keep it ≤ 1023) for triggers 10/11 and the `rssi_above_th` counter, or antenna 1's I amplitude for triggers 28–31. |
 | 10 | IQ | bits6-0 AGC gain threshold (0–127), for triggers 14/15. |
-| 11 | IQ | bits13-0 `pre_trigger_len`: how many samples *before* the trigger are kept. Max 8190, or 4094 on small-BRAM boards. |
+| 11 | IQ | bits13-0 `pre_trigger_len`: how many samples before the trigger are kept. Max 8190, or 4094 on small-BRAM boards. |
 | 12 | IQ | bits13-0 `iq_len`. Set via `iq_len_init`, not here. |
 | 19 | both | Counter event-source select: bits 0, 4, 8, 12, 16, 20 choose the source for registers 26–31 respectively. |
 
-> **Register 3 does not choose where the IQ comes from.** Its bit 0 switches the core between CSI and IQ mode, and bits 5-4 choose what gets packed into each 64-bit word (including whether antenna 1's samples ride along). The *tap point* (off the air, or your own transmit) is **register 5 bits 2-1**, and nothing in register 3 touches it. This is worth stating plainly because the upstream [IQ app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq.md) annotates `wh3h01` with "configure the IQ data source". That command works in the quick start because register 5 happens to already be 0 (received IQ), not because register 3 set anything.
+!!! note "Register 3 does not choose where the IQ comes from"
+    Its bit 0 switches the core between CSI and IQ mode, and bits 5-4 choose what gets packed into each 64-bit word (including whether antenna 1's samples ride along). The tap point (off the air, or your own transmit) is **register 5 bits 2-1**, and nothing in register 3 touches it. The upstream [IQ app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq.md) annotates `wh3h01` with "configure the IQ data source", but that command works in the quick start because register 5 happens to already be 0 (received IQ), not because register 3 set anything.
 
 ### Read-only
 
@@ -192,7 +195,7 @@ These are the `side_ch` core's `slv_regN` in `side_ch.v`. Several registers **me
 |---|---|
 | 20 | Symbols currently waiting in the capture FIFO. |
 | 21 | Max symbols per UDP datagram: 8188, or 4096 on a small-BRAM build. |
-| 22 | FIFO depth: **8192 = full build, 4096 = `SIDE_CH_LESS_BRAM`**. The quickest way to identify your board's build. |
+| 22 | FIFO depth: **8192 = full build, 4096 = `SIDE_CH_LESS_BRAM`** (see [Small-BRAM boards](#small-bram-boards)). |
 | 26–31 | Event counters (see [below](#event-counters-registers-2631)). Writing any value clears one. |
 
 ---
@@ -236,11 +239,11 @@ In IQ mode, register 8 picks the one condition that fires a capture. `./side_ch_
 | 30 | TX starts while antenna 1's I amplitude exceeds the threshold |
 | 31 | As 30, for a packet that needs an ACK |
 
-Four things worth knowing before you rely on this table:
+Before you rely on this table:
 
 - **Free-run is trigger 0 only.** `wh8d0` alone still waits for a decode. Pair it with `wh5d1` to stream continuously.
 - **Trigger 25 reinterprets the match bits.** Register 1's bit13/bit14 still mean addr1/addr2 match, but bit12 selects a **phy_type** match here rather than a Frame Control match.
-- **Reg 4 bit4 works the other way around for trigger 3.** For triggers 22, 23, 26, 27, and 31 the bit *removes* the needs-ACK requirement, as its name (`disable_tx_pkt_need_ack_check`) suggests. Trigger 3 defaults to firing on *every* transmission, and setting the bit *adds* the requirement, narrowing the capture to packets that expect an ACK.
+- **Reg 4 bit4 works the other way around for trigger 3.** For triggers 22, 23, 26, 27, and 31 the bit removes the needs-ACK requirement, as its name (`disable_tx_pkt_need_ack_check`) suggests. Trigger 3 defaults to firing on every transmission, and setting the bit adds the requirement, narrowing the capture to packets that expect an ACK.
 - **Capturing your own signal off the air needs the receiver unmuted.** openwifi mutes the RX baseband during its own transmission, so a TX trigger with IQ source 0 (received IQ) records silence. Unmute it first: `./sdrctl dev sdr0 set reg xpu 1 1`.
 
 ## Event counters (registers 26–31)
@@ -273,7 +276,7 @@ Registers 30 and 31 read together give you a per-peer PER: 31 counts the good on
 
 ### "side info count" stays at 0
 
-Nothing is matching or triggering. In CSI mode, reset the filter with `wh1h0001` to capture every packet and confirm the channel is busy. In IQ mode, also check register 8: a trigger like "AGC gain crosses a threshold" may simply never happen.
+Nothing is matching or triggering. In CSI mode, reset the filter with `wh1h0001` to capture every packet and confirm the channel is busy. In IQ mode, also check register 8: a trigger like "AGC gain crosses a threshold" may never happen.
 
 ### Captures arrive but the plots are garbage
 
@@ -281,7 +284,7 @@ Nothing is matching or triggering. In CSI mode, reset the filter with `wh1h0001`
 
 ### A reloaded module still carries the last session's settings
 
-Reloading `side_ch.ko` does *not* return the core to a clean state. `dev_probe()` writes only registers 0, 1, 3, 4, 8, 11, and 12 (registers 3, 11, and 12 only in IQ mode), so registers 5, 6, 7, 9, 10, and 19 keep whatever you last put there. The reset it pulses through register 0 drives the capture FSM, not the register file, which clears only when the FPGA is reconfigured. This causes two problems:
+Reloading `side_ch.ko` does not return the core to a clean state. `dev_probe()` writes only registers 0, 1, 3, 4, 8, 11, and 12 (registers 3, 11, and 12 only in IQ mode), so registers 5, 6, 7, 9, 10, and 19 keep whatever you last put there. The reset it pulses through register 0 drives the capture FSM, not the register file, which clears only when the FPGA is reconfigured. This causes two problems:
 
 - A leftover `wh5h4` from a loopback test still taps `tx_intf` after the reload, so the IQ quick start silently captures your own transmit instead of the air. Register 5 needs no enabling bit, so nothing else hides the mistake.
 - Going from IQ mode back to CSI mode by reloading with no `iq_len_init` leaves register 3 bit 0 **still set**, because the driver only writes that register when `iq_len_init > 0`. The FPGA stays in IQ mode while the driver frames for CSI. (Also flagged under [Unverified](#unverified-a-suspected-upstream-bug).)
@@ -302,7 +305,7 @@ The FIFO is half-size there. Confirm with `rh22`, keep `iq_len_init` ≤ 4095, a
 
 This was found by reading the openwifi source, not by testing on a running board, and it is not reported upstream. **Treat it as unconfirmed**: check before relying on it, and raise an issue against [open-sdr/openwifi](https://github.com/open-sdr/openwifi/issues) if it holds.
 
-??? warning "Register 3 survives a reload back into CSI mode"
+!!! warning "Register 3 survives a reload back into CSI mode"
 
     `dev_probe()` in `side_ch.c` writes register 3 only inside `if (iq_len_init > 0)`, and nothing else clears the AXI register file: register 0's reset bits drive the capture FSM, not the registers. So IQ mode should persist across an `insmod` that omits `iq_len_init`, leaving the FPGA in IQ mode while the driver frames captures for CSI.
 

@@ -33,7 +33,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
     If you have no board at all, the imec **[w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html)** offers remote access to openwifi-ready boards.
 
 !!! note "ZedBoard-class boards (Zynq-7020) have tighter limits"
-    Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, antsdr, sdrpi, and the other boards listed in [Supported Boards](Supported-Boards.md#the-board-matrix)) have less FPGA memory, so a few features (notably IQ capture buffer length) have reduced limits. The relevant pages call this out.
+    Boards built on the smaller Zynq-7020 (ZedBoard, ADRV9364-Z7020, ZC702, `antsdr`, `sdrpi`, and the other boards listed in [Supported Boards](Supported-Boards.md#the-board-matrix)) have less FPGA memory, so a few features (notably IQ capture buffer length) have reduced limits. The relevant pages call this out.
 
 ## 2. Flash the SD card
 
@@ -56,14 +56,14 @@ This page takes you from an empty SD card to a working openwifi access point tha
 ## 3. First boot and login
 
 1. Insert the SD card, set the board's boot-mode jumpers/switches to SD boot, connect the antennas, and power on.
-2. Give your PC's Ethernet interface the static IP **192.168.10.1** (netmask 255.255.255.0). The board boots with IP **192.168.10.122**.
+2. Give your PC's Ethernet interface the static IP `192.168.10.1` (netmask 255.255.255.0). The board boots with IP `192.168.10.122`.
 3. Log in (password: `openwifi`):
 
    ```bash
    ssh root@192.168.10.122
    ```
 
-   If ssh fails, hook up the UART console to watch the boot, and see [Troubleshooting](Troubleshooting.md).
+   If ssh fails, connect the UART console to watch the boot, and see [Troubleshooting](Troubleshooting.md).
 
 4. One-time setup on a fresh board:
 
@@ -84,14 +84,14 @@ cd openwifi
 
 Useful variants: `./wgd.sh 1` enables experimental A-MPDU aggregation (higher 11n throughput), and `./fosdem-11ag.sh` forces legacy 11a/g mode.
 
-Now look for the **"openwifi"** SSID on your phone or laptop and connect. You should receive an IP in the 192.168.13.0/24 range. Browse to `192.168.13.1` to see the on-board demo page.
+Now look for the **"openwifi"** SSID on your phone or laptop and connect. You should receive an IP in the `192.168.13.0/24` range. Browse to `192.168.13.1` to see the on-board demo page.
 
 Two things to know:
 
 - The default configuration uses **channel 44 (5 GHz)**. If your client device is 2.4 GHz-only, edit `hostapd-openwifi.conf` on the board (channel/band) and re-run `fosdem.sh`.
-- The FPGA uses an **evaluation license of the Xilinx Viterbi decoder, which halts after roughly two hours** of operation. Symptoms: reception dies, and `./sdrctl dev sdr0 get reg rx 20` returns the same value forever. The fix is simply to reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle the board.
+- The FPGA uses an **evaluation license** of the Xilinx Viterbi decoder, which halts after roughly two hours of operation. Symptoms: reception dies, and `./sdrctl dev sdr0 get reg rx 20` returns the same value forever. The fix is to reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle the board.
 
-Also note: the ADRV9361-Z7035 has very low TX power in the 5 GHz band, so keep devices close when using that board on 5 GHz.
+The ADRV9361-Z7035 has very low TX power in the 5 GHz band, so keep devices close when using that board on 5 GHz.
 
 ## 5. Give clients internet access (optional)
 

@@ -16,7 +16,7 @@ Every figure carries a **footnote** pointing to its source so you can check it. 
 |---|---|
 | Wi-Fi standards | 802.11a / 802.11g / 802.11n (Wi-Fi 4), 20 MHz, single spatial stream[^readme] |
 | Channel bandwidth | 20 MHz (also 10 MHz for 802.11p, 2 MHz for 802.11ah-style sub-GHz)[^readme] |
-| RF tuning range | 70 MHz – 6 GHz (Analog Devices AD9361/AD9364 front end)[^faq] |
+| RF tuning range | 70 MHz–6 GHz (Analog Devices AD9361/AD9364 front end)[^faq] |
 | Baseband transceiver sample rate | 20 Msps (20 MHz mode)[^docreadme] |
 | AD9361 ↔ FPGA sample rate | 40 Msps (decimated/interpolated to 20 Msps in the FPGA)[^docreadme] |
 | FPGA baseband clock | 100 MHz default (up to 200/240 MHz on high-end boards)[^tcl][^boards] |
@@ -58,7 +58,7 @@ The RF characteristics come from the **Analog Devices AD9361/AD9364** agile tran
 
 | Parameter | Value |
 |---|---|
-| Tuning range | 70 MHz – 6 GHz[^faq] |
+| Tuning range | 70 MHz–6 GHz[^faq] |
 | Duplex mode | FDD, same TX and RX frequency, with the TX LO / RF switch gated per packet for self-interference-free RX[^docreadme] |
 | Antenna configurations | 1×1 typical, some boards (AD9361) 2×2-capable[^boards] |
 | RF/baseband clock coupling | Baseband clock derived from the AD9361 sample clock, so RF and baseband never drift apart[^docreadme] |
@@ -109,11 +109,11 @@ openwifi is built to fit the **lowest-end supported FPGA (Xilinx Zynq-7020)**, s
 !!! note "These are openwifi-core numbers"
     The utilization above is for the openwifi design. A complete bitstream also includes peripheral logic (DMA, AXI interconnect, the ADI reference design, clocking), so the *total* device utilization is higher. The figures were published in the openwifi release notes. The later `v1.3.0` and `v1.5.0` releases ship full per-core `report_utilization` archives (`*-utilization.zip`) if you need the exact breakdown for a specific version.[^release]
 
-**Clock / speed grade.** The `openofdm_tx` core was optimized so the whole design closes timing at **100 MHz on the low-speed-grade 7020 (−1)**, while higher-grade parts run at 200 MHz (the release notes cite the 7035 −2/−2L, and the ZC706's Zynq-7045 offers the same 200 MHz option).[^release] The baseband clock is set by `NUM_CLK_PER_US` in `openwifi-hw/boards/openwifi.tcl` (default 100).[^tcl] Per-board options are in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).
+Clock / speed grade. The `openofdm_tx` core was optimized so the whole design closes timing at **100 MHz on the low-speed-grade 7020 (−1)**, while higher-grade parts run at 200 MHz (the release notes cite the 7035 −2/−2L, and the ZC706's Zynq-7045 offers the same 200 MHz option).[^release] The baseband clock is set by `NUM_CLK_PER_US` in `openwifi-hw/boards/openwifi.tcl` (default 100).[^tcl] Per-board options are in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).
 
 ### To generate exact numbers for your build
 
-Resource and timing reports are **produced by synthesis**, so they are not committed to the repos as static files. For the precise figures on your target board and version:
+Resource and timing reports are produced by synthesis, so they are not committed to the repos as static files. For the precise figures on your target board and version:
 
 ```bash
 # after building the FPGA (see FPGA Development), in Vivado Tcl or the GUI:
@@ -139,8 +139,6 @@ See [FPGA Development](FPGA-Development.md) for the build flow.
     A bitstream built against the **Xilinx Viterbi decoder evaluation license** halts the receiver after ~2 hours. Reload the FPGA or use a paid license. This is a toolchain licensing limit, not an openwifi design limit. See [Troubleshooting](Troubleshooting.md#reception-dies-after-2-hours).
 
 ## Sources
-
-Every figure on this page traces to one of the footnotes below.
 
 [^readme]: openwifi [`README.md`](https://github.com/open-sdr/openwifi/blob/master/README.md): performance summary (throughput, EVM, sensitivity) and feature list.
 [^docreadme]: openwifi [`doc/README.md`](https://github.com/open-sdr/openwifi/blob/master/doc/README.md): the RF/baseband/sampling design (40→20 Msps, 0.6 µs TX/RX turnaround, RF-baseband clock coupling), the `xpu` register descriptions, and the note that `ad9361_rf_set_channel()` configures per-band FPGA settings including SIFS. The band-dependent `sifs = (actual_rx_lo<2500 ? 10 : 16)` logic also appears in [`driver/sdr.c`](https://github.com/open-sdr/openwifi/blob/master/driver/sdr.c).
