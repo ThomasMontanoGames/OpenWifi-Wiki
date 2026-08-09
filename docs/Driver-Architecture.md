@@ -16,7 +16,7 @@ The naming is regular enough to be worth stating once instead of tabulating. A m
 | `xpu.ko` | `xpu.c` ↔ `xpu.v` | The real-time MAC: CSMA/CA config, TSF load and read, BSSID and address filtering, ACK timing and retransmission limits, LBT threshold, time slicing |
 | `tx_intf.ko` | `tx_intf.c` ↔ `tx_intf.v` | The TX interface: baseband gain, antenna select, FIFO thresholds, interrupt source select, CTS-to-self config, CSI fuzzer |
 | `rx_intf.ko` | `rx_intf.c` ↔ `rx_intf.v` | The RX interface: IQ source select (including FPGA loopback), baseband gain, antenna select, interrupt delay, tlast timeout |
-| `openofdm_tx.ko` | `openofdm_tx.c` ↔ `openofdm_tx.v` | The OFDM transmitter, and very little of it: reset, plus the scrambler pilot and data seeds |
+| `openofdm_tx.ko` | `openofdm_tx.c` ↔ `openofdm_tx.v` | The OFDM transmitter, and very little of it: reset plus the pilot and data scrambler seeds |
 | `openofdm_rx.ko` | `openofdm_rx.c` ↔ `dot11.v` | The OFDM receiver: power threshold, minimum plateau, soft decoding, FFT window shift, phase-offset threshold, state history |
 
 The top-level `driver/Makefile` builds all six in one line:
@@ -32,7 +32,7 @@ obj-m += sdr.o openofdm_rx/openofdm_rx.o openofdm_tx/openofdm_tx.o tx_intf/tx_in
 
 ## How the driver finds its hardware
 
-openwifi is a Linux **platform driver**, not PCI or USB. There is no bus to enumerate, so everything it knows about the hardware comes from the device tree. This is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise.
+openwifi is a Linux **platform driver** rather than a PCI or USB device. There is no bus to enumerate, so everything it knows about the hardware comes from the device tree. This is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise.
 
 `openwifi_dev_probe()` in `sdr.c` runs at load time and does roughly this:
 
@@ -128,7 +128,7 @@ Each of these corresponds directly to a `slv_regN` in that core's `*_s_axi.v`, s
 
 ## Two channels to user space
 
-**1. `sdrctl`, through nl80211 testmode.** `sdrctl` sends an nl80211 testmode message that travels the standard `nl80211 → cfg80211 → mac80211` path into `openwifi_testmode_cmd()` in `sdrctl_intf.c`. Best for issuing commands and for reading and writing registers.
+**1. `sdrctl`, through nl80211 testmode.** `sdrctl` sends an nl80211 testmode message that travels the standard `nl80211 → cfg80211 → mac80211` path into `openwifi_testmode_cmd()` in `sdrctl_intf.c`. It is better for issuing commands and for reading and writing registers.
 
 The register *category* is packed into the **upper 16 bits of the address**:
 

@@ -1,10 +1,10 @@
 # Boot, Kernel, and Device Tree
 
-This page explains how an openwifi board boots: the boot image, the kernel and its patches, and, in the most detail, the **device tree**. The device tree tells Linux where the FPGA blocks live, and it is the main thing you edit when porting to a new board.
+This page explains how an openwifi board boots: the boot image, the kernel and its patches, and, in the most detail, the **device tree**. The device tree declares where the FPGA blocks live, and it is the main thing you edit when porting to a new board.
 
 If you only want to flash a card and run, see [Getting Started](Getting-Started.md). If you want to rebuild the driver or a full SD image, see [Software Development Workflow](Software-Development-Workflow.md). This page is for understanding and modifying the boot chain itself. All paths below are in the [openwifi](https://github.com/open-sdr/openwifi) repo under `kernel_boot/` unless noted.
 
-If you already have a working board and only want to move it onto a newly built kernel and set of modules, go straight to [Updating a running board](#updating-a-running-board), which covers the whole path from a PC-side build to `sdr0` showing up in `ifconfig -a`, with the scripts or by hand.
+If you already have a working board and only want to move it onto a newly built kernel and set of modules, go straight to [Updating a running board](#updating-a-running-board), which covers the whole path from a PC-side build to `sdr0` showing up in `ifconfig -a`. You can follow it with the scripts or by hand.
 
 ## The boot chain at a glance
 
@@ -275,7 +275,7 @@ Use `ifconfig -a` rather than plain `ifconfig`, because `wgd.sh` leaves the inte
 
 #### If `sdr0` does not appear
 
-Read `dmesg | tail -40` right after `./wgd.sh`. The message tells you which step above did not take:
+Read `dmesg | tail -40` right after `./wgd.sh`. The message shows you which step above did not take:
 
 | What you see | What it means | Fix |
 |---|---|---|
@@ -652,7 +652,7 @@ A practical sequence:
 6. **Boot and verify.** After building `BOOT.BIN` + kernel + this `devicetree.dtb` into an SD image (see [Software Development Workflow](Software-Development-Workflow.md#building-a-full-sd-image-from-scratch)), boot with a UART console attached. On a good boot you'll see the AD9361 probe and the `sdr,sdr` driver bind. If it doesn't, the device-tree addresses/interrupts almost certainly disagree with the FPGA. Recheck step 1. Common failures (SPI-flash env, wrong DDR size, ZCU102 SD/SODIMM, no UART) are in [Troubleshooting](Troubleshooting.md#boot-and-networking).
 
 !!! tip "The device tree is where the FPGA meets Linux"
-    A board port is really two halves that must agree: the **FPGA side** (the openwifi-hw Vivado project, which fixes addresses/interrupts, see [FPGA Development](FPGA-Development.md#porting-to-a-new-board)) and the **device-tree side** (this page, which tells Linux those same addresses/interrupts). Get the two to match and the rest of openwifi (driver, `sdrctl`, everything above) works unchanged, because it's all keyed off the `sdr,*` `compatible` strings, not the board.
+    A board port is really two halves that must agree: the **FPGA side** (the openwifi-hw Vivado project, which fixes addresses/interrupts, see [FPGA Development](FPGA-Development.md#porting-to-a-new-board)) and the **device-tree side** (this page, which declares those same addresses/interrupts to Linux). Get the two to match and the rest of openwifi (driver, `sdrctl`, everything above) works unchanged, because it's all keyed off the `sdr,*` `compatible` strings, not the board.
 
 ## Related pages
 
