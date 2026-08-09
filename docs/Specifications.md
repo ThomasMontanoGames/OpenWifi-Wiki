@@ -5,7 +5,7 @@ This page is a **datasheet-style reference** for openwifi: the numbers you need 
 Every figure carries a **footnote** pointing to its source so you can check it. Two conventions to note:
 
 - **The repository is authoritative.** Where a number comes from openwifi's own code, docs, or release notes, the footnote links to it. If a build script or a repo README states something different from this page, trust the repo and please fix this page.
-- **Standard-derived values are marked** with the `[802.11]`[^std] footnote. These follow from the IEEE 802.11 standard and the PHY parameters openwifi implements (e.g. 20 MHz OFDM), not from an openwifi-specific measurement.
+- **Standard-derived values are marked** with the `[802.11]`[^std] footnote. These follow from the IEEE 802.11 standard and the PHY parameters openwifi implements (for example 20 MHz OFDM), not from an openwifi-specific measurement.
 
 !!! warning "Configuration matters"
     openwifi is a *modifiable* design. Bandwidth, baseband clock, MAC timing, and even the FPGA resource footprint depend on how you build and configure it. The figures below describe the **default, open-source `master` configuration** on the reference boards unless stated otherwise.
@@ -87,7 +87,7 @@ openwifi's real-time "low MAC" (the `xpu` core) runs the DCF (CSMA/CA) state mac
 
 ## Measured performance
 
-These are openwifi's published bring-up numbers, measured on **FMCOMMS2 at 2.4 GHz, over cable and over the air**.[^readme] Your results depend on board, RF path, and configuration.
+These are openwifi's published bring-up numbers, measured over cable and over the air on **FMCOMMS2 at 2.4 GHz**.[^readme] Your results depend on board, RF path, and configuration.
 
 | Metric | Value | Conditions |
 |---|---|---|
@@ -147,7 +147,7 @@ See [FPGA Development](FPGA-Development.md) for the build flow.
 [^sdrc]: openwifi [`driver/sdr.c`](https://github.com/open-sdr/openwifi/blob/master/driver/sdr.c): the SIFS and ACK-duration constants used at run time.
 [^frequent]: openwifi [`doc/app_notes/frequent_trick.md`](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/frequent_trick.md): how SIFS/DIFS/EIFS/slot/CW/NAV/ACK/retransmission are overridden or disabled.
 [^tcl]: openwifi-hw [`boards/openwifi.tcl`](https://github.com/open-sdr/openwifi-hw/blob/master/boards/openwifi.tcl): `NUM_CLK_PER_US`, the FPGA baseband-clock setting (default 100 MHz).
-[^release]: openwifi [GitHub Releases](https://github.com/open-sdr/openwifi/releases): FPGA resource-utilization and Fmax/speed-grade statements (release v1.1.0 "taiyuan", full `report_utilization` archives in v1.3.0 and v1.5.0).
+[^release]: openwifi [GitHub Releases](https://github.com/open-sdr/openwifi/releases): FPGA resource-utilization and Fmax/speed-grade statements (release v1.1.0 "taiyuan," full `report_utilization` archives in v1.3.0 and v1.5.0).
 [^std]: **IEEE 802.11**: values that follow from the standard for a 20 MHz OFDM PHY (FFT size, subcarrier counts, symbol/slot timing, legacy rate set), not from an openwifi-specific measurement.
 [^faq]: openwifi [FAQ & Resources](FAQ-and-Resources.md#frequently-asked-questions): AD9361 70 MHz–6 GHz tuning, A-MPDU/A-MSDU status.
 [^boards]: openwifi wiki [Supported Boards](Supported-Boards.md): per-board SoC, antenna capability, and baseband-clock options.

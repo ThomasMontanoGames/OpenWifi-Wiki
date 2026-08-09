@@ -121,9 +121,9 @@ This makes it easy to keep, share, and switch between variants. To build a varia
 
 - no argument: load the driver `.ko` files and the FPGA image (if `system_top.bit.bin` exists) from the current directory, with `test_mode=0`
 - a numeric first argument is assigned to `test_mode` (loads everything from the current directory)
-- `remote` downloads the files and then loads them; an optional second argument names the target directory, an optional third sets `test_mode`
-- any other first argument that is not a `.tar.gz` file is treated as a directory to load from; an optional second argument sets `test_mode`
-- a `.tar.gz` file is unpacked and loaded from the unpacked directory; an optional second argument sets `test_mode`
+- `remote` downloads the files and then loads them. An optional second argument names the target directory, an optional third sets `test_mode`
+- any other first argument that is not a `.tar.gz` file is treated as a directory to load from. An optional second argument sets `test_mode`
+- a `.tar.gz` file is unpacked and loaded from the unpacked directory. An optional second argument sets `test_mode`
 
 ### test_mode
 

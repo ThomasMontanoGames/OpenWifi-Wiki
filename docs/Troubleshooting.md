@@ -79,7 +79,7 @@ Set `nameserver 8.8.8.8` in `/etc/resolv.conf` on the board.
 
 Some FMCOMMS2/3/4 boards ship with a wrong or empty FRU EEPROM, which crashes some platforms (notably ZCU102). Reprogram it with [fru_tools](https://github.com/analogdevicesinc/fru_tools):
 
-1. Boot the FMCOMMS board on a platform that *does* come up (e.g. a 32-bit zed/zc706/zc702).
+1. Boot the FMCOMMS board on a platform that *does* come up (for example a 32-bit zed/zc706/zc702).
 2. Build `fru_tools`.
 3. Locate the EEPROM with `find /sys -name eeprom`.
 4. Confirm the mismatch with `fru-dump -i <eeprom> -b`.

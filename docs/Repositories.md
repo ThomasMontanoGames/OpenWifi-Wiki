@@ -8,7 +8,7 @@ openwifi is a full-stack, Linux `mac80211`-compatible IEEE 802.11 (Wi-Fi) implem
 
 ## Why more than one repository?
 
-There is not one "openwifi repo". There are four, each with its own job and toolchain:
+There is not one "openwifi repo." There are four, each with its own job and toolchain:
 
 <figure>
 <svg viewBox="0 0 920 450" role="img" aria-label="The four openwifi repositories and how they connect: openwifi (driver and tools), openwifi-hw (FPGA design), openwifi-hw-img (prebuilt bitstreams), and openofdm (OFDM receiver submodule)." style="width:100%;height:auto;max-width:1080px;font-family:inherit;font-size:13px">
@@ -90,7 +90,7 @@ There is not one "openwifi repo". There are four, each with its own job and tool
 `openwifi-hw-img` is pulled in by the software build scripts, and `openofdm` is fetched as a git submodule of `openwifi-hw`.
 
 !!! tip "The `board_name` thread ties it all together"
-    The same `board_name` string (e.g. `zed_fmcs2`, `zcu102_fmcs2`) names a board in all the repos: `openwifi-hw/boards/$BOARD_NAME/` (FPGA project), `openwifi-hw-img/boards/$BOARD_NAME/sdk/` (prebuilt bitstream), and `openwifi/kernel_boot/boards/$BOARD_NAME/` (boot files + device tree). Set `export BOARD_NAME=...` once and every build script uses it. See [Supported Boards](Supported-Boards.md).
+    The same `board_name` string (for example `zed_fmcs2`, `zcu102_fmcs2`) names a board in all the repos: `openwifi-hw/boards/$BOARD_NAME/` (FPGA project), `openwifi-hw-img/boards/$BOARD_NAME/sdk/` (prebuilt bitstream), and `openwifi/kernel_boot/boards/$BOARD_NAME/` (boot files + device tree). Set `export BOARD_NAME=...` once and every build script uses it. See [Supported Boards](Supported-Boards.md).
 
 ## How the pieces fit at build and run time
 
@@ -100,7 +100,7 @@ There is not one "openwifi repo". There are four, each with its own job and tool
 
 ## Versions this wiki targets
 
-openwifi pins several toolchains and upstream projects, and they intentionally don't all share a version number. A 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or a repo README states a version different from the table below, trust the repo. Treat this table as a snapshot from the last reconciliation with the repos (**7 August 2026**). Bumping it when they move is a welcome contribution.
+openwifi pins several toolchains and upstream projects, and they intentionally don't all share a version number. A 2022-era FPGA toolchain paired with a current kernel is normal here. If a build script or a repo README states a version different from the table below, trust the repo. Treat this table as a snapshot from the last reconciliation with the repos (**August 7, 2026**). Bumping it when they move is a welcome contribution.
 
 | Component | Target version | Set / pinned in | Notes |
 |---|---|---|---|
@@ -116,7 +116,7 @@ openwifi pins several toolchains and upstream projects, and they intentionally d
 !!! note "Driver and FPGA ship as a matched set"
     openwifi's releases are codenamed (for example `v1.5.0` *shahecheng*, `v1.2.0` *leuven*) and version the driver and the FPGA design together, because the two sides share the register-map contract described above. Run a driver against the bitstream from the same release rather than mixing across versions. The `wgd.sh` hot-reload flow exists to swap matched driver + FPGA pairs on a running board without rebooting (see [Software Development Workflow](Software-Development-Workflow.md)). There is no formal cross-version compatibility matrix, so when in doubt, match versions. The full release history and notes live on the [openwifi releases page](https://github.com/open-sdr/openwifi/releases).
 
-## Where do I look for…?
+## Where do you look for…?
 
 ### …runtime behavior (rates, power, CCA, ACK, slicing)
 `openwifi/user_space/`: dozens of helper scripts wrap `sdrctl` register writes. Start with the [sdrctl & Runtime Control](sdrctl-and-Runtime-Control.md) page. The tool itself is `openwifi/user_space/sdrctl_src/`.

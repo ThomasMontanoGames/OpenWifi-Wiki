@@ -60,7 +60,7 @@ DCF
 :   Distributed Coordination Function: the standard's name for the CSMA/CA-based channel-access method. Implemented in `csma_ca.v` inside `xpu`.
 
 DCXO
-:   Digitally-Controlled Crystal Oscillator: the AD9361's tunable reference crystal. A board overlay sets its coarse/fine tuning (`adi,dcxo-coarse-and-fine-tune`) to trim the frequency. See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#what-a-board-overlay-adds).
+:   Digitally controlled crystal oscillator: the AD9361's tunable reference crystal. A board overlay sets its coarse/fine tuning (`adi,dcxo-coarse-and-fine-tune`) to trim the frequency. See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#what-a-board-overlay-adds).
 
 Device tree (DTB / DTS / DTSO)
 :   The data structure that tells Linux what hardware is present and at which addresses/interrupts. openwifi builds a board's `devicetree.dtb` by layering overlays (`.dtso`) onto a stock board tree. Porting a board is largely a device-tree exercise.
@@ -195,7 +195,7 @@ PL / PS
 :   Programmable Logic / Processing System: the two halves of a Xilinx Zynq SoC. The FPGA fabric is the PL, and the ARM cores are the PS. Some boards move Ethernet to the PL side for bandwidth.
 
 PMUFW
-:   Platform Management Unit Firmware: a ZynqMP-specific boot component (ZCU102), built alongside the FSBL and ATF.
+:   Platform Management Unit Firmware: a ZynqMP-specific boot component (ZCU102) built alongside the FSBL and ATF.
 
 PPS
 :   Pulse Per Second: a once-a-second timing signal (typically from GPS) for precise clock alignment. Boards like the E310 v2 accept an external 10 MHz / PPS reference. See [Supported Boards](Supported-Boards.md#antsdr-e310-v2-microphase).
@@ -225,7 +225,7 @@ SoC
 :   System on Chip. openwifi runs on Xilinx Zynq / Zynq UltraScale+ SoCs, which combine ARM cores (PS) with FPGA fabric (PL).
 
 SODIMM
-:   Small Outline DIMM: the pluggable DRAM module used on some boards (e.g. ZCU102). Certain modules fail with the U-Boot SPL DDR bring-up. See [Troubleshooting](Troubleshooting.md#no-uart-output-on-zcu102-under-openwrt).
+:   Small Outline DIMM: the pluggable DRAM module used on some boards (for example the ZCU102). Certain modules fail with the U-Boot SPL DDR bring-up. See [Troubleshooting](Troubleshooting.md#no-uart-output-on-zcu102-under-openwrt).
 
 SoftMAC
 :   A Wi-Fi design where the upper MAC runs in host software (Linux `mac80211`) rather than on the chip. openwifi is a SoftMAC design, which is why standard Linux tools work over `sdr0`.

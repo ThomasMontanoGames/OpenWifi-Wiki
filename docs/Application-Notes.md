@@ -56,7 +56,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![Live IQ display](assets/img/iq-screen-shot.jpg)
 
 ??? note "ACK timing verification by IQ capture"
-    Trigger IQ capture on the ACK-send event to directly measure the Rx-ACK-GAP and Tx-ACK-GAP against the ~16 µs SIFS, across MCS and packet lengths.
+    Trigger IQ capture on the ACK-send event to directly measure the Rx-ACK-GAP and Tx-ACK-GAP against the ~16 µs SIFS across MCS and packet lengths.
 
     [Read more →](Research-Features.md#ack-timing-measurement) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_ack_timing.md)
 

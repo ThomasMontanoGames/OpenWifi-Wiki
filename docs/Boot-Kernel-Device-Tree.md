@@ -1,4 +1,4 @@
-# Boot, Kernel and Device Tree
+# Boot, Kernel, and Device Tree
 
 This page explains how an openwifi board boots: the boot image, the kernel and its patches, and, in the most detail, the **device tree**. The device tree tells Linux where the FPGA blocks live, and it is the main thing you edit when porting to a new board.
 
@@ -137,9 +137,9 @@ Four small patches (in `kernel_boot/`, documented in `kernel_patch_readme.md`) a
 
 ## Updating a running board
 
-Everything above is how a board is built and what it boots. This part is the routine operation: taking a board that already runs openwifi and moving it onto a kernel, a module set or a driver you just built. The layout section comes first, because all three procedures after it are variations on getting the same files into the same two directories.
+Everything above is how a board is built and what it boots. This part is the routine operation: taking a board that already runs openwifi and moving it onto a kernel, a module set, or a driver you just built. The layout section comes first, because all three procedures after it are variations on getting the same files into the same two directories.
 
-- [Updating a board to a newly built kernel](#updating-a-board-to-a-newly-built-kernel): the normal path, using the transfer and populate scripts. New kernel, reboot needed.
+- [Updating a board to a newly built kernel](#updating-a-board-to-a-newly-built-kernel): the normal path: the transfer and populate scripts. New kernel, reboot needed.
 - [The same update by hand](#the-same-update-by-hand-without-the-scripts): the identical set of copies with plain `scp`, for when the scripts' hard-coded addresses or their all-or-nothing behavior do not suit you.
 - [Replacing a single module on a running board](#replacing-a-single-module-on-a-running-board): the light case. Same kernel, one rebuilt `.ko`, no reboot.
 
@@ -281,7 +281,7 @@ Read `dmesg | tail -40` right after `./wgd.sh`. The message tells you which step
 |---|---|---|
 | `insmod: ERROR: could not insert module ...: Invalid module format`, and `dmesg` shows `version magic ... should be ...` | The `.ko` was built against a different kernel than the one running | Rebuild the driver (step 2) against the kernel that is actually booted, and re-copy it. Compare `modinfo /root/openwifi/sdr.ko \| grep vermagic` with `uname -r` |
 | `modprobe: FATAL: Module mac80211 not found in directory /lib/modules/<version>` | The `/lib/modules` symlink is missing or still points at the old kernel version | Step 6 |
-| `insmod: ERROR: ... Unknown symbol in module`, with `dmesg` naming `ad9361_set_tx_atten` or `ad9361_do_calib_run` | The loaded `ad9361_drv.ko` is an unpatched one, so the exported functions the driver needs are absent | Confirm `prepare_kernel.sh` applied the [kernel patches](#the-kernel-patches), then redo steps 1, 3 and 5 |
+| `insmod: ERROR: ... Unknown symbol in module`, with `dmesg` naming `ad9361_set_tx_atten` or `ad9361_do_calib_run` | The loaded `ad9361_drv.ko` is an unpatched one, so the exported functions the driver needs are absent | Confirm `prepare_kernel.sh` applied the [kernel patches](#the-kernel-patches), then redo steps 1, 3, and 5 |
 | Modules load with no error, but no `sdr0` and `dmesg` shows no openwifi probe lines at all | The driver never bound, because nothing in the device tree matches `compatible = "sdr,sdr"`, or the `.dtb` in the `BOOT` partition is not the openwifi one | [The device tree](#the-device-tree) below, and check that step 5 wrote the `.dtb` into `BOOT` |
 | `Unsupported PRODUCT_ID 0xFF` or `0x00` at AD9361 probe | The AD9361 is not responding over SPI, which is a hardware or FMC-connection problem, not a kernel one | [Troubleshooting → hardware quirks](Troubleshooting.md#hardware-quirks) |
 
@@ -300,7 +300,7 @@ dmesg | grep -i -E 'sdr|ad9361|openwifi'
 
 ### The same update by hand, without the scripts
 
-Steps 3 to 7 above are only file copies and a symlink, so you can do them by hand once steps 1 and 2 (build the kernel, rebuild the driver against it) are done. That is worth doing when your board is not at the hard-coded `192.168.10.122`, when you only want part of the update, or when you want to see exactly which files are touched. Everything below is what `transfer_kernel_image_module_to_board.sh`, `transfer_driver_userspace_to_board.sh`, `populate_kernel_image_module_reboot.sh` and `populate_driver_userspace.sh` do, with the tar step dropped and the paths spelled out.
+Steps 3 to 7 above are only file copies and a symlink, so you can do them by hand once steps 1 and 2 (build the kernel, rebuild the driver against it) are done. That is worth doing when your board is not at the hard-coded `192.168.10.122`, when you only want part of the update, or when you want to see exactly which files are touched. Everything below is what `transfer_kernel_image_module_to_board.sh`, `transfer_driver_userspace_to_board.sh`, `populate_kernel_image_module_reboot.sh` and `populate_driver_userspace.sh` do with the tar step dropped and the paths spelled out.
 
 **On the PC: pick the arch-dependent names.**
 

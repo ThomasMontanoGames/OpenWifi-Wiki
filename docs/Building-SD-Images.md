@@ -37,7 +37,7 @@ The builds below assume you understand the [boot chain and device tree](Boot-Ker
 
 ### 1. Flash the ADI Kuiper base image
 
-Download the **"13 December 2023 release (2022_r2)"** (`image_2023-12-13-ADI-Kuiper-full.zip`) from the [ADI Kuiper page](https://wiki.analog.com/resources/tools-software/linux-software/kuiper-linux?redirect=1) and extract the `.img`. Flash it:
+Download the **"December 13, 2023 release (2022_r2)"** (`image_2023-12-13-ADI-Kuiper-full.zip`) from the [ADI Kuiper page](https://wiki.analog.com/resources/tools-software/linux-software/kuiper-linux?redirect=1) and extract the `.img`. Flash it:
 
 ```bash
 # Check the real sector count first: fdisk -l 2023-12-13-ADI-Kuiper-full.img

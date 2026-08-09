@@ -12,7 +12,7 @@ This page is the tool and register reference. For the workflows that use it, CSI
 |---|---|---|
 | `side_ch` | FPGA | Taps the receiver, applies the trigger/match conditions, buffers captures in a BRAM FIFO ([FPGA IP Cores](FPGA-IP-Cores.md#side_ch-the-csi-iq-capture-side-channel)) |
 | `side_ch.ko` | Board (kernel) | Serves netlink requests, reads/writes the 32 registers, runs the DMA that drains the FIFO into memory |
-| `side_ch_ctl` | Board (user space) | The CLI: register reads/writes, capture polling, and forwarding each capture to a PC over UDP |
+| `side_ch_ctl` | Board (user space) | The command-line tool: register reads/writes, capture polling, and forwarding each capture to a PC over UDP |
 | `side_info_display.py`, `iq_capture.py` | Your PC | Receive the UDP stream on port 4000 and plot/log it. `iq_capture_2ant.py` and `iq_capture_freq_offset.py` are variants for dual-antenna captures and frequency-offset analysis |
 
 ![CSI side-channel architecture](assets/img/csi-architecture.jpg)
@@ -180,14 +180,14 @@ These are the `side_ch` core's `slv_regN` in `side_ch.v`. Several registers **me
 | 6 | both | addr1 (destination) match target: the **last 32 bits** of the MAC. |
 | 7 | both | addr2 (source) match target, last 32 bits. Also the addr2 target used by the event counters. |
 | 8 | IQ | bits4-0 trigger select, 0–31. See [the trigger table](#trigger-reference-register-8). |
-| 9 | IQ | bits15-0 threshold, doing double duty: RSSI in `rssi_half_db` (bits10-0, read as a signed value, so keep it ≤ 1023) for triggers 10/11 and the `rssi_above_th` counter, or antenna 1's I amplitude for triggers 28–31. |
+| 9 | IQ | bits15-0 threshold, doing double duty: RSSI in `rssi_half_db` (bits10-0, read as a signed value, so keep it ≤ 1023) for triggers 10/11 and the `rssi_above_th` counter, or antenna 1's in-phase amplitude for triggers 28–31. |
 | 10 | IQ | bits6-0 AGC gain threshold (0–127), for triggers 14/15. |
 | 11 | IQ | bits13-0 `pre_trigger_len`: how many samples before the trigger are kept. Max 8190, or 4094 on small-BRAM boards. |
 | 12 | IQ | bits13-0 `iq_len`. Set via `iq_len_init`, not here. |
 | 19 | both | Counter event-source select: bits 0, 4, 8, 12, 16, 20 choose the source for registers 26–31 respectively. |
 
 !!! note "Register 3 does not choose where the IQ comes from"
-    Its bit 0 switches the core between CSI and IQ mode, and bits 5-4 choose what gets packed into each 64-bit word (including whether antenna 1's samples ride along). The tap point (off the air, or your own transmit) is **register 5 bits 2-1**, and nothing in register 3 touches it. The upstream [IQ app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq.md) annotates `wh3h01` with "configure the IQ data source", but that command works in the quick start because register 5 happens to already be 0 (received IQ), not because register 3 set anything.
+    Its bit 0 switches the core between CSI and IQ mode, and bits 5-4 choose what gets packed into each 64-bit word (including whether antenna 1's samples ride along). The tap point (off the air, or your own transmit) is **register 5 bits 2-1**, and nothing in register 3 touches it. The upstream [IQ app note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq.md) annotates `wh3h01` with "configure the IQ data source," but that command works in the quick start because register 5 happens to already be 0 (received IQ), not because register 3 set anything.
 
 ### Read-only
 
@@ -206,7 +206,7 @@ In IQ mode, register 8 picks the one condition that fires a capture. `./side_ch_
 
 | Y | Fires when |
 |---|---|
-| 0 | Decoding finishes, FCS pass **or** fail. With reg 5 bit0 set, free-runs instead. |
+| 0 | Decoding finishes with FCS pass or fail. With reg 5 bit0 set, it free-runs instead. |
 | 1 | Decoding finishes with FCS pass |
 | 2 | Decoding finishes with FCS fail |
 | 3 | The first IQ of a transmitted packet reaches the DAC, and it isn't a retransmission |
@@ -234,9 +234,9 @@ In IQ mode, register 8 picks the one condition that fires a capture. `./side_ch_
 | 25 | addr2 seen, subject to the match bits in reg 1 |
 | 26 | TX RF starts, for a packet that needs an ACK |
 | 27 | TX RF stops, for a packet that needs an ACK |
-| 28 | The absolute value of antenna 1's I samples exceeds the reg 9 threshold while TX baseband is ongoing (collision capture) |
-| 29 | The absolute value of antenna 1's I samples exceeds the reg 9 threshold while TX RF is ongoing (collision capture) |
-| 30 | TX starts while antenna 1's I amplitude exceeds the threshold |
+| 28 | The absolute value of antenna 1's in-phase samples exceeds the reg 9 threshold while TX baseband is ongoing (collision capture) |
+| 29 | The absolute value of antenna 1's in-phase samples exceeds the reg 9 threshold while TX RF is ongoing (collision capture) |
+| 30 | TX starts while antenna 1's in-phase amplitude exceeds the threshold |
 | 31 | As 30, for a packet that needs an ACK |
 
 Before you rely on this table:
@@ -256,8 +256,8 @@ The side channel also counts PHY RX/TX events in the FPGA, which works in either
 | 27 | bit4 | long preamble detected | `phy_tx_done` |
 | 28 | bit8 | PHY header strobe | RSSI above threshold |
 | 29 | bit12 | PHY header **valid** | AGC gain change |
-| 30 | bit16 | data packet for me, decoded, addr2 matched | AGC lock |
-| 31 | bit20 | data packet for me, decoded **with good FCS**, addr2 matched | TX packet needs ACK |
+| 30 | bit16 | data packet, decoded, addr2 matched | AGC lock |
+| 31 | bit20 | data packet, decoded **with good FCS**, addr2 matched | TX packet needs ACK |
 
 The counters are 16 bits wide and wrap silently, so clear the ones you use at the start of a measurement window.
 

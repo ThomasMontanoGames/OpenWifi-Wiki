@@ -85,7 +85,7 @@ Wi-Fi 6 is different. It reworks the OFDM numerology and adds OFDMA, which subdi
 
 ## Wi-Fi 4 (802.11n) in the open-source release
 
-802.11n's formal name for its feature set is **HT, high throughput**, and that is the label used in practice: driver logs mark 802.11n frames `ht1` and legacy 11a/g frames `ht0`, tools take `-m n` or "HT" flags, and capability fields are called "HT capabilities". The amendment added five PHY improvements and frame aggregation at the MAC:
+802.11n's formal name for its feature set is **HT, high throughput**, and that is the label used in practice: driver logs mark 802.11n frames `ht1` and legacy 11a/g frames `ht0`, tools take `-m n` or "HT" flags, and capability fields are called "HT capabilities." The amendment added five PHY improvements and frame aggregation at the MAC:
 
 | 802.11n feature | What it does | In openwifi? | How you control it |
 |---|---|---|---|
@@ -97,7 +97,7 @@ Wi-Fi 6 is different. It reworks the OFDM numerology and adds OFDMA, which subdi
 | MIMO (up to 4 streams) | Multiplies throughput by the stream count | ❌ no | – |
 | 40 MHz bandwidth | Doubles the channel | ❌ no | – |
 
-With everything supported switched on, the theoretical PHY ceiling is **72.2 Mbps** (MCS 7 with short GI). The step-by-step derivation is on the [Architecture page](Architecture.md#what-openwifi-implements-of-80211agn), and the measured best case is 40–50 Mbps TCP / ~50 Mbps UDP with aggregation on.[^readme]
+With everything supported switched on, the theoretical PHY ceiling is **72.2 Mbps** (MCS 7 with short GI). The step-by-step derivation is on the [Architecture page](Architecture.md#what-openwifi-implements-of-80211agn), and measured throughput reaches 40–50 Mbps TCP / ~50 Mbps UDP with aggregation on.[^readme]
 
 ### The HT rate table
 
@@ -247,7 +247,7 @@ The `1` becomes the `test_mode` module parameter of `sdr.ko`. With bit 0 set, th
 <figcaption>The same OFDM symbols with the normal 800 ns and the short 400 ns guard interval. Figure from the openwifi 802.11n app note.</figcaption>
 </figure>
 
-openwifi's PHY handles 400 ns short-GI frames in both directions, and short GI is what lifts MCS 7 from 65 to 72.2 Mbps. The driver adds a subtlety, though: it only *advertises* short-GI support to peers when `test_mode` **bit 1** is set. The code comment says short GI "seems to bring unnecessary stability issue", so by default a negotiated link runs with the normal 800 ns GI and tops out at 65 Mbps.[^sdrc]
+openwifi's PHY handles 400 ns short-GI frames in both directions, and short GI is what lifts MCS 7 from 65 to 72.2 Mbps. The driver adds a subtlety, though: it only *advertises* short-GI support to peers when `test_mode` **bit 1** is set. The code comment says short GI "seems to bring unnecessary stability issue," so by default a negotiated link runs with the normal 800 ns GI and tops out at 65 Mbps.[^sdrc]
 
 ```bash
 ./wgd.sh 2        # advertise short GI only
@@ -297,7 +297,7 @@ A capture with `tcpdump` on a monitor interface shows the same information in th
 - **One spatial stream, 20 MHz, always.** The 72.2 Mbps ceiling is a hard PHY limit of the open-source design. The two antennas on a board are separate TX and RX paths for isolation, not MIMO.
 - **Throughput in practice is ~50 Mbps**, not 72. Preambles, ACKs, and contention take their share even with aggregation.[^readme]
 - **Short GI is off by default** at the capability level, so a default link peaks at 65 Mbps PHY rate.
-- **A-MSDU is absent and A-MPDU is experimental**, so a commercial peer that relies on aggressive aggregation defaults will reach a higher rate than an openwifi link.
+- **A-MSDU is absent and A-MPDU is experimental**, so a commercial peer that relies on aggressive aggregation defaults reaches a higher rate than an openwifi link.
 - **No 802.11b compatibility.** In the 2.4 GHz band, legacy clients and management-frame fallbacks cause problems. See [About 802.11b](Operating-Modes.md#about-80211b).
 
 ## Wi-Fi 6 (802.11ax)

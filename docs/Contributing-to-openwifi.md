@@ -19,7 +19,7 @@ The forms are linked from each repository's `CONTRIBUTING.md` (for example, [ope
 - **Build guides:** [Software Development Workflow](Software-Development-Workflow.md) (driver + live reload), [FPGA Development](FPGA-Development.md) (bitstream, IP cores, simulation), [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md), and [Building SD Images](Building-SD-Images.md).
 - **No hardware?** The imec [w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html) offers remote access to openwifi boards.
 
-## 3. Which repository does my change belong in?
+## 3. Which repository does this change belong in?
 
 openwifi is [split across several repos](Repositories.md) by toolchain, so the first question is which one to target:
 

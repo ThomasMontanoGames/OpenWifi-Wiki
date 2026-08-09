@@ -17,7 +17,7 @@
 *[BCC]: Binary Convolutional Coding: the standard's name for the punctured convolutional FEC 802.11a/g/n uses.
 *[BSR]: Buffer Status Report: an 802.11ax report of a station's pending uplink data, solicited by a trigger frame.
 *[BSRP]: Buffer Status Report Poll: the 802.11ax trigger frame type (4) an AP sends to ask stations how much uplink data they hold.
-*[BRAM]: Block RAM: the FPGA's on-chip memory, used for the TX buffer and capture FIFO.
+*[BRAM]: Block RAM: the FPGA's on-chip memory, which holds the TX buffer and capture FIFO.
 *[BSSID]: Basic Service Set Identifier: the MAC address identifying a Wi-Fi network (the AP in infrastructure mode).
 *[CCA]: Clear Channel Assessment: the "is the channel busy?" check in CSMA/CA (configurable via sdrctl).
 *[Co-OFDMA]: Coordinated OFDMA: an openwifi research feature where multiple APs coordinate their OFDMA transmissions.
@@ -35,7 +35,7 @@
 *[CWmax]: Maximum contention window for CSMA/CA backoff.
 *[DCF]: Distributed Coordination Function: the standard's CSMA/CA-based channel-access method.
 *[DCM]: Dual Carrier Modulation: an optional 802.11ax mode that duplicates data across subcarrier pairs for robustness.
-*[DCXO]: Digitally-Controlled Crystal Oscillator: the AD9361's tunable reference crystal.
+*[DCXO]: Digitally controlled crystal oscillator: the AD9361's tunable reference crystal.
 *[DHCP]: Dynamic Host Configuration Protocol: assigns IP addresses on a network.
 *[DDR]: Double Data Rate SDRAM: the board's main memory, initialized by the FSBL at boot.
 *[DTB]: Device Tree Blob: the compiled description of the board's hardware for Linux.
@@ -60,7 +60,7 @@
 *[FPGA]: Field-Programmable Gate Array: the reconfigurable logic where openwifi's PHY and real-time MAC live.
 *[FRU]: Field-Replaceable Unit: identification data in an FMCOMMS board's EEPROM.
 *[FSBL]: First Stage Boot Loader: the initial boot stage built from the hardware description.
-*[FSM]: Finite State Machine: sequential logic that steps through a fixed set of states (e.g. the side channel's capture FSM).
+*[FSM]: Finite State Machine: sequential logic that steps through a fixed set of states (for example the side channel's capture FSM).
 *[GEM]: Gigabit Ethernet MAC: the Zynq PS-side Ethernet controller.
 *[GI]: Guard Interval: the cyclic-prefix gap between OFDM symbols that absorbs multipath.
 *[GPIO]: General-Purpose Input/Output: software-controllable pins (board LEDs, RF-switch control).
@@ -113,7 +113,7 @@
 *[RU]: Resource Unit: a group of OFDMA subcarriers assigned to one station in 802.11ax (not in the open-source release).
 *[SDR]: Software-Defined Radio: signal processing done in software/logic rather than fixed hardware.
 *[side_ch]: openwifi's FPGA capture engine, tapping IQ and demodulator results independently of the packet path.
-*[SIFS]: Short Interframe Space: the brief gap before an ACK (10 us at 2.4 GHz, 16 us at 5 GHz).
+*[SIFS]: Short Interframe Space: the brief gap before an ACK (10 μs at 2.4 GHz, 16 μs at 5 GHz).
 *[SMA]: SubMiniature version A: the coaxial RF connector used for antennas and conducted-test cables.
 *[SoftMAC]: A Wi-Fi design where the upper MAC runs in host software (Linux mac80211).
 *[SoC]: System on Chip: openwifi runs on Xilinx Zynq / Zynq UltraScale+ SoCs.

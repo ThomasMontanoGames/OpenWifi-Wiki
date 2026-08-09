@@ -82,11 +82,11 @@ Four consequences follow from this.
 
 **You do not need an openwifi build of either daemon.** `apt-get install hostapd` is what the [SD image build](Building-SD-Images.md) does, and it is enough. The one exception is the 11b-suppressing `wpa_supplicant` described below, and that patch is about rate advertisement, not about openwifi.
 
-**The daemons cannot see or set openwifi's own settings.** TX power, RX gain, CCA threshold, ACK behavior, and the FPGA registers are reached through a completely separate channel, `sdrctl`, which uses an nl80211 *testmode* command. See [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md). So a config file will never contain an openwifi register setting, and `sdrctl` will never change an SSID.
+**The daemons cannot see or set openwifi's own settings.** TX power, RX gain, CCA threshold, ACK behavior, and the FPGA registers are reached through a completely separate channel, `sdrctl`, which uses an nl80211 *testmode* command. See [sdrctl and Runtime Control](sdrctl-and-Runtime-Control.md). So a config file never contains an openwifi register setting, and `sdrctl` never changes an SSID.
 
 **hostapd does not transmit beacons.** It hands `mac80211` the beacon contents, and `mac80211` plus the driver put a beacon on the air on a timer. That is why the beacon check in the [AP walkthrough](Operating-Modes.md#access-point) watches the TX interrupt count in `/proc/interrupts` rather than anything hostapd prints.
 
-**Encryption runs in software.** The driver implements no key-offload callback (there is no `set_key` in the [callback table](Driver-Architecture.md#the-mac80211-callback-surface)), so `mac80211` does CCMP on the ARM cores. WPA2 works normally, but it costs processor time, so an encrypted link will not reach the throughput of an open one. When you are measuring peak throughput, test with security disabled.
+**Encryption runs in software.** The driver implements no key-offload callback (there is no `set_key` in the [callback table](Driver-Architecture.md#the-mac80211-callback-surface)), so `mac80211` does CCMP on the ARM cores. WPA2 works normally, but it costs processor time, so an encrypted link doesn't reach the throughput of an open one. When you are measuring peak throughput, test with security disabled.
 
 ## The configuration files openwifi ships
 
@@ -124,7 +124,7 @@ Staying in 5 GHz sidesteps the whole problem, which is why the demo defaults to 
 
 A-MPDU aggregation is **not** a hostapd setting. It is enabled when the driver loads, with `./wgd.sh 1`. See [Turning on A-MPDU aggregation](Wi-Fi-4-and-Wi-Fi-6.md#turning-on-a-mpdu-aggregation).
 
-## Debugging a link that will not come up
+## Debugging a link that won't come up
 
 Run the daemon in the foreground with verbose output. This is the fastest way to find out whether the problem is above or below the daemon:
 
@@ -141,6 +141,6 @@ Read the output against these three cases.
 
 If a config file sets `ctrl_interface`, you can also attach `wpa_cli` or `hostapd_cli` to a running daemon to inspect state and issue commands without restarting it.
 
-Two openwifi-specific traps: reloading the driver destroys and recreates `sdr0`, so any daemon that was running is now attached to nothing and has to be restarted, as noted in the [driver iteration loop](Software-Development-Workflow.md#the-driver-iteration-loop). And NetworkManager will fight `wpa_supplicant` for control of the interface, which is why the client walkthrough starts with `service network-manager stop`.
+Two openwifi-specific traps: reloading the driver destroys and recreates `sdr0`, so any daemon that was running is now attached to nothing and has to be restarted, as noted in the [driver iteration loop](Software-Development-Workflow.md#the-driver-iteration-loop). And NetworkManager fights `wpa_supplicant` for control of the interface, which is why the client walkthrough starts with `service network-manager stop`.
 
 For anything below the daemon, the driver's own logging is on the [Troubleshooting](Troubleshooting.md#driver-dmesg-logging) page.
