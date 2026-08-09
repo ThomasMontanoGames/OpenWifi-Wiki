@@ -1,4 +1,14 @@
-# openwifi Wiki
+<h1 align="center">openwifi Wiki</h1>
+
+<p align="center">
+  Documentation for the <a href="https://github.com/open-sdr/openwifi">openwifi</a> and <a href="https://github.com/open-sdr/openwifi-hw">openwifi-hw</a> projects<br>
+  <a href="https://thomas-montano.github.io/OpenWifi-Wiki/">thomas-montano.github.io/OpenWifi-Wiki</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/thomas-montano/OpenWifi-Wiki/actions/workflows/deploy.yml"><img src="https://github.com/thomas-montano/OpenWifi-Wiki/actions/workflows/deploy.yml/badge.svg" alt="Deploy wiki to GitHub Pages"></a>
+  <a href="https://github.com/thomas-montano/OpenWifi-Wiki/actions/workflows/build-check.yml"><img src="https://github.com/thomas-montano/OpenWifi-Wiki/actions/workflows/build-check.yml/badge.svg" alt="Build check"></a>
+</p>
 
 Documentation for the [openwifi](https://github.com/open-sdr/openwifi) and [openwifi-hw](https://github.com/open-sdr/openwifi-hw) projects, written for onboarding new contributors. It consolidates the two repositories' READMEs, the project document, the application notes, the image-build and boot/device-tree details, the FPGA IP-core and per-board hardware notes, a glossary, and the known-issues list into a set of cross-linked pages, with instructions rewritten for clarity.
 
