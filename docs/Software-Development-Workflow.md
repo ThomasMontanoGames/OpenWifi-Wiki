@@ -2,7 +2,7 @@
 
 This page covers the software side of openwifi development: rebuilding and deploying the driver, `sdrctl`, and the other `user_space/` tools. Building the FPGA bitstream and turning it into a loadable image are on the [FPGA Development](FPGA-Development.md) page. This page picks up at getting things onto the board.
 
-The prebuilt SD image may be older than the current repo, so **copy the latest `user_space/` files onto the board** before doing serious work, and rebuild the driver against the matching kernel.
+The prebuilt SD image may be older than the current repo, so **copy the repo's `user_space/` files onto the board** before doing serious work, and rebuild the driver against the matching kernel.
 
 If you are in the middle of editing code and want the steps, start with the [quick reference](#quick-reference-from-code-change-to-running-board) below and follow its links for detail.
 

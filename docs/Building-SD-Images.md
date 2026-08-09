@@ -10,7 +10,7 @@ openwifi boots from an SD card running one of two base operating systems, and yo
 
 The builds below assume you understand the [boot chain and device tree](Boot-Kernel-Device-Tree.md). For the driver/dev loop see [Software Development Workflow](Software-Development-Workflow.md).
 
-## Which one should I build?
+## Which one should you build?
 
 | | ADI Kuiper | OpenWrt |
 |---|---|---|

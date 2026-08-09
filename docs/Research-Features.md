@@ -100,7 +100,7 @@ openwifi's baseband can receive its *own* transmit signal, so with a TX and an R
 
 ![Wi-Fi CSI radar concept: directional TX/RX antennas sensing a target](assets/img/openwifi-radar.jpg)
 
-The recipe: bring up the latest driver+FPGA package, monitor a channel, restrict CSI to your own injector's source MAC, **unmute self-reception**, then inject a stream of packets to sound the channel:
+The recipe: bring up the driver+FPGA package, monitor a channel, restrict CSI to your own injector's source MAC, **unmute self-reception**, then inject a stream of packets to sound the channel:
 
 ```bash
 # on the board, after loading drv_and_fpga.tar.gz and monitoring channel 1:

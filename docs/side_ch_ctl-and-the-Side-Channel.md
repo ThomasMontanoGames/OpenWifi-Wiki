@@ -248,7 +248,7 @@ Before you rely on this table:
 
 ## Event counters (registers 26–31)
 
-The side channel also counts PHY RX/TX events in the FPGA, which works in either mode as soon as `side_ch.ko` is loaded. Each counter has two selectable sources, chosen by a bit in register 19:
+The side channel also counts PHY RX/TX events in the FPGA, which works in either mode once `side_ch.ko` is loaded. Each counter has two selectable sources, chosen by a bit in register 19:
 
 | reg | reg 19 bit | Source when 0 | Source when 1 |
 |---|---|---|---|

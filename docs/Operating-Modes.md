@@ -85,7 +85,7 @@ The second node should discover and **join the same Cell ID** automatically. Onc
 
 ## Monitor mode
 
-Monitor mode makes the receiver capture everything, including control frames and frames with bad CRC. It is the prerequisite for packet injection and for most research captures.
+Monitor mode makes the receiver capture everything, including control frames, and frames with bad CRC. It is the prerequisite for packet injection and for most research captures.
 
 ```bash
 cd openwifi

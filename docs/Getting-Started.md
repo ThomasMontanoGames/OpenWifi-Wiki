@@ -7,7 +7,7 @@ This page takes you from an empty SD card to a working openwifi access point tha
 **Hardware**
 
 - A supported SDR board (see table below).
-- An SD card, 16 GB or larger.
+- An SD card that is 16 GB or larger.
 - Two antennas suitable for 2.4/5 GHz (or SMA cables + at least 30 dB attenuation for conducted tests).
 - An Ethernet cable between the board and your PC.
 - Optionally a USB-UART cable for a serial console, which helps a lot when networking doesn't come up.

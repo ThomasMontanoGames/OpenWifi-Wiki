@@ -333,4 +333,4 @@ Beyond registers, the driver exposes rich per-packet counters through sysfs, wra
 ./stat_enable.sh 0               # turn statistics off
 ```
 
-The counter names match variable names in `sdr.c`, so grepping the source tells you the precise meaning. There are also FPGA-level event counters exposed through the side channel, see [Research Features](Research-Features.md#fpga-event-counters).
+The counter names match variable names in `sdr.c`, so grepping the source shows you the precise meaning. There are also FPGA-level event counters exposed through the side channel, see [Research Features](Research-Features.md#fpga-event-counters).

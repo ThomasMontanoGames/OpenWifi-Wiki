@@ -44,7 +44,7 @@ Zynq> saveenv
 
 ### Wrong memory size on ADRV9361-Z7035 SoM
 
-Linux sees half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild U-Boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) (`make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf`) and regenerate `BOOT.BIN`.
+Linux detects only half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild U-Boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) (`make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf`) and regenerate `BOOT.BIN`.
 
 ## Client / link problems
 

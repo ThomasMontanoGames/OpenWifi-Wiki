@@ -109,7 +109,7 @@ Both scripts are invoked for you by the higher-level image/build helpers. You ra
 
 ## The kernel
 
-openwifi runs the **Analog Devices Linux kernel** (a fork of the Xilinx kernel with AD9361 support), currently branch **`2026_R1` (Linux v6.12)**. The driver builds against this kernel. The AD9361 is driven by ADI's in-tree IIO driver, which openwifi patches lightly.
+openwifi runs the **Analog Devices Linux kernel** (a fork of the Xilinx kernel with AD9361 support), branch **`2026_R1` (Linux v6.12)**. The driver builds against this kernel. The AD9361 is driven by ADI's in-tree IIO driver, which openwifi patches lightly.
 
 `user_space/prepare_kernel.sh $XILINX_DIR <32|64>` does the whole thing:
 
@@ -444,7 +444,7 @@ scp adi-linux-64/drivers/iio/adc/ad9361_drv.ko \
     root@<board-ip>:/root/kernel_modules/
 ```
 
-Then reload on the board. The simplest way is to re-run `./wgd.sh` in `/root/openwifi/`, which `rmmod`s and `insmod`s `sdr` plus its five sub-core modules from that directory in the right order. To reload a single module by hand, `insmod` it by path (the openwifi stack) or `modprobe` it by name after `depmod -a` (a base module):
+Then reload on the board. The usual way is to re-run `./wgd.sh` in `/root/openwifi/`, which `rmmod`s and `insmod`s `sdr` plus its five sub-core modules from that directory in the right order. To reload a single module by hand, `insmod` it by path (the openwifi stack) or `modprobe` it by name after `depmod -a` (a base module):
 
 ```bash
 rmmod sdr 2>/dev/null            # unload the old one if it's live

@@ -63,7 +63,7 @@ DCXO
 :   Digitally controlled crystal oscillator: the AD9361's tunable reference crystal. A board overlay sets its coarse/fine tuning (`adi,dcxo-coarse-and-fine-tune`) to trim the frequency. See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#what-a-board-overlay-adds).
 
 Device tree (DTB / DTS / DTSO)
-:   The data structure that tells Linux what hardware is present and at which addresses/interrupts. openwifi builds a board's `devicetree.dtb` by layering overlays (`.dtso`) onto a stock board tree. Porting a board is largely a device-tree exercise.
+:   The data structure that describes to Linux what hardware is present and at which addresses/interrupts. openwifi builds a board's `devicetree.dtb` by layering overlays (`.dtso`) onto a stock board tree. Porting a board is largely a device-tree exercise.
 
 DIFS
 :   DCF Interframe Space: the idle time a station waits before starting contention. One of the CSMA timing parameters `xpu` implements (and that can be disabled for experiments).
