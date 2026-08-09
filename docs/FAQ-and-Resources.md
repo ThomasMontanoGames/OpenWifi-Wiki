@@ -34,7 +34,7 @@ Only for some boards. Boards with the Zynq-7020 FPGA (ZedBoard, ADRV9364-Z7020, 
 
 Yes. The imec [w-iLab.t testbed](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html) offers remote access to openwifi boards (and supports JTAG boot instead of SD card).
 
-### Will there be an openwifi ASIC (e.g. on SkyWater sky130)?
+### Will there be an openwifi ASIC (for example on SkyWater sky130)?
 
 It's frequently requested, and the team is supportive but not actively working on it. The current focus is maturing the FPGA IP to match commercial chips. A Wi-Fi chip is more complex than it looks, and cheap only because of enormous production volume.
 

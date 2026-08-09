@@ -94,7 +94,7 @@ The sequence: the SoC's boot ROM loads **BOOT.BIN**, whose FSBL initializes DDR 
 
 The two SoC families build BOOT.BIN differently, which is why the ZCU102 needs a separate build path:
 
-| | Zynq-7000 (32-bit) | Zynq UltraScale+ / MPSoC (64-bit, e.g. ZCU102) |
+| | Zynq-7000 (32-bit) | Zynq UltraScale+ / MPSoC (64-bit, for example ZCU102) |
 |---|---|---|
 | Build script | `kernel_boot/build_boot_bin.sh` | `kernel_boot/build_zynqmp_boot_bin.sh` |
 | BOOT.BIN stages | FSBL → bitstream → U-Boot | FSBL → **PMUFW** → bitstream → **ATF (BL31)** → U-Boot |
@@ -330,7 +330,7 @@ cp $KDIR/Module.symvers $KDIR/modules.builtin $KDIR/modules.builtin.modinfo \
    $KDIR/modules.order ./kernel_modules/
 ```
 
-The `find` flattens the whole kernel tree into one directory, so there is no `kernel/drivers/...` hierarchy under it. That flat layout is what `/lib/modules/$(uname -r)` will point at on the board, and it is why the four metadata files have to travel with the `.ko`s. Without `modules.order` and `modules.builtin`, `depmod` cannot build a usable `modules.dep` and `modprobe mac80211` fails.
+The `find` flattens the whole kernel tree into one directory, so there is no `kernel/drivers/...` hierarchy under it. That flat layout is what `/lib/modules/$(uname -r)` points at on the board, and it is why the four metadata files have to travel with the `.ko`s. Without `modules.order` and `modules.builtin`, `depmod` cannot build a usable `modules.dep` and `modprobe mac80211` fails.
 
 **On the PC: add the boot files.**
 
@@ -430,7 +430,7 @@ If it does not show up, the same table applies: [If `sdr0` does not appear](#if-
 
 If a board is already up and you just rebuilt one or more modules against the **same** kernel it is running, you need neither of the two procedures above, nor `update_sdcard.sh`, nor a reboot. You can push the `.ko`s over the network and reload them live. The one thing to get right is *which* directory each module lands in, and that follows directly from how `wgd.sh` loads it (this still relies on the `/lib/modules` symlink described above):
 
-- **openwifi driver stack** (`sdr`, `tx_intf`, `rx_intf`, `openofdm_tx`, `openofdm_rx`, `xpu`) and the **board-support modules** (`ad9361_drv`, `xilinx_dma`, …): `wgd.sh` `insmod`s these by explicit path from its own directory, so they go into `/root/openwifi/`. Putting them in `kernel_modules/` will *not* make `wgd.sh` find them.
+- **openwifi driver stack** (`sdr`, `tx_intf`, `rx_intf`, `openofdm_tx`, `openofdm_rx`, `xpu`) and the **board-support modules** (`ad9361_drv`, `xilinx_dma`, …): `wgd.sh` `insmod`s these by explicit path from its own directory, so they go into `/root/openwifi/`. Putting them in `kernel_modules/` does *not* make `wgd.sh` find them.
 - **Base kernel modules** (`mac80211`, `cfg80211`, other in-tree `.ko`s): these are the only ones `wgd.sh` pulls with `modprobe`, so they go into `/root/kernel_modules/` (the `/lib/modules/$(uname -r)` target).
 
 The openwifi driver `.ko`s live in `driver/` on the host after `make_all.sh`. In-tree modules come from the built `adi-linux[-64]/` tree:
@@ -453,13 +453,13 @@ insmod /root/openwifi/sdr.ko     # openwifi stack: insmod by path, like wgd.sh
 ```
 
 !!! warning "The module must match the running kernel"
-    A `.ko` is only loadable by the exact kernel it was built against. `insmod` will reject it (`version magic` / `invalid module format`) if you changed the kernel config or bumped the kernel version. Copying modules live only works when you rebuilt just the module against the same kernel that is booted. If you changed the kernel itself, you have to install the new image and reboot, so use the [full update procedure](#updating-a-board-to-a-newly-built-kernel) instead of `scp`ing the `.ko`s.
+    A `.ko` is only loadable by the exact kernel it was built against. `insmod` rejects it (`version magic` / `invalid module format`) if you changed the kernel config or bumped the kernel version. Copying modules live only works when you rebuilt just the module against the same kernel that is booted. If you changed the kernel itself, you have to install the new image and reboot, so use the [full update procedure](#updating-a-board-to-a-newly-built-kernel) instead of `scp`ing the `.ko`s.
 
 ---
 
 ## The device tree
 
-This is the central piece of a board port. The **device tree** is a data structure describing the hardware (every peripheral, its register address, its interrupts, its clocks) that Linux reads at boot to know what exists. openwifi's driver is a Linux **platform driver** that binds to a device-tree node with `compatible = "sdr,sdr"`, and it learns the AXI addresses and interrupts of every FPGA core *from the device tree*. If the device tree doesn't match the FPGA build, the driver won't find the hardware (or will bind to the wrong addresses).
+This is the central piece of a board port. The **device tree** is a data structure describing the hardware (every peripheral, its register address, its interrupts, its clocks) that Linux reads at boot to know what exists. openwifi's driver is a Linux **platform driver** that binds to a device-tree node with `compatible = "sdr,sdr"`, and it learns the AXI addresses and interrupts of every FPGA core *from the device tree*. If the device tree doesn't match the FPGA build, the driver does not find the hardware (or binds to the wrong addresses).
 
 ### How openwifi builds a board's device tree
 
@@ -472,7 +472,7 @@ construct_device_tree.sh $BOARD_NAME $ARCH   # ARCH = 32 or 64
 
 Three ingredients go in:
 
-1. **The stock board device tree**: the ordinary ADI/Xilinx `.dts` for the board (e.g. `zynq-zed.dts`, `zynqmp-zcu102-rev1.1.dts`). This describes the ARM SoC, DDR, Ethernet, UART, SD, etc. (everything *except* openwifi).
+1. **The stock board device tree**: the ordinary ADI/Xilinx `.dts` for the board (for example `zynq-zed.dts`, `zynqmp-zcu102-rev1.1.dts`). This describes the ARM SoC, DDR, Ethernet, UART, SD, etc. (everything *except* openwifi).
 2. **`openwifi_32_ad9361.dtso` / `openwifi_64_ad9361.dtso`**: the **architecture-wide** openwifi overlay. It adds the openwifi FPGA IP blocks and the AD9361 binding, and is shared by *all* boards of that architecture.
 3. **`overlays/<board_name>.dtso`**: the **board-specific** overlay: the AD9361 reference-clock frequency, board LEDs/GPIO, and any board-unique glue.
 
@@ -543,7 +543,7 @@ The script compiles each overlay with `dtc`, preprocesses and compiles the stock
     This overlay-based device-tree system came out of the NLnet project [*Extensive openwifi support for OpenWRT*](https://nlnet.nl/project/OpenWifi-OpenWRT/), which set out to modularize openwifi's hardware description and to break its dependency on ADI Kuiper Linux so it can target OpenWrt.
 
 !!! note "Most shipped boards include a fixed `devicetree.dts`"
-    If a board directory already contains a prebuilt `devicetree.dts`, `construct_device_tree.sh` **only recompiles the overlays and stops**: it trusts the shipped tree. The stock-`.dts`-plus-`fdtoverlay` path is what you use when bringing up a *new* board that doesn't have a prebuilt tree yet. The script keeps a `board_name → stock .dts` map internally (e.g. `zed_fmcs2 → zynq-zed.dts`, `adrv9364z7020 → zynq-adrv9364.dts`).
+    If a board directory already contains a prebuilt `devicetree.dts`, `construct_device_tree.sh` **only recompiles the overlays and stops**: it trusts the shipped tree. The stock-`.dts`-plus-`fdtoverlay` path is what you use when bringing up a *new* board that doesn't have a prebuilt tree yet. The script keeps a `board_name → stock .dts` map internally (for example `zed_fmcs2 → zynq-zed.dts`, `adrv9364z7020 → zynq-adrv9364.dts`).
 
 ### What the openwifi overlay adds
 
@@ -634,7 +634,7 @@ A practical sequence:
 3. **Write your board overlay** `overlays/<board_name>.dtso`. Start from the closest existing overlay (`zed_fmcs2.dtso` for a plain FMCOMMS board, or `e310v2.dtso`/`sdrpi.dtso` for boards with a VCXO/GPS/extra GPIO). Set:
     - the **AD9361 reference clock** frequency (`clk_*_fixed` → `ad9361_ext_refclk`) to your board's crystal/VCXO,
     - the **DCXO tuning** if applicable,
-    - **LEDs/GPIO** and any **RF-switch/port control** your board needs (e.g. the ANTSDR RF-switch caveat noted in [Supported Boards](Supported-Boards.md#antsdr-microphase) lives here).
+    - **LEDs/GPIO** and any **RF-switch/port control** your board needs (for example the ANTSDR RF-switch caveat noted in [Supported Boards](Supported-Boards.md#antsdr-microphase) lives here).
 
 4. **Provide the stock board `.dts`.** Add a `board_name → stock .dts` entry to the map in `construct_device_tree.sh` and place the matching stock ADI/Xilinx `.dts` (plus its `.dtsi` includes) in the defaults folder. openwifi obtains stock trees by decompiling the ADI Linux image's `.dtb` with `dtc`, then editing.
 

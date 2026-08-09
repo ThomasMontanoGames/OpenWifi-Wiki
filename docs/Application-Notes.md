@@ -106,7 +106,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
 ## Counters and statistics
 
 ??? note "Access counter/statistics in FPGA"
-    Read FPGA-level event counters directly: the `openofdm_rx` watchdog counters (abnormal-signal events) and the side-channel PHY RX/TX event counters (preamble detected, TX start/done, FCS-good-for-me, and more), all via register reads.
+    Read FPGA-level event counters directly: the `openofdm_rx` watchdog counters (abnormal-signal events) and the side-channel PHY RX/TX event counters (preamble detected, TX start/done, good-FCS frames addressed to the board, and more), all via register reads.
 
     [Read more →](Research-Features.md#fpga-event-counters) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/perf_counter.md)
 

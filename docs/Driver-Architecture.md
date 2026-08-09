@@ -28,7 +28,7 @@ obj-m += sdr.o openofdm_rx/openofdm_rx.o openofdm_tx/openofdm_tx.o tx_intf/tx_in
 `side_ch.ko` is **deliberately not in that list**. It has its own `make_driver.sh` and is built and loaded separately, because you load it on demand for research capture rather than always running it. See [FPGA IP Cores](FPGA-IP-Cores.md#side_ch-the-csi-iq-capture-side-channel) and [Research Features](Research-Features.md).
 
 !!! note "`driver/xilinx_dma/` is a historical leftover"
-    You will find an `xilinx_dma` directory in the driver tree. Its own README says openwifi no longer maintains a modified Xilinx DMA driver and that the stock in-kernel one is used instead. Do not treat it as a live component.
+    The driver tree contains an `xilinx_dma` directory. Its own README says openwifi no longer maintains a modified Xilinx DMA driver and that the stock in-kernel one is used instead. Do not treat it as a live component.
 
 ## How the driver finds its hardware
 
@@ -36,7 +36,7 @@ openwifi is a Linux **platform driver**, not PCI or USB. There is no bus to enum
 
 `openwifi_dev_probe()` in `sdr.c` runs at load time and does roughly this:
 
-1. **Match the device-tree node.** The driver binds to `compatible = "sdr,sdr"`. No matching node means no probe, which is the usual cause of "the module loaded but `sdr0` never appeared".
+1. **Match the device-tree node.** The driver binds to `compatible = "sdr,sdr"`. No matching node means no probe, which is the usual cause of "the module loaded but `sdr0` never appeared."
 2. **Allocate the mac80211 device** with `ieee80211_alloc_hw()` against `openwifi_ops`.
 3. **Detect the board.** The driver reads the **`model` string of the device-tree root** and matches on substrings. `ZCU102` means `ZYNQMP_AD9361`, anything else with a model string means `ZYNQ_AD9361`. Separately, `ZCU102`, `Z7035`, and `ZC706` are classified `LARGE_FPGA` and everything else falls back to `SMALL_FPGA`. If there is no model string at all, the driver looks for an `lmk` node (the TI LMK04828 clock chip) and, if it finds one, treats the board as an `RFSOC4X2`. This detection is what makes capture-buffer length and similar limits adapt per board without configuration. See [Supported Boards](Supported-Boards.md).
 4. **Find the AD9361.** On everything except the RFSoC4x2, the driver locates the `ad9361-phy` device on the SPI bus and the `cf-ad9361-dds-core-lpc` platform device, then keeps handles to the ADI PHY and DDS state so it can call into the standard Analog Devices IIO driver later (`ad9361_set_tx_atten`, `ad9361_do_calib_run`, and so on). A missing or unprobed AD9361 driver fails the openwifi probe outright, which is why ADI kernel patches are a prerequisite.

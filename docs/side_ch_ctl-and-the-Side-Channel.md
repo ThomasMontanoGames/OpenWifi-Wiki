@@ -193,7 +193,7 @@ These are the `side_ch` core's `slv_regN` in `side_ch.v`. Several registers **me
 
 | reg | Meaning |
 |---|---|
-| 20 | Symbols currently waiting in the capture FIFO. |
+| 20 | Symbols waiting in the capture FIFO. |
 | 21 | Max symbols per UDP datagram: 8188, or 4096 on a small-BRAM build. |
 | 22 | FIFO depth: **8192 = full build, 4096 = `SIDE_CH_LESS_BRAM`** (see [Small-BRAM boards](#small-bram-boards)). |
 | 26–31 | Event counters (see [below](#event-counters-registers-2631)). Writing any value clears one. |

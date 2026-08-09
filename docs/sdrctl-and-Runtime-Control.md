@@ -21,7 +21,7 @@ sdrctl dev sdr0 set reg <module_name> <reg_idx> <value>
 ```
 
 !!! warning "Linux may overwrite registers you set by hand"
-    Some registers are written by the driver in real time under mac80211's direction. If you set those by hand, Linux may overwrite them (or your value may destabilize things). When a table says "auto set by …", treat manual writes as experiment-only.
+    Some registers are written by the driver in real time under mac80211's direction. If you set those by hand, Linux may overwrite them (or your value may destabilize things). When a table says "auto set by …," treat manual writes as experiment-only.
 
 ## Module names
 
@@ -72,7 +72,7 @@ Normally the AD9361 AGC handles this. For experiments:
 ./set_rx_gain_auto.sh         # back to AGC
 ```
 
-To choose a good manual value, run under AGC, enable stats (`./stat_enable.sh`), read the actual AGC gain of received packets (`./rx_gain_show.sh`), then subtract the band offset: **−14 dB** at 5220 MHz, **−5 dB** in 2.4 GHz. (E.g. observed AGC gain 34 → set `20` at 5 GHz, or `29` at 2.4 GHz.)
+To choose a good manual value, run under AGC, enable stats (`./stat_enable.sh`), read the actual AGC gain of received packets (`./rx_gain_show.sh`), then subtract the band offset: **−14 dB** at 5220 MHz, **−5 dB** in 2.4 GHz. (For example: observed AGC gain 34 → set `20` at 5 GHz, or `29` at 2.4 GHz.)
 
 ### Antenna selection
 
@@ -177,10 +177,10 @@ openwifi can gate each of its four TX queues to a fraction of a repeating time c
 | `para_name` | Meaning |
 |---|---|
 | `slice_idx` | Which slice (0–3) subsequent commands configure. **Set to 4 when done to synchronize all slices**, otherwise slice start/end times won't line up. |
-| `addr` | Target MAC for this slice (last 32 bits, e.g. `b94cb1c1` for `6c:fd:b9:4c:b1:c1`) |
-| `slice_total` | Cycle length in µs (e.g. `49999` for 50 ms) |
-| `slice_start` | Slice start time in µs (e.g. `10000` for 10 ms) |
-| `slice_end` | Slice end time in µs (e.g. `39999` for 40 ms) |
+| `addr` | Target MAC for this slice (last 32 bits, for example `b94cb1c1` for `6c:fd:b9:4c:b1:c1`) |
+| `slice_total` | Cycle length in µs (for example `49999` for 50 ms) |
+| `slice_start` | Slice start time in µs (for example `10000` for 10 ms) |
+| `slice_end` | Slice end time in µs (for example `39999` for 40 ms) |
 | `tsf` | Set the TSF timer (needs two decimal values: high then low) |
 
 The imec [w-iLab.t tutorial](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html#sdr-tx-time-slicing) has a fuller walkthrough.
@@ -221,7 +221,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 
 | reg | Meaning |
 |---|---|
-| 0 | TX attenuation, dB×1000 (e.g. 3000 = 3 dB) |
+| 0 | TX attenuation, dB×1000 (for example 3000 = 3 dB) |
 | 1 | TX frequency in MHz (overrides Linux tuning) |
 | 5 | RX frequency in MHz (overrides Linux tuning) |
 

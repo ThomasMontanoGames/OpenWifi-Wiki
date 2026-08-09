@@ -286,7 +286,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 - **Userspace tools are pre-installed.** The openwifi package puts all `user_space` files under `/root/openwifi` (so the app-note scripts work), and installs the compiled tools (`sdrctl`, `inject_80211`, `analyze_80211`, `side_ch_ctl`) into `/usr/bin`, so they're in `$PATH`.
 - **Kernel modules are packed in.** No manual copying is needed, and `insmod side_ch` works directly.
 - **SSH uses mDNS:** `ssh root@openwrt.lan`, no password by default.
-- The app-note [IQ and CSI workflows](Research-Features.md) work on OpenWrt with minor differences (e.g. `insmod side_ch iq_len_init=4095`, then `side_ch_ctl` and the host-side Python display scripts as usual).
+- The app-note [IQ and CSI workflows](Research-Features.md) work on OpenWrt with minor differences (for example `insmod side_ch iq_len_init=4095`, then `side_ch_ctl` and the host-side Python display scripts as usual).
 
 ### Debugging the openwifi package
 

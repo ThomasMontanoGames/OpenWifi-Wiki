@@ -2,7 +2,7 @@
 
 openwifi presents a normal Linux Wi-Fi interface (`sdr0`), so you drive it with the same tools you'd use for any card: `hostapd`, `wpa_supplicant`, `iw`, `iwconfig`. This page walks through each mode. Throughout, **"on board"** means commands run over ssh on the SDR board, and **"on PC"** means commands run on your computer.
 
-The two daemons used below are covered in their own right on [hostapd and wpa_supplicant](hostapd-and-wpa_supplicant.md): what they do, how they reach openwifi, which config files to edit, and how to read their output when a link will not come up.
+The two daemons used below are covered in their own right on [hostapd and wpa_supplicant](hostapd-and-wpa_supplicant.md): what they do, how they reach openwifi, which config files to edit, and how to read their output when a link won't come up.
 
 A few reminders that apply to every mode:
 
@@ -129,7 +129,7 @@ Watch them arrive on any other device sniffing channel 11.
 | `-m` | PHY mode: `a`, `g`, or `n` |
 | `-r` | Rate / MCS index (0–7) |
 | `-t` | Packet type: `m`/`c`/`d`/`r` = management/control/data/reserved |
-| `-e` | Subtype (hex). E.g. with `-t m`: 8=Beacon, A=Disassoc, B=Auth, C=Deauth. With `-t c`: A/B/C/D = PS-Poll/RTS/CTS/ACK. With `-t d`: 0/1/2/8 = Data/Data+CF-Ack/Data+CF-Poll/QoS-Data |
+| `-e` | Subtype (hex). For example, with `-t m`: 8=Beacon, A=Disassoc, B=Auth, C=Deauth. With `-t c`: A/B/C/D = PS-Poll/RTS/CTS/ACK. With `-t d`: 0/1/2/8 = Data/Data+CF-Ack/Data+CF-Poll/QoS-Data |
 | `-a` / `-b` | Last byte of addr1 / addr2 (hex) |
 | `-i` | Short-GI flag (0/1) |
 | `-n` | Number of packets |
@@ -138,7 +138,7 @@ Watch them arrive on any other device sniffing channel 11.
 
 To customize full frame contents, edit the `ieee_hdr_*` byte arrays in `inject_80211.c`. The byte/bit ordering is not always intuitive versus the standard.
 
-**Controlling ACK behavior for injection.** Even in monitor mode, the FPGA will still auto-transmit an ACK when it receives a matching data frame. To stop that (usually what you want when injecting/fuzzing), disable hardware ACK TX:
+**Controlling ACK behavior for injection.** Even in monitor mode, the FPGA still auto-transmits an ACK when it receives a matching data frame. To stop that (usually what you want when injecting/fuzzing), disable hardware ACK TX:
 
 ```bash
 sdrctl dev sdr0 set reg xpu 11 16
