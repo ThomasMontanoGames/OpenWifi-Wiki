@@ -48,6 +48,11 @@ disagree, the repository wins. Fix the wiki. The upstream sources are:
 - `.github/workflows/`: CI/CD (see below). `.github/scripts/collect_changes.py`
   is the Python helper for the sync workflow, and `.github/sync-state.json`
   records the last-processed upstream commit SHA per source repository.
+- `.vale.ini` and `styles/`: Vale prose linting. `styles/Google/` is the
+  vendored style package (commit it, do not fetch it at lint time),
+  `styles/openwifi/` holds project-specific rules, and
+  `styles/config/vocabularies/openwifi/` is the project vocabulary. See the
+  Vale section below.
 - `site/`, `internal/`, `.cache/`: gitignored (build output, scratch notes,
   plugin cache). Never commit anything under them. Put any scratch work of your
   own (notes, captured command output, temporary scripts) in `internal/`, not
@@ -85,6 +90,31 @@ py -m mkdocs build --strict
 
 The Material for MkDocs banner about MkDocs 2.0 printed before the real output is
 normal and is not an error.
+
+### Vale prose linting
+
+[Vale](https://vale.sh/) lints the prose against the Google Developer
+Documentation Style Guide, vendored in `styles/Google/`. Run it before pushing
+docs changes:
+
+```bash
+vale docs/ includes/
+```
+
+`.vale.ini` tunes the rule set with a comment per rule. Rules that map to the
+hard rules below are errors (`openwifi.EmDash`, `Google.Semicolons`).
+`styles/openwifi/` holds project rules written for this wiki: `EmDash.yml`
+bans the em dash character in any context, which `Google.EmDash` cannot do
+because it only checks spacing around dashes. Rules that are structurally
+wrong for this content (acronym expansion, contractions, passive voice,
+heading casing and punctuation, text after colons) are off. `Vale.Terms` is
+off because it cannot handle sentence-start capitalization. The remaining
+output is suggestions and warnings, not a gate.
+
+Domain vocabulary for the spell checker lives in
+`styles/config/vocabularies/openwifi/accept.txt`. When `Vale.Spelling` flags a
+real project term (board names, tool names, SDR jargon), add it there as a
+case-insensitive regex instead of disabling the rule.
 
 ## CI/CD and deployment
 

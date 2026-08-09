@@ -1,0 +1,15 @@
+# Project rule, stricter than Google.EmDash: AGENTS.md bans em dashes
+# entirely, while the Google rule only checks spacing around them.
+extends: existence
+message: "No em dashes. Use a comma, a colon, or a separate sentence."
+level: error
+nonword: true
+tokens:
+  # Em dash in any context, spaced or not.
+  - '—'
+  # Spaced en dash used as a pause. Unspaced en dashes are legitimate
+  # numeric ranges (70 MHz–6 GHz) and stay allowed.
+  - '\s–\s'
+  # Double hyphen as a dash stand-in. Commands belong in backticks,
+  # which Vale skips, so bare --flags in prose get caught too.
+  - '--'
