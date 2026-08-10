@@ -108,7 +108,7 @@ The six cores form a transmit chain and a receive chain that meet at the AD9361 
 <figcaption><em>The openwifi FPGA signal chain. Solid boxes are openwifi IP cores (teal = transmit, indigo = receive), and dashed pills are the external AD9361 RF front end. The row through the middle is the path to and from the radio, with each OFDM core hanging off its interface core below it. The <strong>xpu</strong> real-time MAC orchestrates timing and channel access, while <strong>side_ch</strong> taps the receiver to stream CSI/IQ to the host.</em></figcaption>
 </figure>
 
-Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) and, where it moves sample data, an AXI-Stream master/slave for DMA. All are authored by Xianjun Jiao (with Michael Mehari co-authoring `openofdm_tx`). A driver file and its FPGA core usually share a name (`xpu.c` ↔ `xpu.v`), and every register the driver writes (`hw_def.h`) has a matching `slv_regN` in the core's `_s_axi.v`.
+Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) and, where it moves sample data, an AXI-Stream master/slave for DMA. A driver file and its FPGA core usually share a name (`xpu.c` ↔ `xpu.v`), and every register the driver writes (`hw_def.h`) has a matching `slv_regN` in the core's `_s_axi.v`.
 
 | Core | Role | Register bank size | Unit-test benches? |
 |---|---|---|---|
