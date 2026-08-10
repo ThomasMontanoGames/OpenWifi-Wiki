@@ -153,6 +153,96 @@ Notable source (`ip/openofdm_tx/src/`, 28 files):
 - **Preamble ROMs**: `l_stf_rom.v` / `l_ltf_rom.v` (legacy short/long training fields) and `ht_stf_rom.v` / `ht_ltf_rom.v` (802.11n HT training fields).
 - **`modulation.v`, `crc32_tx.v`, `bitreverse.v`, `dpram.v`, `axi_fifo_bram.v`**: the modulation mapper, frame CRC, and buffering.
 
+<figure>
+<svg viewBox="0 0 1040 500" role="img" aria-label="openofdm transmit data flow. The core reads 64-bit frame words from transmit BRAM, creates and scrambles frame bits, calculates the FCS, convolutionally encodes, punctures, interleaves, and maps bits to constellation IQ. It inserts pilots and null subcarriers into 64 frequency bins, applies the IFFT, stores cyclic-prefix and symbol samples in FIFOs, and multiplexes them with preamble ROM samples onto a ready-valid 16-bit I and 16-bit Q output." style="width:100%;height:auto;max-width:1120px;font-family:inherit;font-size:13px">
+  <defs>
+    <marker id="tx-flow-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.65"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="28" font-size="11" font-weight="700" fill="#0d9488">FRAME AND BIT DOMAIN</text>
+  <text x="20" y="210" font-size="11" font-weight="700" fill="#c2740a">FREQUENCY-DOMAIN IQ</text>
+  <text x="20" y="338" font-size="11" font-weight="700" fill="#be3d73">TIME-DOMAIN IQ</text>
+
+  <g fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" marker-end="url(#tx-flow-arrow)">
+    <line x1="142" y1="96" x2="176" y2="96"/>
+    <line x1="316" y1="96" x2="350" y2="96"/>
+    <line x1="482" y1="96" x2="516" y2="96"/>
+    <line x1="648" y1="96" x2="682" y2="96"/>
+    <path d="M753,134 V184 H857 V218"/>
+    <line x1="786" y1="262" x2="752" y2="262"/>
+    <line x1="604" y1="262" x2="564" y2="262"/>
+    <path d="M493,300 V326 H300 V346"/>
+    <line x1="380" y1="390" x2="420" y2="390"/>
+    <line x1="580" y1="390" x2="620" y2="390"/>
+    <line x1="780" y1="390" x2="820" y2="390"/>
+  </g>
+
+  <g fill="currentColor" fill-opacity="0.035" stroke="currentColor" stroke-opacity="0.32" stroke-width="1.2">
+    <rect x="20" y="58" width="122" height="76" rx="7"/>
+    <rect x="176" y="58" width="140" height="76" rx="7"/>
+    <rect x="350" y="58" width="132" height="76" rx="7"/>
+    <rect x="516" y="58" width="132" height="76" rx="7"/>
+    <rect x="682" y="58" width="142" height="76" rx="7"/>
+  </g>
+  <text x="81" y="83" text-anchor="middle" font-weight="700" fill="currentColor">TX BRAM</text>
+  <text x="81" y="103" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">64-bit words</text>
+  <text x="81" y="119" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">10-bit read address</text>
+  <text x="246" y="79" text-anchor="middle" font-weight="700" fill="currentColor">Frame bit source</text>
+  <text x="246" y="98" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">PLCP · service · PSDU</text>
+  <text x="246" y="114" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">FCS · tail · pad</text>
+  <text x="416" y="83" text-anchor="middle" font-weight="700" fill="currentColor">Scrambler + FCS</text>
+  <text x="416" y="103" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">7-bit LFSR</text>
+  <text x="416" y="119" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">CRC-32 appended</text>
+  <text x="582" y="83" text-anchor="middle" font-weight="700" fill="currentColor">Convolutional code</text>
+  <text x="582" y="103" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">1 bit → 2 coded bits</text>
+  <text x="582" y="119" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">BRAM FIFO decouples FSMs</text>
+  <text x="753" y="79" text-anchor="middle" font-weight="700" fill="currentColor">Puncture + interleave</text>
+  <text x="753" y="98" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">rate-selected LUT</text>
+  <text x="753" y="114" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">symbol bit RAM</text>
+
+  <g fill="#c2740a" fill-opacity="0.055" stroke="#c2740a" stroke-opacity="0.52" stroke-width="1.3">
+    <rect x="422" y="224" width="142" height="76" rx="7"/>
+    <rect x="604" y="224" width="148" height="76" rx="7"/>
+    <rect x="786" y="224" width="142" height="76" rx="7"/>
+  </g>
+  <text x="493" y="253" text-anchor="middle" font-weight="700" fill="#c2740a">64-point IFFT</text>
+  <text x="493" y="274" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">frequency bins →</text>
+  <text x="493" y="290" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">time samples</text>
+  <text x="678" y="249" text-anchor="middle" font-weight="700" fill="#c2740a">64-bin assembly</text>
+  <text x="678" y="269" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">data + four pilots</text>
+  <text x="678" y="285" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">DC + guard bins = 0</text>
+  <text x="857" y="249" text-anchor="middle" font-weight="700" fill="#c2740a">Constellation mapper</text>
+  <text x="857" y="269" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">BPSK · QPSK</text>
+  <text x="857" y="285" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">16-QAM · 64-QAM</text>
+
+  <g fill="#be3d73" fill-opacity="0.045" stroke="#be3d73" stroke-opacity="0.48" stroke-width="1.3">
+    <rect x="220" y="352" width="160" height="76" rx="7"/>
+    <rect x="420" y="352" width="160" height="76" rx="7"/>
+    <rect x="620" y="352" width="160" height="76" rx="7"/>
+    <rect x="820" y="352" width="160" height="76" rx="7"/>
+  </g>
+  <text x="300" y="377" text-anchor="middle" font-weight="700" fill="#be3d73">Symbol + CP FIFOs</text>
+  <text x="300" y="397" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">all 64 IFFT samples</text>
+  <text x="300" y="413" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">last 16 or 8 copied for CP</text>
+  <text x="500" y="377" text-anchor="middle" font-weight="700" fill="#be3d73">CP / symbol mux</text>
+  <text x="500" y="397" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">16 + 64 legacy</text>
+  <text x="500" y="413" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">8 + 64 short GI</text>
+  <text x="700" y="377" text-anchor="middle" font-weight="700" fill="#be3d73">Preamble mux</text>
+  <text x="700" y="397" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">L-STF/L-LTF ROMs</text>
+  <text x="700" y="413" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">HT-STF/HT-LTF ROMs</text>
+  <text x="900" y="377" text-anchor="middle" font-weight="700" fill="#be3d73">IQ output</text>
+  <text x="900" y="397" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">16-bit I + 16-bit Q</text>
+  <text x="900" y="413" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">valid / ready backpressure</text>
+
+  <path d="M700,330 V346" fill="none" stroke="currentColor" stroke-opacity="0.45" stroke-width="1.3" marker-end="url(#tx-flow-arrow)"/>
+  <text x="700" y="325" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.72">training-field ROMs</text>
+  <text x="520" y="474" text-anchor="middle" font-size="10.5" fill="currentColor" fill-opacity="0.72">result_iq_ready advances every output source. Deasserting it holds the current sample and stalls forwarding.</text>
+</svg>
+<figcaption><em>The implemented <a href="https://github.com/open-sdr/openwifi-hw/blob/d047d794195beb72e12d2a9a6c205c16399cf288/ip/openofdm_tx/src/dot11_tx.v"><code>dot11_tx</code></a> path. Three state machines collect and encode frame bits, generate OFDM symbols, and forward packet samples. IQ first exists after constellation mapping. It is frequency-domain IQ before the IFFT and time-domain IQ after the IFFT.</em></figcaption>
+</figure>
+
 Addressed as register space `tx` (category 5). Scrambler seeds are at regs 1/2 (default 127).
 
 ---
@@ -162,6 +252,106 @@ Addressed as register space `tx` (category 5). Scrambler seeds are at regs 1/2 (
 The receive counterpart: it detects the preamble, synchronizes, estimates the channel, equalizes, and Viterbi-decodes, handing parsed bytes (`byte_in`, `fcs_ok`, `pkt_rate`, `pkt_len`) up to `xpu` and `rx_intf`. It is the core that most affects **receiver sensitivity** (documented per band/board around −92 dBm at MCS0 / −73 dBm at MCS7 on FMCOMMS2 at 2.4 GHz).
 
 Unlike the other five cores, `openofdm_rx` is a **git submodule**: it lives in the separate [openofdm](https://github.com/open-sdr/openofdm) repo (branch `dot11zynq`, or `dot11zynq_hls` for the HLS variant), and a fresh `openwifi-hw` clone has an empty `ip/openofdm_rx/` until you run `./get_ip_openofdm_rx.sh`. Its simulation entry point is the `dot11_tb` testbench (`dot11_inst → ofdm_decoder_inst → viterbi_inst`), which is also where you find the **Xilinx Viterbi decoder**, the IP whose evaluation license causes a running board's receiver to halt after ~2 hours (see [Troubleshooting](Troubleshooting.md#reception-dies-after-2-hours)).
+
+<figure>
+<svg viewBox="0 0 1040 560" role="img" aria-label="openofdm receive data flow. Signed 16-bit I and Q samples enter with a strobe and feed short-preamble detection and long synchronization in parallel. Long synchronization buffers samples, estimates timing and frequency offset, rotates samples, and performs a 64-point FFT. Post-FFT rotation corrects phase, and the equalizer estimates the channel from long training symbols, estimates common pilot phase, and equalizes data subcarriers. CSI and equalizer IQ are exposed to the side channel. Equalized constellation points are demapped, deinterleaved, Viterbi decoded, descrambled, packed into bytes, and checked by CRC." style="width:100%;height:auto;max-width:1120px;font-family:inherit;font-size:13px">
+  <defs>
+    <marker id="rx-flow-arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="currentColor" fill-opacity="0.65"/>
+    </marker>
+  </defs>
+
+  <text x="20" y="28" font-size="11" font-weight="700" fill="#4f5bd5">TIME-DOMAIN IQ AND SYNCHRONIZATION</text>
+  <text x="20" y="224" font-size="11" font-weight="700" fill="#c2740a">FREQUENCY-DOMAIN IQ</text>
+  <text x="20" y="398" font-size="11" font-weight="700" fill="#0d9488">BITS AND BYTES</text>
+
+  <g fill="none" stroke="currentColor" stroke-opacity="0.55" stroke-width="1.5" marker-end="url(#rx-flow-arrow)">
+    <line x1="168" y1="94" x2="206" y2="94"/>
+    <line x1="368" y1="94" x2="406" y2="94"/>
+    <line x1="568" y1="94" x2="606" y2="94"/>
+    <line x1="768" y1="94" x2="806" y2="94"/>
+    <path d="M887,132 V226"/>
+    <line x1="806" y1="270" x2="718" y2="270"/>
+    <line x1="556" y1="270" x2="468" y2="270"/>
+    <path d="M387,308 V420"/>
+    <line x1="446" y1="464" x2="458" y2="464"/>
+    <line x1="588" y1="464" x2="600" y2="464"/>
+    <line x1="740" y1="464" x2="752" y2="464"/>
+    <line x1="882" y1="464" x2="894" y2="464"/>
+  </g>
+
+  <g fill="#4f5bd5" fill-opacity="0.045" stroke="#4f5bd5" stroke-opacity="0.5" stroke-width="1.3">
+    <rect x="20" y="56" width="148" height="76" rx="7"/>
+    <rect x="206" y="56" width="162" height="76" rx="7"/>
+    <rect x="406" y="56" width="162" height="76" rx="7"/>
+    <rect x="606" y="56" width="162" height="76" rx="7"/>
+    <rect x="806" y="56" width="162" height="76" rx="7"/>
+  </g>
+  <text x="94" y="79" text-anchor="middle" font-weight="700" fill="#4f5bd5">Sample input</text>
+  <text x="94" y="99" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">signed 16-bit I</text>
+  <text x="94" y="115" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">signed 16-bit Q + strobe</text>
+  <text x="287" y="79" text-anchor="middle" font-weight="700" fill="#4f5bd5">Short synchronization</text>
+  <text x="287" y="99" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">16-sample autocorrelation</text>
+  <text x="287" y="115" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">power plateau detection</text>
+  <text x="487" y="79" text-anchor="middle" font-weight="700" fill="#4f5bd5">Long synchronization</text>
+  <text x="487" y="99" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">sample RAM + LTS correlation</text>
+  <text x="487" y="115" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">FFT-window selection</text>
+  <text x="687" y="79" text-anchor="middle" font-weight="700" fill="#4f5bd5">Frequency correction</text>
+  <text x="687" y="99" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">64-sample delayed product</text>
+  <text x="687" y="115" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">complex sample rotation</text>
+  <text x="887" y="79" text-anchor="middle" font-weight="700" fill="#4f5bd5">64-point FFT</text>
+  <text x="887" y="99" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">64 corrected samples</text>
+  <text x="887" y="115" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">→ 64 subcarriers</text>
+
+  <text x="294" y="164" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.72">The same strobed IQ stream drives short and long synchronization.</text>
+
+  <g fill="#c2740a" fill-opacity="0.055" stroke="#c2740a" stroke-opacity="0.52" stroke-width="1.3">
+    <rect x="806" y="232" width="162" height="76" rx="7"/>
+    <rect x="556" y="232" width="162" height="76" rx="7"/>
+    <rect x="306" y="232" width="162" height="76" rx="7"/>
+  </g>
+  <text x="887" y="255" text-anchor="middle" font-weight="700" fill="#c2740a">Post-FFT rotation</text>
+  <text x="887" y="275" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">phase correction per bin</text>
+  <text x="887" y="291" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">frequency-dependent adjustment</text>
+  <text x="637" y="255" text-anchor="middle" font-weight="700" fill="#c2740a">Channel estimate</text>
+  <text x="637" y="275" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">average two LTS symbols</text>
+  <text x="637" y="291" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">optional subcarrier smoothing</text>
+  <text x="387" y="255" text-anchor="middle" font-weight="700" fill="#c2740a">Equalization</text>
+  <text x="387" y="275" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">pilot common-phase correction</text>
+  <text x="387" y="291" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">channel-corrected constellation</text>
+
+  <path d="M637,308 V340 H306" fill="none" stroke="#be3d73" stroke-opacity="0.62" stroke-width="1.4" marker-end="url(#rx-flow-arrow)"/>
+  <path d="M387,308 V326 H306" fill="none" stroke="#be3d73" stroke-opacity="0.62" stroke-width="1.4" marker-end="url(#rx-flow-arrow)"/>
+  <rect x="30" y="314" width="276" height="54" rx="7" fill="#be3d73" fill-opacity="0.045" stroke="#be3d73" stroke-opacity="0.5" stroke-width="1.3"/>
+  <text x="168" y="336" text-anchor="middle" font-weight="700" fill="#be3d73">Side-channel and debug access</text>
+  <text x="168" y="353" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">32-bit CSI + valid · 32-bit equalizer IQ + valid</text>
+
+  <g fill="#0d9488" fill-opacity="0.045" stroke="#0d9488" stroke-opacity="0.5" stroke-width="1.3">
+    <rect x="306" y="426" width="140" height="76" rx="7"/>
+    <rect x="458" y="426" width="130" height="76" rx="7"/>
+    <rect x="600" y="426" width="140" height="76" rx="7"/>
+    <rect x="752" y="426" width="130" height="76" rx="7"/>
+    <rect x="894" y="426" width="126" height="76" rx="7"/>
+  </g>
+  <text x="376" y="449" text-anchor="middle" font-weight="700" fill="#0d9488">Demodulation</text>
+  <text x="376" y="469" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">BPSK to 64-QAM</text>
+  <text x="376" y="485" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">hard or soft bits</text>
+  <text x="523" y="449" text-anchor="middle" font-weight="700" fill="#0d9488">Deinterleave</text>
+  <text x="523" y="469" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">rate-selected order</text>
+  <text x="523" y="485" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">puncture erasures</text>
+  <text x="670" y="449" text-anchor="middle" font-weight="700" fill="#0d9488">Viterbi decoder</text>
+  <text x="670" y="469" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">AXI-stream Xilinx IP</text>
+  <text x="670" y="485" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">coded bits → data bits</text>
+  <text x="817" y="449" text-anchor="middle" font-weight="700" fill="#0d9488">Descramble</text>
+  <text x="817" y="469" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">reverse data LFSR</text>
+  <text x="817" y="485" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">bit stream</text>
+  <text x="957" y="449" text-anchor="middle" font-weight="700" fill="#0d9488">Bytes + status</text>
+  <text x="957" y="469" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">8-bit byte + strobe</text>
+  <text x="957" y="485" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.75">length · rate · CRC/FCS</text>
+  <text x="520" y="540" text-anchor="middle" font-size="10.5" fill="currentColor" fill-opacity="0.72">sample_in_strobe marks valid IQ samples. Each later stage emits its own strobe or AXI-stream valid signal.</text>
+</svg>
+<figcaption><em>The receive path at <a href="https://github.com/open-sdr/openofdm/tree/2bb3ad1a1f0023bfd15168db4e196ebf0d56d76c"><code>openofdm</code> commit <code>2bb3ad1</code></a>. The top-level <a href="https://github.com/open-sdr/openofdm/blob/2bb3ad1a1f0023bfd15168db4e196ebf0d56d76c/verilog/dot11.v"><code>dot11</code></a> core keeps IQ packed as <code>{I[15:0], Q[15:0]}</code>. IQ is time-domain before <code>sync_long</code>'s FFT and frequency-domain after it. The equalizer's CSI and corrected constellation outputs are available outside the decoder, while payload access is an 8-bit byte stream.</em></figcaption>
+</figure>
 
 Addressed as register space `rx` (category 4). Its `signal_watchdog` submodule powers the [openofdm_rx watchdog counters](Research-Features.md#fpga-event-counters), and the driver reads its build revision at register 31. See [FPGA Development → HLS](FPGA-Development.md#high-level-synthesis-hls-modules) for building the channel-estimation and equalizer stages from C++ via Vitis HLS.
 
