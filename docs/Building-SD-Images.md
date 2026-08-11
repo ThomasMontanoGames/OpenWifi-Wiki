@@ -279,7 +279,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 7. **Flash** the resulting image with the same `dd` procedure as the quick start (mind the different output path). Exit the container with `Ctrl+D` first.
 
 !!! tip "Building for every board at once"
-    `doc/img_build_instruction/openwrt/build_all_images.sh` in the openwifi repo repeats steps 5 to 7 for every `*_defconfig` in `openwrt-openwifi/configs/`, producing the whole set of prebuilt images in one run under `./output_images`.
+    `doc/img_build_instruction/openwrt/build_images.sh` in the openwifi repo repeats steps 5 and 6 for every `*_defconfig` in `openwrt-openwifi/configs/`, or only the boards passed as arguments, producing images under `./output_images`. Each board is built by `doc/img_build_instruction/openwrt/build_image_for_board.sh`, which you can also run directly to build a single board.
 
 ### OpenWrt tips
 
