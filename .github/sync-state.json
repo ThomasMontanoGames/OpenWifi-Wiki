@@ -2,8 +2,8 @@
   "version": 1,
   "repos": {
     "open-sdr/openwifi": {
-      "last_sha": "8dbf2d1f6181cbfae82d12d8a826686af35ef23f",
-      "last_synced": "2026-08-07T10:53:25+00:00",
+      "last_sha": "2dd857c9de45829825cc1682227fb436b8296996",
+      "last_synced": "2026-08-12T16:50:35+00:00",
       "default_branch": "master"
     },
     "open-sdr/openwifi-hw": {
