@@ -86,14 +86,14 @@ Make your changes there, then re-integrate into the board design by re-running `
 
 ## Simulating an IP core
 
-Most cores ship a top-level testbench (`*_tb.v`), which is the fastest way to develop without hardware. Using `openofdm_rx` as the example:
+Most cores ship a top-level testbench (`*_tb.v`), which is the fastest way to develop without hardware. As a quick start, using `openofdm_rx` as the example:
 
 1. Create the IP's Vivado project (as above): `./create_vivado_proj.sh $XILINX_DIR openofdm_rx.tcl`.
 2. In Vivado: *Sources → Simulation Sources → sim_1 → dot11_tb*.
-3. *SIMULATION → Run Simulation → Run Behavioral Simulation.* The first run is slow because sub-IP cores compile once. Later runs are fast.
-4. Press **Run All (F3)** to run to completion.
-5. The testbench uses `$fopen`/`$fscanf`/`$fwrite` to read test vectors and dump variables for later checking. Read `*_tb.v` to see the flow. Simulation-specific settings live in `openofdm_rx_pre_def.v`.
-6. After editing design files, use **Relaunch Simulation**. Drag any signal from *SIMULATION → Scope* (for example `dot11_tb → dot11_inst → ofdm_decoder_inst → viterbi_inst`) into the waveform view and relaunch to inspect it.
+3. *SIMULATION → Run Simulation → Run Behavioral Simulation*, then **Run All (F3)**. The first run is slow because sub-IP cores compile once. Later runs are fast.
+4. After editing design files, use **Relaunch Simulation**.
+
+The [FPGA Simulation and Testbenches](FPGA-Simulation.md) page covers this in full: the IQ input format, the test vectors, which signals and dumped files to inspect, batch simulation, and the transmitter and block-level unit tests.
 
 ## Conditional compilation with Verilog macros
 

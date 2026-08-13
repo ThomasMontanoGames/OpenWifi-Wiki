@@ -20,6 +20,8 @@ Xilinx('s)?
 Vivado
 Vitis
 Verilog
+Tcl
+XSim
 Kuiper
 ADI('s)?
 imec
@@ -67,6 +69,9 @@ defeatable
 beaconing
 backhaul
 demodulator('s)?
+demod
+descrambl(e|es|er|ing)
+unpacker
 STAs?
 SNRs?
 APs?
@@ -127,7 +132,7 @@ schedulable
 subframes?
 substrings?
 sysfs
-testbench
+testbench(es)?
 testmode
 toolchains?
 udev

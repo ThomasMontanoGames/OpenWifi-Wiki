@@ -40,6 +40,7 @@
 *[DDR]: Double Data Rate SDRAM: the board's main memory, initialized by the FSBL at boot.
 *[DTB]: Device Tree Blob: the compiled description of the board's hardware for Linux.
 *[DTS]: Device Tree Source: the human-readable device-tree description.
+*[DUT]: Device Under Test: the module a testbench drives and observes.
 *[DTSO]: Device Tree Source Overlay: an overlay layered onto a stock board device tree.
 *[DIFS]: DCF Interframe Space: the idle time a station waits before starting contention.
 *[DMA]: Direct Memory Access: moves packets/samples between FPGA and memory without CPU copying.
