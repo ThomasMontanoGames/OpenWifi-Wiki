@@ -1,23 +1,24 @@
 # Building SD Images
 
-openwifi boots from an SD card running one of two base operating systems, and you can build either from scratch:
+openwifi boots from an SD card running one of three base operating systems, and you can build any of them from scratch:
 
 - **ADI Kuiper**: a Debian/Ubuntu-like image (the classic openwifi environment, and what the `fosdem.sh` demo and most app notes assume).
 - **OpenWrt**: a router-style image with the LuCI web UI, with openwifi packaged as a kernel module.
+- **Buildroot**: a compact image, for the MicroPhase ANTSDR boards only. See [Buildroot](#buildroot-compact-images-for-antsdr-boards) below.
 
 !!! tip "You may not need to build anything"
-    Prebuilt images exist for both. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
+    Prebuilt images exist for Kuiper and OpenWrt. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
 
 The builds below assume you understand the [boot chain and device tree](Boot-Kernel-Device-Tree.md). For the driver/dev loop see [Software Development Workflow](Software-Development-Workflow.md).
 
 ## Which one should you build?
 
-| | ADI Kuiper | OpenWrt |
-|---|---|---|
-| Feels like | A small Debian/Ubuntu box | A Wi-Fi router (LuCI web UI) |
-| Best for | Research, the app-note workflows, full apt tooling | Router use cases |
-| Build needs | Vivado 2022.2 + Vitis | Docker only (no Vivado) |
-| openwifi tools | Built on the board | Packaged into the image (in `$PATH`) |
+| | ADI Kuiper | OpenWrt | Buildroot |
+|---|---|---|---|
+| Feels like | A small Debian/Ubuntu box | A Wi-Fi router (LuCI web UI) | A minimal BusyBox system |
+| Best for | Research, the app-note workflows, full apt tooling | Router use cases | A small, fast-booting image on ANTSDR boards |
+| Build needs | Vivado 2022.2 + Vitis | Docker only (no Vivado) | The prebuilt board `system_top.xsa` (no Vivado) |
+| openwifi tools | Built on the board | Packaged into the image (in `$PATH`) | Packaged into the image, under `/root/openwifi` |
 
 ---
 
@@ -303,6 +304,30 @@ src-link openwifi /openwrt-openwifi-packages-feed
 ```
 
 You can also bind-mount the OpenWrt tree under `/workdir` so paths printed in the container are copy-pasteable on the host. OpenWrt-specific issues (including the ZCU102 UART/SODIMM problem) are collected in [Troubleshooting → OpenWrt-specific](Troubleshooting.md#openwrt-specific).
+
+## Buildroot: compact images for ANTSDR boards
+
+A third, Buildroot-based image workflow builds a much smaller SD-card image (about 169 MB, versus the multi-gigabyte ADI Kuiper image). It is an additional path alongside Kuiper and OpenWrt, not a replacement, and it targets only the MicroPhase ANTSDR boards:
+
+| `board_name` argument | Hardware |
+|---|---|
+| `antsdr_e200` | ANTSDR-E200 |
+| `antsdr` | ANTSDR-E310/ANT |
+| `e310v2` | ANTSDR-E310V2 |
+
+**Prerequisites:** the `buildroot` git submodule (`git submodule update --init buildroot`), and the matching board's `system_top.xsa`. By default the build script looks for it under `../openwifi-hw-img/boards/<board>/sdk/system_top.xsa`, or set the `OPENWIFI_XSA` or `OPENWIFI_HW_IMG_DIR` environment variable to point elsewhere.
+
+Build with:
+
+```bash
+./buildroot-build.sh <board> build
+```
+
+The Linux kernel, modules, and ext4 root filesystem are shared across all three boards and built once. Only U-Boot, the device tree, and the FPGA bitstream stay board-specific. Login is `root` / `openwifi`, and `eth0` is a static `192.168.10.122` as in the other workflows.
+
+Runtime FPGA handling differs slightly from Kuiper and OpenWrt. Since U-Boot already configures the FPGA at boot, `./wgd.sh` on a Buildroot image reuses that configuration by default instead of reloading a local bitstream file. Set `OPENWIFI_RELOAD_FPGA=1` before running `./wgd.sh` to force a reload through Linux FPGA Manager for development.
+
+Full details are in [`doc/img_build_instruction/buildroot/README.md`](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/buildroot/README.md) in the openwifi repo.
 
 ## Related pages
 
