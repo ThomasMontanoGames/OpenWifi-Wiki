@@ -4,10 +4,10 @@ openwifi boots from an SD card running one of three base operating systems, and 
 
 - **ADI Kuiper**: a Debian/Ubuntu-like image (the classic openwifi environment, and what the `fosdem.sh` demo and most app notes assume).
 - **OpenWrt**: a router-style image with the LuCI web UI, with openwifi packaged as a kernel module.
-- **Buildroot**: a compact image, currently for the MicroPhase ANTSDR boards only. See [Buildroot](#buildroot-compact-images-for-antsdr-boards) below.
+- **Buildroot**: a compact image, for the MicroPhase ANTSDR boards only. See [Buildroot](#buildroot-compact-images-for-antsdr-boards) below.
 
 !!! tip "You may not need to build anything"
-    Prebuilt images exist for both. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
+    Prebuilt images exist for Kuiper and OpenWrt. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
 
 The builds below assume you understand the [boot chain and device tree](Boot-Kernel-Device-Tree.md). For the driver/dev loop see [Software Development Workflow](Software-Development-Workflow.md).
 
@@ -307,7 +307,7 @@ You can also bind-mount the OpenWrt tree under `/workdir` so paths printed in th
 
 ## Buildroot: compact images for ANTSDR boards
 
-A third, Buildroot-based image workflow builds a much smaller SD-card image (about 169 MB, versus the multi-gigabyte ADI Kuiper image). It is an additional path alongside Kuiper and OpenWrt, not a replacement, and it currently targets only the MicroPhase ANTSDR boards:
+A third, Buildroot-based image workflow builds a much smaller SD-card image (about 169 MB, versus the multi-gigabyte ADI Kuiper image). It is an additional path alongside Kuiper and OpenWrt, not a replacement, and it targets only the MicroPhase ANTSDR boards:
 
 | `board_name` argument | Hardware |
 |---|---|

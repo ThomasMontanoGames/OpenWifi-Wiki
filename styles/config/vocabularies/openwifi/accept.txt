@@ -19,6 +19,7 @@ radiotap
 Xilinx('s)?
 Vivado
 Vitis
+Buildroot
 Verilog
 Tcl
 XSim
