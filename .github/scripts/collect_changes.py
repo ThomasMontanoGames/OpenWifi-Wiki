@@ -397,7 +397,7 @@ def render_prompt(repo_result, context_path, dry_run=False):
     r = repo_result
     newest = r["commits"][-1]
     # Conventional Branch format: <type>/<kebab-case-description>. See the Git
-    # conventions section of CLAUDE.md.
+    # conventions section of AGENTS.md.
     branch = "docs/sync-%s-%s" % (r["repo_short"], newest["short_sha"])
 
     pr_refs = []
@@ -443,7 +443,7 @@ def render_prompt(repo_result, context_path, dry_run=False):
 
         Then do the following.
 
-        1. Read this repository's CLAUDE.md in full, and README.md. CLAUDE.md
+        1. Read this repository's AGENTS.md in full, and README.md. AGENTS.md
            contains the writing style rules for this wiki and the git
            conventions. The style rules are strict: no em dashes, no semicolons
            in prose, plain non-idiomatic English, lowercase `openwifi`, relative
@@ -505,7 +505,7 @@ def render_prompt(repo_result, context_path, dry_run=False):
            anchors.
 
         8. Commit using a Conventional Commits message, as described in the git
-           conventions section of CLAUDE.md. Almost always the type is `docs`.
+           conventions section of AGENTS.md. Almost always the type is `docs`.
            The subject is imperative mood, lowercase after the colon, no trailing
            period, and 72 characters or fewer. For example:
 

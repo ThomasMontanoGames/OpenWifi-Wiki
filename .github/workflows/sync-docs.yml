@@ -1,7 +1,7 @@
 name: Sync wiki with openwifi upstream
 
 # Polls the two openwifi source repositories and, when a change looks
-# documentation-relevant, runs a headless Claude Code session that opens a pull
+# documentation-relevant, runs a headless Kimi Code session that opens a pull
 # request against this wiki. Nothing is ever merged automatically.
 #
 # Everything lives in this repository. The source repositories are public, so no
@@ -67,10 +67,65 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          # Kimi Code CLI requires Node.js 22.19 or later.
+          node-version: "22"
 
-      - name: Install Claude Code
-        run: npm install -g @anthropic-ai/claude-code
+      - name: Install Kimi Code CLI
+        run: npm install -g @moonshot-ai/kimi-code
+
+      - name: Configure Kimi Code
+        # Uses a Kimi Code subscription (OAuth), not a metered API key. The
+        # credential file comes from a local `kimi login`: copy
+        # ~/.kimi-code/credentials/kimi-code.json into the
+        # KIMI_OAUTH_CREDENTIALS repository secret. The oauth reference below
+        # points the provider at that file.
+        env:
+          KIMI_OAUTH_CREDENTIALS: ${{ secrets.KIMI_OAUTH_CREDENTIALS }}
+        run: |
+          mkdir -p ~/.kimi-code/credentials
+          printf '%s' "$KIMI_OAUTH_CREDENTIALS" > ~/.kimi-code/credentials/kimi-code.json
+          chmod 600 ~/.kimi-code/credentials/kimi-code.json
+          cat > ~/.kimi-code/config.toml <<'EOF'
+          default_model = "kimi-code/k3"
+
+          [providers."managed:kimi-code"]
+          type = "kimi"
+          base_url = "https://api.kimi.com/coding/v1"
+          oauth = { storage = "file", key = "kimi-code" }
+
+          [models."kimi-code/k3"]
+          provider = "managed:kimi-code"
+          model = "k3"
+          max_context_size = 1048576
+
+          [[permission.rules]]
+          decision = "allow"
+          pattern = "Bash(git*)"
+
+          [[permission.rules]]
+          decision = "allow"
+          pattern = "Bash(gh pr create*)"
+
+          [[permission.rules]]
+          decision = "allow"
+          pattern = "Bash(gh pr view*)"
+
+          [[permission.rules]]
+          decision = "allow"
+          pattern = "Bash(gh pr list*)"
+
+          [[permission.rules]]
+          decision = "allow"
+          pattern = "Bash(mkdocs*)"
+
+          [[permission.rules]]
+          decision = "allow"
+          pattern = "Bash(pip*)"
+
+          [[permission.rules]]
+          decision = "deny"
+          pattern = "Bash"
+          EOF
 
       - name: Configure git identity
         run: |
@@ -119,8 +174,6 @@ jobs:
       - name: Run documentation sync sessions
         if: steps.collect.outputs.run_count != '0'
         env:
-          # Personal Claude subscription token, generated with `claude setup-token`.
-          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           # Used by the agent's `git push` and `gh pr create` against this repo only.
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -139,12 +192,10 @@ jobs:
             git reset --hard HEAD
             git clean -fd
 
-            claude -p "$(cat "$prompt_file")" \
-              --model claude-sonnet-5 \
-              --max-turns 40 \
-              --permission-mode acceptEdits \
-              --allowedTools "Read,Write,Edit,Glob,Grep,TodoWrite,Bash(git:*),Bash(gh pr create:*),Bash(gh pr view:*),Bash(gh pr list:*),Bash(mkdocs:*),Bash(pip:*)" \
-              --output-format text || { echo "session for $repo failed"; FAILED=1; }
+            # kimi -p runs non-interactively with auto permission: no approval
+            # prompts, and the deny rules written above still apply. There is
+            # no max-turns equivalent; the job timeout is the bound.
+            kimi -p "$(cat "$prompt_file")" || { echo "session for $repo failed"; FAILED=1; }
 
             echo "::endgroup::"
           done < <(jq -r '.runs[] | "\(.prompt_file) \(.repo)"' "$PLAN")
