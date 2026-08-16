@@ -42,9 +42,21 @@ Zynq> env default -a
 Zynq> saveenv
 ```
 
+!!! warning "This resets all U-Boot variables"
+    `env default -a` + `saveenv` permanently restores factory defaults and erases any custom U-Boot variables you set. Reboot the board afterwards; it should then boot normally.
+
 ### Wrong memory size on ADRV9361-Z7035 SoM
 
-Linux detects only half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild U-Boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) (`make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf`) and regenerate `BOOT.BIN`.
+Linux detects only half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild U-Boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) and regenerate `BOOT.BIN`:
+
+```bash
+source environment_setting.sh          # from the u-boot-xlnx checkout
+export ARCH=arm
+export CROSS_COMPILE=arm-linux-gnueabihf-
+make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf
+```
+
+The 1 GB fix is already in u-boot-xlnx master (`zynq-adrv9361.dts`), so a current checkout needs no source edits.
 
 ## Client / link problems
 
@@ -109,11 +121,14 @@ Tracked in issues [#366](https://github.com/open-sdr/openwifi/issues/366) and [#
 
 journald can't write because logs filled the disk. Clean up and cap journald:
 
+!!! warning "These commands are destructive"
+    They delete every log currently on the board and permanently remove the rsyslog package. Fine on a throwaway demo image, not fine if you still need those logs.
+
 ```bash
-systemd-tmpfiles --clean
+sudo systemd-tmpfiles --clean
 sudo systemd-tmpfiles --remove
-rm /var/log/* -rf
-apt --autoremove purge rsyslog
+sudo rm /var/log/* -rf
+sudo apt --autoremove purge rsyslog
 ```
 
 Then add to `/etc/systemd/journald.conf`:

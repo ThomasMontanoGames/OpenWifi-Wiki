@@ -33,10 +33,10 @@ cd openwifi
 ./wgd.sh
 ifconfig sdr0 up
 iwlist sdr0 scan                    # the target SSID should appear
-wpa_supplicant -i sdr0 -c wpa-openwifi.conf
+wpa_supplicant -i sdr0 -c wpa-openwifi.conf   # pass -c wpa-connect.conf instead when joining your own AP
 ```
 
-Adjust the SSID/passphrase in the config file for your target network (`wpa-openwifi.conf` for an openwifi AP, or edit `wpa-connect.conf` for a different network). A successful association prints something like:
+Adjust the SSID/passphrase in the config file for your target network (`wpa-openwifi.conf` for an openwifi AP, or edit `wpa-connect.conf` for a different network and pass it with `-c`). A successful association prints something like:
 
 ```text
 sdr0: SME: Trying to authenticate with 66:55:44:33:22:8c (SSID='openwifi' freq=5220 MHz)
@@ -163,12 +163,12 @@ analyze_80211 trace.pcap
 openwifi is **OFDM-only** and therefore not backward-compatible with 802.11b. This matters at connection setup, since 2.4 GHz devices often fall back to 11b rates for beacons and management frames. The fix is to suppress 11b rates on both ends:
 
 - **On the openwifi AP:** the provided `hostapd-openwifi.conf` already suppresses 11b rates (`supported_rates` / `basic_rates`).
-- **On a commercial client:** unmodified `wpa_supplicant` can't suppress 11b rates in 2.4 GHz. Build the patched version openwifi provides:
+- **On a commercial client:** unmodified `wpa_supplicant` can't suppress 11b rates in 2.4 GHz. Build the patched version openwifi provides, on the client machine:
 
   ```bash
-  sudo apt-get install libssl1.0-dev
+  sudo apt-get install libssl-dev    # Ubuntu 20.04 and later. On 18.04 the package is libssl1.0-dev
   cd openwifi/user_space
   ./build_wpa_supplicant_wo11b.sh
   ```
 
-Using 5 GHz channels avoids the issue entirely, which is why the default demo uses channel 44.
+Using 5 GHz channels avoids the issue entirely, which is why the default demo uses a 5 GHz channel.

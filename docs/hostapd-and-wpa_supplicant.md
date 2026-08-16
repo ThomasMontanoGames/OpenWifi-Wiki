@@ -106,19 +106,19 @@ Check the shipped files on your own board before assuming defaults. They change 
 
 Most openwifi work never touches these files. These are the cases that do.
 
-**Changing channel or band.** The demo defaults to channel 44 in 5 GHz. A 2.4 GHz-only client cannot see it. Edit the channel and `hw_mode` in `hostapd-openwifi.conf` and re-run `fosdem.sh`. This is the single most common edit, and it is called out in [Getting Started](Getting-Started.md#4-start-the-access-point) for that reason.
+**Changing channel or band.** The demo defaults to channel 36 in 5 GHz. A 2.4 GHz-only client cannot see it. Edit the channel and `hw_mode` in `hostapd-openwifi.conf` and re-run `fosdem.sh`. This is the single most common edit, and it is called out in [Getting Started](Getting-Started.md#4-start-the-access-point) for that reason.
 
 **Turning security on or off.** Standard hostapd `wpa` / `wpa_passphrase` / `wpa_key_mgmt` settings, matched by `psk` and `key_mgmt` on the client side. Worth disabling when you are benchmarking, for the software-crypto reason above.
 
-**Suppressing 802.11b rates.** openwifi is OFDM-only and cannot do the 11b (DSSS) rates that 2.4 GHz devices often fall back to for beacons and management frames. The shipped `hostapd-openwifi.conf` already handles the AP side with `supported_rates` and `basic_rates`. The client side is harder, because an unmodified `wpa_supplicant` gives you no way to suppress 11b rates in 2.4 GHz, so openwifi ships a patched build:
+**Suppressing 802.11b rates.** openwifi is OFDM-only and cannot do the 11b (DSSS) rates that 2.4 GHz devices often fall back to for beacons and management frames. The shipped `hostapd-openwifi.conf` already handles the AP side with `supported_rates` and `basic_rates`. The client side is harder, because an unmodified `wpa_supplicant` gives you no way to suppress 11b rates in 2.4 GHz, so openwifi ships a patched build. Run this on the client machine:
 
 ```bash
-sudo apt-get install libssl1.0-dev
+sudo apt-get install libssl-dev    # Ubuntu 20.04 and later. On 18.04 the package is libssl1.0-dev
 cd openwifi/user_space
 ./build_wpa_supplicant_wo11b.sh
 ```
 
-Staying in 5 GHz sidesteps the whole problem, which is why the demo defaults to channel 44. The full explanation is in [About 802.11b](Operating-Modes.md#about-80211b).
+Staying in 5 GHz avoids the whole problem, which is why the demo defaults to a 5 GHz channel. The full explanation is in [About 802.11b](Operating-Modes.md#about-80211b).
 
 **Forcing legacy 802.11a/g.** Use `fosdem-11ag.sh`, or set `ieee80211n=0` in the hostapd config yourself. Useful when you are trying to tell an 11n problem apart from an RF problem. The 11n side is covered in [Wi-Fi 4 and Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md).
 

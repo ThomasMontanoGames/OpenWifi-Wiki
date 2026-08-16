@@ -13,8 +13,8 @@ CSI and IQ capture both ride the same **side channel** infrastructure: the FPGA 
 Two ways to build the side-channel pieces:
 
 ```bash
-# side_ch.ko (on host):
-$OPENWIFI_DIR/driver/side_ch/make_driver.sh $OPENWIFI_DIR $XILINX_DIR $ARCH_BIT   # ARCH_BIT: 32 or 64
+# side_ch.ko (on host, run from $OPENWIFI_DIR/driver/side_ch):
+./make_driver.sh $XILINX_DIR $ARCH_BIT   # ARCH_BIT: 32 or 64. The script derives OPENWIFI_DIR from its own location
 # side_ch_ctl (compile ON the board):
 gcc -o side_ch_ctl side_ch_ctl.c
 ```
@@ -223,7 +223,7 @@ The capture is windowed around a trigger event: `iq_len` total samples, of which
 | 25 | addr1 and/or addr2 matched (configure like the CSI filter) |
 | 26–31 | ACK-related TX edges and dual-antenna collision conditions |
 
-Thresholds: RSSI via `wh9dY` (0–2047), AGC gain via `wh10dY` (0–127). For free-run, use `wh8d0` **and** `wh5d1` together. Register 5 is multi-purpose (bit0 free-run, bits7-4 `tx_control_state` target, bits9-8 phy_type). For example `wh5h230` targets `tx_control_state=SEND_BLK_ACK(3)` and `phy_type=HE(2)`.
+Thresholds: RSSI via `wh9dY` (an 11-bit signed `rssi_half_db` value, keep it ≤ 1023), AGC gain via `wh10dY` (0–127). For free-run, use `wh8d0` **and** `wh5d1` together. Register 5 is multi-purpose (bit0 free-run, bits7-4 `tx_control_state` target, bits9-8 phy_type). For example `wh5h230` targets `tx_control_state=SEND_BLK_ACK(3)` and `phy_type=HE(2)`.
 
 ### Frequency-offset check and SNR
 
@@ -234,7 +234,7 @@ Thresholds: RSSI via `wh9dY` (0–2047), AGC gain via `wh10dY` (0–127). For fr
 
 On AD9361 boards (FMCOMMS2/3, ADRV9361-Z7035) you can capture IQ from the *monitoring* antenna (rx1) coherently alongside the main antenna (rx0). Place rx1 near a peer node to catch collisions, moments when both link ends transmit at once. Set rx1's AGC to manual at a low gain in `rf_init.sh` (`echo manual > in_voltage1_gain_control_mode` and `echo 20 > in_voltage1_hardwaregain`), then use a short `pre_trigger_len` and a TX-done trigger (`wh8d23`), or the dedicated collision trigger (`wh8d29`, rx1 IQ above threshold while this SDR is transmitting). Capture with `iq_capture_2ant.py`. Full recipe in the [dual-antenna IQ note](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_2ant.md).
 
-The same note carries two further quick starts that capture the board's **own TX IQ** from inside the FPGA rather than anything received over the air. The first is a trigger mode that fires when the transmitter starts (`wh8d16`, with `wh5h2` tapping the IQ at the `openofdm_tx` core or `wh5h4` at `tx_intf`). The second is a free-running mode that streams transmit baseband continuously (`wh8d0` with source `wh5h3` or `wh5h5`). Both use a short capture window (`iq_len_init=511`, enough for the preambles and a few OFDM symbols) and the same `iq_capture_2ant.py` display.
+The same note carries two further quick starts that capture the board's **own TX IQ** from inside the FPGA rather than anything received over the air. The first uses trigger 16, a `tx_control_state` match (see the [trigger reference](side_ch_ctl-and-the-Side-Channel.md#trigger-reference-register-8)): `wh8d16`, with `wh5h2` tapping the IQ at the `openofdm_tx` core or `wh5h4` at `tx_intf`. The upstream note describes this combination as firing when the transmitter starts, while the RTL defines trigger 16 as a control-state hit with the target state set by `wh5`. The second is a free-running mode that streams transmit baseband continuously (`wh8d0` with source `wh5h3` or `wh5h5`). Both use a short capture window (`iq_len_init=511`, enough for the preambles and a few OFDM symbols) and the same `iq_capture_2ant.py` display.
 
 <figure markdown>
 ![Dual-antenna collision-capture setup](assets/img/iq_2ant-setup.png){ width="520" }
@@ -264,7 +264,7 @@ Full duplex also enables self-loopback tests of packets, CSI, and IQ, either ove
 
 ![Self-loopback principle](assets/img/openwifi-loopback-principle.jpg)
 
-You need: monitor mode, CCA effectively disabled (`xpu 8 <big>`), self-RX unmuted (`xpu 1 1`), a TX-start trigger, and the loopback source select (`side_ch_ctl wh5h0` for over-the-air, `wh5h4` for FPGA-internal). Inject a packet in a second ssh session (`./inject_80211 -m n -r 5 -n 1 sdr0`) to fire the capture.
+You need: monitor mode, CCA effectively disabled (`xpu 8 <big>`), self-RX unmuted (`xpu 1 1`), a TX-control-state trigger (`wh8d16`, trigger 16 above), and the loopback source select (`side_ch_ctl wh5h0` for over-the-air, `wh5h4` for FPGA-internal). Inject a packet in a second ssh session (`./inject_80211 -m n -r 5 -n 1 sdr0`) to fire the capture.
 
 <div class="grid" markdown>
 ![Over-the-air self-loopback IQ](assets/img/openwifi-iq-loopback.jpg)

@@ -110,14 +110,14 @@ The six cores form a transmit chain and a receive chain that meet at the AD9361 
 
 Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) and, where it moves sample data, an AXI-Stream master/slave for DMA. A driver file and its FPGA core usually share a name (`xpu.c` ↔ `xpu.v`), and every register the driver writes (`hw_def.h`) has a matching `slv_regN` in the core's `_s_axi.v`.
 
-| Core | Role | Register bank size | Unit-test benches? |
+| Core | Role | Register bank size | Testbenches |
 |---|---|---|---|
-| `xpu` | Real-time MAC (CSMA/CA, ACK, TSF, filtering, queue gating) | **64** AXI-Lite regs | yes (`fifo_sample_delay`, `mv_avg`) |
-| `openofdm_tx` | 802.11 OFDM transmitter | 32 regs | yes (`test_vec/`) |
-| `openofdm_rx` | 802.11 OFDM receiver | (submodule) | yes (`dot11_tb`) |
-| `tx_intf` | DAC-side interface + TX BRAM + CSI fuzzer | 32 regs | no |
-| `rx_intf` | ADC-side interface + RX DMA | 32 regs | yes (`adc_intf`) |
-| `side_ch` | CSI / raw-IQ capture side channel | 32 regs | no |
+| `xpu` | Real-time MAC (CSMA/CA, ACK, TSF, filtering, queue gating) | **64** AXI-Lite regs | unit: `mv_avg`, `fifo_sample_delay` |
+| `openofdm_tx` | 802.11 OFDM transmitter | 32 regs | full transmitter: `dot11_tx_tb` + `test_vec/` |
+| `openofdm_rx` | 802.11 OFDM receiver | 32 regs (in the `openofdm` submodule) | full receiver: `dot11_tb` |
+| `tx_intf` | DAC-side interface + TX BRAM + CSI fuzzer | 32 regs | none |
+| `rx_intf` | ADC-side interface + RX DMA | 32 regs | unit: `adc_intf` |
+| `side_ch` | CSI / raw-IQ capture side channel | 32 regs | none |
 
 ---
 

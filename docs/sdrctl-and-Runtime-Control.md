@@ -125,7 +125,7 @@ The hex nibbles encode log2 values: `b5` for q3 means CWmax=2¹¹−1=2047, CWmi
 
 ### Retransmission and ACK control (xpu register 11)
 
-Change only the bits you mean to, because other bits of this register have other jobs.
+Other bits of this register have other jobs, so the value you write must combine every bit you want set. After a fresh `wgd.sh` load the register is 0 and the driver does not touch it, so the absolute values below are complete settings (25 = 16 + 8 + 1 keeps the retransmission cap and disables ACK TX). If you have changed the register since boot, read it first and merge your bits into the current value.
 
 ```bash
 ./sdrctl dev sdr0 get reg xpu 11        # read first

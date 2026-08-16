@@ -207,8 +207,11 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
     ```bash
     cd ~/Downloads && gunzip openwrt-zynq-generic-analog_devices_zynq-adrv9364-squashfs-sdcard.img.gz
-    sudo dd if=~/Downloads/openwrt-zynq-generic-analog_devices_zynq-adrv9364-squashfs-sdcard.img of=/dev/mmcblk0 status=progress
+    sudo dd if=~/Downloads/openwrt-zynq-generic-analog_devices_zynq-adrv9364-squashfs-sdcard.img of=/dev/your_sdcard_dev status=progress
     ```
+
+    !!! warning "Check the target device"
+        On a PC, `/dev/mmcblk0` is often the PC's own internal eMMC, not the SD card. Run `lsblk` before and after inserting the card and use the device that appeared. Picking the wrong `of=` target overwrites that disk.
 
 2. Boot the board. After about a minute an **`openwrt-openwifi`** SSID appears on 2.4 GHz channel 1. Connecting gives you an IP but no internet yet.
 

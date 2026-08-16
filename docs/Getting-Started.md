@@ -88,7 +88,7 @@ Now look for the **"openwifi"** SSID on your phone or laptop and connect. You sh
 
 Two things to know:
 
-- The default configuration uses **channel 44 (5 GHz)**. If your client device is 2.4 GHz-only, edit `hostapd-openwifi.conf` on the board (channel/band) and re-run `fosdem.sh`.
+- The shipped `hostapd-openwifi.conf` defaults to **channel 36 (5 GHz)**. If your client device is 2.4 GHz-only, edit `hostapd-openwifi.conf` on the board (channel/band) and re-run `fosdem.sh`.
 - The FPGA uses an **evaluation license** of the Xilinx Viterbi decoder, which halts after roughly two hours of operation. Symptoms: reception dies, and `./sdrctl dev sdr0 get reg rx 20` returns the same value forever. The fix is to reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle the board.
 
 The ADRV9361-Z7035 has very low TX power in the 5 GHz band, so keep devices close when using that board on 5 GHz.

@@ -164,7 +164,7 @@ For regression-style runs you do not need the GUI. The openofdm repo has three h
 | [`openofdm_rx_sim_iq_file_batch.tcl`](https://github.com/open-sdr/openofdm/blob/dot11zynq/openofdm_rx_sim_iq_file_batch.tcl) | Loops the single-file run over many IQ files |
 | [`openofdm_rx_side_ch_sim_ultra_scale.tcl`](https://github.com/open-sdr/openofdm/blob/dot11zynq/openofdm_rx_side_ch_sim_ultra_scale.tcl) | Simulates the receiver together with `side_ch` on UltraScale parts |
 
-`openofdm_rx_sim_iq_file.tcl` shows the pattern the others follow. It writes the chosen file into the `` `SAMPLE_FILE `` macro, computes the run length from the file (roughly `lines / 20 + 1` microseconds, since the input is 20 MSPS), runs the simulation, and copies every dumped `.txt` into a results directory named after the input file. That last step is what makes batch runs comparable: each input keeps its own set of dumps.
+`openofdm_rx_sim_iq_file.tcl` shows the pattern the others follow. It writes the chosen file into the `` `SAMPLE_FILE `` macro, computes the run length from the file (`lines / 20` microseconds by Tcl integer division, since the input is 20 MSPS), runs the simulation, and copies every dumped `.txt` into a results directory named after the input file. That last step is what makes batch runs comparable: each input keeps its own set of dumps.
 
 ## The transmitter testbench (`dot11_tx_tb`)
 

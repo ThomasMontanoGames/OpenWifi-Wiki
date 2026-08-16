@@ -160,7 +160,7 @@ The kernel build produces the image and a tree of `.ko` modules, but openwifi do
 
 `<ARCH>` is `32` or `64`, giving `openwifi32`/`openwifi64` and `kernel_modules32`/`kernel_modules64` directories side by side on the `rootfs` partition. At this point the modules are only *staged*. Nothing is under `/lib/modules` yet.
 
-The board-side script `populate_kernel_image_module_reboot.sh` is what finishes the job. It picks the set matching the board's architecture and:
+The board-side script `populate_kernel_image_module_reboot.sh` is what finishes the job. The architecture selection already happened host-side (`transfer_kernel_image_module_to_board.sh` packs only the matching set), and the script uses `uname -m` only to pick the kernel image and device tree filenames (`uImage` + `devicetree.dtb` on 32-bit, `Image` + `system.dtb` on 64-bit). It:
 
 - moves the board-support modules (`ad9361_drv.ko`, `adi_axi_hdmi.ko`, `axidmatest.ko`, `lcd.ko`, `xilinx_dma.ko`) out of `kernel_modules` and into `openwifi/`, next to the driver,
 - symlinks the staged directory into the module path (`ln -s /root/kernel_modules /lib/modules/$(uname -r)`) and runs `depmod`, so `modprobe` can resolve dependencies for the running kernel,
