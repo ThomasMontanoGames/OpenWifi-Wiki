@@ -169,3 +169,4 @@ backports
 minicom
 kbps
 prepended
+rsyslog

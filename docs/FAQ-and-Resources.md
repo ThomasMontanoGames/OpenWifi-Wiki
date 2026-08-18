@@ -2,7 +2,7 @@
 
 ## Frequently asked questions
 
-### What hardware do I need, and how do I get it running?
+### What hardware do you need, and how do you get it running?
 
 Pick a board from [Supported Boards](Supported-Boards.md): the ZedBoard plus an FMCOMMS2/3 card is the classic reference, and several cheaper community boards work too. Then follow [Getting Started](Getting-Started.md) to flash the SD image, boot the board, and bring up the `sdr0` interface.
 

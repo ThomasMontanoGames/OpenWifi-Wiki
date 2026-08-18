@@ -122,7 +122,7 @@ Some ZCU102 boards kernel-panic during boot, a failure traced to the RTC capacit
 journald can't write because logs filled the disk. Clean up and cap journald:
 
 !!! warning "These commands are destructive"
-    They delete every log currently on the board and permanently remove the rsyslog package. Fine on a throwaway demo image, not fine if you still need those logs.
+    They delete every log on the board and permanently remove the rsyslog package. Fine on a throwaway demo image, not fine if you still need those logs.
 
 ```bash
 sudo systemd-tmpfiles --clean

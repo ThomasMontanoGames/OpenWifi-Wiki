@@ -59,7 +59,7 @@ The RF characteristics come from the **Analog Devices AD9361/AD9364** agile tran
 | Parameter | Value |
 |---|---|
 | Tuning range | 70 MHz–6 GHz[^faq] |
-| Duplex mode | FDD, same TX and RX frequency. The TX LO and RF switch turn on only for the duration of a packet, so the receiver never hears its own transmitter[^docreadme] |
+| Duplex mode | FDD with the same TX and RX frequency. The TX LO and RF switch turn on only for the duration of a packet, so the receiver never hears its own transmitter[^docreadme] |
 | Antenna configurations | 1×1 typical, some boards (AD9361) 2×2-capable[^boards] |
 | RF/baseband clock coupling | Baseband clock derived from the AD9361 sample clock, so RF and baseband never drift apart[^docreadme] |
 
@@ -141,7 +141,7 @@ See [FPGA Development](FPGA-Development.md) for the build flow.
 ## Sources
 
 [^readme]: openwifi [`README.md`](https://github.com/open-sdr/openwifi/blob/master/README.md): performance summary (throughput, EVM, sensitivity) and feature list.
-[^docreadme]: openwifi [`doc/README.md`](https://github.com/open-sdr/openwifi/blob/master/doc/README.md): the RF/baseband/sampling design (40→20 Msps, 0.6 µs TX/RX turnaround, RF-baseband clock coupling), the `xpu` register descriptions, and the note that `ad9361_rf_set_channel()` configures per-band FPGA settings including SIFS. The band-dependent `sifs = (actual_rx_lo<2500 ? 10 : 16)` line exists in [`driver/sdr.c`](https://github.com/open-sdr/openwifi/blob/master/driver/sdr.c) only as a comment; the active code sets `sifs = 16` unconditionally.
+[^docreadme]: openwifi [`doc/README.md`](https://github.com/open-sdr/openwifi/blob/master/doc/README.md): the RF/baseband/sampling design (40→20 Msps, 0.6 µs TX/RX turnaround, RF-baseband clock coupling), the `xpu` register descriptions, and the note that `ad9361_rf_set_channel()` configures per-band FPGA settings including SIFS. The band-dependent `sifs = (actual_rx_lo<2500 ? 10 : 16)` line exists in [`driver/sdr.c`](https://github.com/open-sdr/openwifi/blob/master/driver/sdr.c) only as a comment. The active code sets `sifs = 16` unconditionally.
 [^11n]: openwifi [`doc/app_notes/ieee80211n.md`](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md): subcarriers, coding rates, guard interval, and the 72.2 Mbps theoretical rate, with MIMO and 40 MHz listed as not supported.
 [^acktiming]: openwifi [`doc/app_notes/iq_ack_timing.md`](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_ack_timing.md): the measured ≈16 µs self-ACK gap (320 samples at 20 Msps).
 [^sdrc]: openwifi [`driver/sdr.c`](https://github.com/open-sdr/openwifi/blob/master/driver/sdr.c): the SIFS and ACK-duration constants used at run time.

@@ -47,7 +47,7 @@ A passing run ends with one line per frame in `fcs_out.txt` (the sample count fo
 
 The receiver expects **20 MSPS** baseband IQ, 16 bits each. The testbench reads its samples from a text file named by the `` `SAMPLE_FILE `` macro in [`verilog/openofdm_rx_pre_def.v`](https://github.com/open-sdr/openofdm/tree/dot11zynq/verilog). Change that macro to point at a different capture, then relaunch.
 
-Each line of the file is three integers: I, Q, and a dummy RSSI value.
+Each line of the file is three integers: `I`, `Q`, and a dummy RSSI value.
 
 ```text
 -152 37 0
