@@ -38,8 +38,10 @@ This is the main simulation environment. `dot11_tb` instantiates the `dot11` rec
 4. Press **Run All (F3)** to run to completion.
 5. After editing a design file, use **Relaunch Simulation** rather than recreating the project.
 
+A passing run ends with one line per frame in `fcs_out.txt` (the sample count followed by the `fcs_ok` flag), and `byte_out.txt` holds the decoded bytes to compare against the known frame. The first run can take several minutes while every sub-IP compiles.
+
 !!! tip "Icarus Verilog as a lighter alternative"
-    The openofdm repo also builds with [Icarus Verilog](http://iverilog.icarus.com/) and [GtkWave](http://gtkwave.sourceforge.net/) instead of Vivado. A `Makefile` lives in [`openofdm/verilog/`](https://github.com/open-sdr/openofdm/tree/dot11zynq/verilog). This is handy on a machine without a Vivado install, though the Xilinx primitives (the Viterbi decoder) still need the Vivado simulation libraries.
+    The openofdm repo also builds with [Icarus Verilog](http://iverilog.icarus.com/) and [GtkWave](http://gtkwave.sourceforge.net/) instead of Vivado. A `Makefile` lives in [`openofdm/verilog/`](https://github.com/open-sdr/openofdm/tree/dot11zynq/verilog): `make` compiles the design and runs `dot11_tb` under `vvp`, and `make clean` removes the outputs. This is handy on a machine without a Vivado install, though the Xilinx primitives (the Viterbi decoder) still need the Vivado simulation libraries, which you generate with Vivado's `compile_simlib`.
 
 ### The IQ input: what you feed
 
@@ -152,7 +154,7 @@ Sample IQ files live in [`openofdm/testing_inputs/`](https://github.com/open-sdr
 | `conducted/` | Captured over a cable (`dot11a_*`, `dot11n_*` at each rate) | Test against a real but low-distortion signal |
 | `radiated/` | Captured over the air, with `.pcap` companions | Test sync and equalization against real multipath and noise |
 
-File names encode the format and rate, for example `dot11n_6.5mbps` or `ht_mcs7_gi1`. Start from a `simulated/` file at a low MCS when bringing up a change, then move to `conducted/` and `radiated/` to stress synchronization and the equalizer.
+File names encode the format and rate, for example `dot11n_6.5mbps` or `ht_mcs7_gi1`. Start from a `simulated/` file at a low MCS when bringing up a change, then move to `conducted/` and `radiated/` to stress synchronization and the equalizer. Note that the `scripts/` Python model only covers the receiver direction (it decodes a sample file). The repo ships no generator for producing a fresh `simulated/` vector.
 
 ## Automated and batch simulation
 
@@ -173,7 +175,7 @@ The transmit side has its own testbench, [`dot11_tx_tb.v`](https://github.com/op
 - `tx_intf.mem`: the base TX interface memory image.
 - `ht_tx_intf_mem_mcs7_gi1_aggr0_byte100.mem` and `..._byte8176.mem`: 802.11n HT frames at MCS7, short guard interval, for a 100-byte and an 8176-byte payload.
 
-Simulate it the same way as the receiver: create the `openofdm_tx` project, select `dot11_tx_tb` as the simulation top, and run behavioral simulation. Because the transmitter is deterministic, its output IQ can be fed straight into `dot11_tb` as a receiver test vector. This is the [self-loopback test](Research-Features.md#self-loopback-testing) you run on hardware, done entirely in simulation.
+Simulate it the same way as the receiver: create the `openofdm_tx` project, select `dot11_tx_tb` as the simulation top, and run behavioral simulation. The testbench writes each output sample as one `I Q` line to `dot11_tx.txt`. Because the transmitter is deterministic, that output can be converted into a `dot11_tb` sample file (append the dummy RSSI column the receiver format expects) and replayed through the receiver. This is the [self-loopback test](Research-Features.md#self-loopback-testing) you run on hardware, done entirely in simulation.
 
 ## Block-level unit tests
 
@@ -190,7 +192,8 @@ To run one, source its `.tcl` to create the project, then open it and run behavi
 ```bash
 cd ip/xpu/unit_test/mv_avg
 vivado -mode batch -source mv_avg_tb.tcl
-# then open ./mv_avg_tb in Vivado and Run Behavioral Simulation
+# the batch run only creates the ./mv_avg_tb project, it does not simulate
+# open ./mv_avg_tb in the Vivado GUI and Run Behavioral Simulation
 ```
 
 The `mv_avg` test is the clearest example of the file-vector pattern: `test_data_in_out.m` generates `data_in.txt` and the expected output in MATLAB, the testbench reads `data_in.txt`, and you compare the Verilog result against the MATLAB reference. That is the same read-a-vector, dump-a-result, diff-against-a-golden-model loop the full `dot11_tb` uses, shrunk to one block.

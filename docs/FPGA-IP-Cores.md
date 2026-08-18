@@ -240,7 +240,7 @@ Notable source (`ip/openofdm_tx/src/`, 28 files):
   <text x="700" y="325" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.72">training-field ROMs</text>
   <text x="520" y="474" text-anchor="middle" font-size="10.5" fill="currentColor" fill-opacity="0.72">result_iq_ready advances every output source. Deasserting it holds the current sample and stalls forwarding.</text>
 </svg>
-<figcaption><em>The implemented <a href="https://github.com/open-sdr/openwifi-hw/blob/d047d794195beb72e12d2a9a6c205c16399cf288/ip/openofdm_tx/src/dot11_tx.v"><code>dot11_tx</code></a> path. Three state machines collect and encode frame bits, generate OFDM symbols, and forward packet samples. IQ first exists after constellation mapping. It is frequency-domain IQ before the IFFT and time-domain IQ after the IFFT.</em></figcaption>
+<figcaption><em>The implemented <a href="https://github.com/open-sdr/openwifi-hw/blob/d047d794195beb72e12d2a9a6c205c16399cf288/ip/openofdm_tx/src/dot11_tx.v"><code>dot11_tx</code></a> path. Three state machines collect and encode frame bits, generate OFDM symbols, and forward packet samples. IQ first exists after constellation mapping. It is frequency-domain IQ before the IFFT and time-domain IQ after the IFFT. CP is the cyclic prefix.</em></figcaption>
 </figure>
 
 Addressed as register space `tx` (category 5). Scrambler seeds are at regs 1/2 (default 127).

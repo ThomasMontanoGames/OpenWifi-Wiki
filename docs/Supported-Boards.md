@@ -9,12 +9,12 @@ openwifi runs on a range of **Xilinx Zynq-7000 / Zynq UltraScale+ (MPSoC)** SoC 
 
 | `board_name` | Hardware | SoC | Vivado license required? | Notes |
 |---|---|---|---|---|
-| `zc706_fmcs2` | Xilinx ZC706 + AD-FMCOMMS2/3/4 | Zynq-7045 | **Yes** | High-end dev board, 100/200 MHz BB clock options |
+| `zc706_fmcs2` | Xilinx ZC706 + AD-FMCOMMS2/3/4 | Zynq-7045 | **Yes** | High-end dev board, 100/200 MHz baseband clock options |
 | `zed_fmcs2` | Avnet/Digilent ZedBoard + AD-FMCOMMS2/3/4 | Zynq-7020 | No | The classic reference board, fully tested |
 | `zc702_fmcs2` | Xilinx ZC702 + AD-FMCOMMS2/3/4 | Zynq-7020 | No | |
-| `zcu102_fmcs2` | Xilinx ZCU102 + AD-FMCOMMS2/3/4 | **Zynq UltraScale+ (64-bit)** | **Yes** | The main 64-bit board, needs ATF/PMUFW boot stages, 240/100 MHz BB clock |
-| `adrv9364z7020` | ADRV9364-Z7020 SoM + ADRV1CRR-BOB carrier | Zynq-7020 | No | Integrated AD9364 (single RX/TX) |
-| `adrv9361z7035` | ADRV9361-Z7035 SoM + ADRV1CRR-BOB/FMC | Zynq-7035 | **Yes** | AD9361 (2×2 capable), **very low TX power at 5 GHz**, 100/200 MHz BB clock |
+| `zcu102_fmcs2` | Xilinx ZCU102 + AD-FMCOMMS2/3/4 | **Zynq UltraScale+ (64-bit)** | **Yes** | The main 64-bit board, needs ATF/PMUFW boot stages, 240/100 MHz baseband clock |
+| `adrv9364z7020` | ADRV9364-Z7020 SoM + ADRV1CRR-BOB breakout carrier | Zynq-7020 | No | Integrated AD9364 (single RX/TX) |
+| `adrv9361z7035` | ADRV9361-Z7035 SoM + ADRV1CRR-BOB/FMC | Zynq-7035 | **Yes** | AD9361 (2×2 capable), **very low TX power at 5 GHz**, 100/200 MHz baseband clock |
 | `antsdr` | MicroPhase enhanced ADALM-Pluto | Zynq-7020 | No | See caveat below |
 | `e310v2` | MicroPhase "new antsdr" (E310 v2) | Zynq-7020 | No | Adds GPS + external ref + VCXO |
 | `antsdr_e200` | MicroPhase enhanced ADALM-Pluto (smaller/cheaper) | Zynq-7020 | No | Ethernet on PL side |
@@ -43,13 +43,13 @@ An enhanced ADALM-Pluto: Zynq-7020 + AD936x, usable both as a generic SDR (Pluto
 
 ### ANTSDR-E200 (MicroPhase)
 
-A smaller, cheaper sibling of the ANTSDR-E310. Its distinguishing feature: the **Ethernet MAC is moved to the PL (FPGA fabric) side** rather than the Zynq PS side. The rationale is bandwidth: above a 20 Msps baseband sample rate the Ethernet link carries about 80 MB/s, and the PS-side Zynq GEM controller would saturate the CPU. Moving Ethernet to PL frees the processor and also lets the E200 support the UHD driver (via MicroPhase's separate `antsdr_uhd` project). IIO-based SDR use is unaffected because it still uses the Zynq GEM.
+A smaller, cheaper sibling of the ANTSDR-E310. Its distinguishing feature: the **network port is moved to the PL (FPGA fabric) side** rather than the Zynq PS side, for bandwidth reasons. Above a 20 Msps baseband sample rate the Ethernet link carries about 80 MB/s, and the PS-side Zynq GEM controller would saturate the CPU. Both paths exist: the PL-side Ethernet serves the high-rate SDR traffic and lets the E200 support the UHD driver (via MicroPhase's separate `antsdr_uhd` project), while IIO-based SDR drivers are unaffected because they still use the Zynq PS GEM controller.
 
 ![ANTSDR-E200 structure](assets/img/e200-struct.svg){ width="800" }
 
 ### ANTSDR-E310 v2 (MicroPhase)
 
-An upgraded E310 aimed at LTE/GSM/Wi-Fi experimentation. Over the original E310 it adds **improved RF performance, an onboard GPS module, an external 10 MHz / PPS reference input, and a VCXO**. The combination of VCXO, external reference, and DAC gives a more accurate, stable clock (important for time-sync and TSN work). Like the E200 it puts Ethernet on the PL side, enabling UHD-driver-class throughput.
+An upgraded E310 aimed at LTE/GSM/Wi-Fi experimentation. Over the original E310 it adds **improved RF performance, an onboard GPS module, an external 10 MHz / PPS reference input, and a VCXO**. A DAC steers the VCXO against the external reference, giving a more accurate, stable clock (important for time-sync and TSN work). Like the E200 it puts Ethernet on the PL side, enabling UHD-driver-class throughput.
 
 ![ANTSDR-E310 v2 structure](assets/img/e310v2-struct.png)
 
@@ -71,10 +71,10 @@ A Zynq-7020 + AD936x SDR in a **Raspberry-Pi form factor**.
 
 ## Board bring-up quirks worth knowing up front
 
-- **ADRV9361-Z7035 low 5 GHz TX power.** Keep nodes close (or plan for attenuation) when testing this board at 5 GHz. This is called out in nearly every operating-mode walkthrough.
+- **ADRV9361-Z7035 low 5 GHz TX power.** Keep nodes close (or plan for attenuation) when testing this board at 5 GHz. This is called out in nearly every [Operating Modes](Operating-Modes.md) walkthrough.
 - **ZCU102 differs from every other board.** It is the main 64-bit (Zynq UltraScale+) target (the RFSoC4x2 is the only other 64-bit entry in the matrix), so it uses a different boot chain (ARM Trusted Firmware BL31 + PMU firmware, built by `build_zynqmp_boot_bin.sh`), a `system.dts` instead of `devicetree.dts`, and can hit SD-card, RTC, and SODIMM-module issues (see [Troubleshooting](Troubleshooting.md)).
-- **neptunesdr** sometimes shows an `EXT4-fs error` on first boot. Re-flash with a different imaging tool.
-- **CH341-based UART adapters** (antsdr_e200 and others) may need `sudo apt remove brltty` before the console device appears.
+- **neptunesdr** sometimes shows an [`EXT4-fs error` on first boot](Troubleshooting.md#ext4-fs-error-device-mmcblk0p2-on-first-boot). Re-flash with a different imaging tool.
+- **CH341-based UART adapters** (antsdr_e200 and others) may need `sudo apt remove brltty` before [the console device appears](Troubleshooting.md#no-uart-console-device-appears).
 
 ## The baseband clock per board
 

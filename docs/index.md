@@ -22,8 +22,9 @@ Unlike a commercial Wi-Fi chip, every layer of openwifi is open and modifiable: 
 - **802.11a/g/n operation** at 20 MHz bandwidth, with the RF front end tunable from 70 MHz to 6 GHz (2 MHz mode for 802.11ah-style sub-GHz work and 10 MHz for 802.11p vehicular experiments are also possible).
 - **All the usual roles**: Access Point, client (station), ad-hoc, and monitor mode, all driven by the standard Linux tools.
 - **A real-time low MAC in FPGA**: DCF (CSMA/CA) meeting 802.11 SIFS timing (10 µs in 2.4 GHz, 16 µs in 5 GHz), hardware ACK generation, retransmission, RTS/CTS, and NAV (all configurable or defeatable for experiments).
-- **Research features** that a commercial chip does not provide: per-packet CSI extraction, raw IQ capture with dozens of trigger conditions, packet injection and fuzzing, a CSI fuzzer for privacy research, full-duplex self-reception ("Wi-Fi as radar"), and time-sliced FPGA transmit queues for network slicing.
-- **Performance** in its best configuration (802.11n with A-MPDU aggregation): 40–50 Mbps TCP and ~50 Mbps UDP in iperf, EVM around −38 dB, and receiver sensitivity around −92 dBm at MCS0 / −73 dBm at MCS7 (measured with FMCOMMS2 at 2.4 GHz).
+- **Research features** that a commercial chip does not provide: per-packet CSI extraction, raw IQ capture with dozens of trigger conditions, packet injection and fuzzing, a CSI fuzzer for privacy research, full-duplex self-reception ("Wi-Fi as radar"), and time-sliced FPGA transmit queues for [network slicing](sdrctl-and-Runtime-Control.md#time-slicing-network-slicing).
+- **Throughput** in its best configuration (802.11n with A-MPDU aggregation): 40–50 Mbps TCP and ~50 Mbps UDP in iperf.
+- **RF quality**: EVM around −38 dB, and receiver sensitivity around −92 dBm at MCS0 / −73 dBm at MCS7 (measured with FMCOMMS2 at 2.4 GHz).
 
 !!! note "Not in the open-source release"
     MIMO and 40 MHz bandwidth are *not* supported in the open-source release. 802.11ax and other advanced features are part of the commercial offering at [openwifi.tech](https://openwifi.tech).

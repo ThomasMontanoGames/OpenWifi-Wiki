@@ -35,9 +35,9 @@ openwifi is [split across several repos](Repositories.md) by toolchain, so the f
 
 ## 4. Propose the change
 
-- **Discuss large changes first** on the relevant repo's [Discussions](https://github.com/open-sdr/openwifi/discussions) or [Issues](https://github.com/open-sdr/openwifi/issues) so effort isn't wasted.
+- **Discuss large changes first** in the tracker of the repo your change belongs to, for example [openwifi Discussions](https://github.com/open-sdr/openwifi/discussions) or [openwifi-hw Issues](https://github.com/open-sdr/openwifi-hw/issues), so effort isn't wasted.
 - **Match the surrounding code style** and keep changes focused.
-- **Open a pull request** against the relevant repository, referencing any related issue. Make sure the CLA (step 1) is on file first.
+- **Open a pull request** against the relevant repository, referencing any related issue. Make sure the CLA (step 1) is on file first. After you open it, the maintainer reviews the PR, and CI runs the strict site build on documentation pull requests.
 
 ## 5. Community and support
 
@@ -55,4 +55,4 @@ openwifi is dual-licensed: **AGPLv3** for the open-source release, with commerci
 
 ## Contributing to this wiki
 
-This wiki rewrites and reorganizes the documentation in the openwifi repositories. It is not the project's official documentation, and the repositories are always the source of truth. If the wiki and a repo disagree, trust the repo, and fixing the wiki to match is itself a welcome contribution. The wiki lives in its own repository and is edited via pull request there. The pages are plain Markdown built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), and `mkdocs build --strict` must pass.
+This wiki rewrites and reorganizes the documentation in the openwifi repositories. It is not the project's official documentation, and the repositories are always the source of truth. If the wiki and a repo disagree, trust the repo, and fixing the wiki to match is itself a welcome contribution. The wiki lives in [its own repository](https://github.com/thomas-montano/OpenWifi-Wiki) and is edited via pull request there. That repo's `AGENTS.md` lists the content rules every wiki page must follow. The pages are plain Markdown built with [MkDocs Material](https://squidfunk.github.io/mkdocs-material/), and `mkdocs build --strict` must pass.

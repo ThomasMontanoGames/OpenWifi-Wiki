@@ -35,6 +35,7 @@ The builds below assume you understand the [boot chain and device tree](Boot-Ker
     ```
 
 - The usual environment variables (`XILINX_DIR`, `OPENWIFI_HW_IMG_DIR`, `BOARD_NAME`) set as in [Environment Setup](Development-Environment-Setup.md#environment-variables).
+- `SDCARD_DIR`: the mount point that contains the card's `BOOT` and `rootfs` partitions (the last argument of `update_sdcard.sh` below).
 
 ### 1. Flash the ADI Kuiper base image
 
@@ -142,7 +143,7 @@ Resolve any connectivity problem before continuing. (To make forwarding persiste
 
 ### 6. Install tools and build the on-board utilities
 
-In the board's ssh session (set the clock first with `date -s` if needed):
+In the board's ssh session (set the clock first with `date -s` if needed, for example `date -s "2026-08-16 12:00"`):
 
 ```bash
 sudo apt update
@@ -215,13 +216,13 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
 2. Boot the board. After about a minute an **`openwrt-openwifi`** SSID appears on 2.4 GHz channel 1. Connecting gives you an IP but no internet yet.
 
-3. Give the board (and its clients) internet through your PC. Connect Ethernet, and the board assigns your PC `192.168.10.1`. Find your interface names with `ip addr`, then run the script below. Its first argument is the PC's internet-facing interface, the second is the board-facing one:
+3. Give the board (and its clients) internet through your PC. Connect Ethernet, and the board assigns your PC `192.168.10.1`. The script ships in the openwifi repo next to the [OpenWrt build instructions](https://github.com/open-sdr/openwifi/tree/master/doc/img_build_instruction/openwrt), under `doc/img_build_instruction/openwrt/`. Find your interface names with `ip addr`, then run the script below. Its first argument is the PC's internet-facing interface, the second is the board-facing one:
 
     ```bash
     ./give_board_internet_access.sh wlan0 eth0
     ```
 
-4. Reach **LuCI** at `http://192.168.10.122` (`http://openwrt.lan` should work too) from the PC, or `http://192.168.13.1` from a device on the `openwrt-openwifi` SSID. There is no password by default. Set one for any real use. Network → Wireless is where you tweak the radio:
+4. Reach **LuCI** at `http://192.168.10.122` (`http://openwrt.lan` should work too) from the PC, or `http://192.168.13.1` from a device on the `openwrt-openwifi` SSID. There is no password by default. Set one for any real use. Network → Wireless is where you configure the radio:
 
     ![OpenWrt LuCI wireless configuration page](assets/img/openwrt-luci-wireless.png)
 
@@ -232,7 +233,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
 **Prerequisite:** Docker on a Linux host (Windows untested). Vivado is **not** required.
 
-1. **Clone** the OpenWrt source with openwifi support (branch `openwrt-openwifi_v25.12.5` = OpenWrt v25.12.5, Linux 6.12, mac80211 v6.18):
+1. **Clone** the OpenWrt source with openwifi support (branch `openwrt-openwifi_v25.12.5` = OpenWrt v25.12.5, Linux 6.12, mac80211 v6.18 (backports package, which is why the number runs ahead of the kernel)):
 
     ```bash
     git clone --branch openwrt-openwifi_v25.12.5 https://github.com/open-sdr/openwrt-openwifi.git
@@ -280,10 +281,10 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
     make -j3 V=sc
     ```
 
-7. **Flash** the resulting image with the same `dd` procedure as the quick start (mind the different output path). Exit the container with `Ctrl+D` first.
+7. **Flash** the resulting image with the same `dd` procedure as the quick start. The build places the image under `bin/targets/` in the build tree (for the zynq target, `bin/targets/zynq/generic/`). Exit the container with `Ctrl+D` first.
 
 !!! tip "Building for every board at once"
-    `doc/img_build_instruction/openwrt/build_images.sh` in the openwifi repo repeats steps 5 and 6 for every `*_defconfig` in `openwrt-openwifi/configs/`, or only the boards passed as arguments, producing images under `./output_images`. Each board is built by `doc/img_build_instruction/openwrt/build_image_for_board.sh`, which you can also run directly to build a single board.
+    [`doc/img_build_instruction/openwrt/build_images.sh`](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/openwrt/build_images.sh) in the openwifi repo repeats steps 5 and 6 for every `*_defconfig` in `openwrt-openwifi/configs/`, or only the boards passed as arguments, producing images under `./output_images`. Each board is built by `doc/img_build_instruction/openwrt/build_image_for_board.sh`, which you can also run directly to build a single board.
 
 ### OpenWrt tips
 

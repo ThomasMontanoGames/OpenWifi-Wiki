@@ -165,3 +165,7 @@ tx_intf
 Gb
 Fc
 ns
+backports
+minicom
+kbps
+prepended

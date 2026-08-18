@@ -9,15 +9,15 @@ All commands run **on the board**, from the `openwifi` directory.
 **Parameters** (high-level settings like time slices):
 
 ```bash
-sdrctl dev sdr0 get <para_name>
-sdrctl dev sdr0 set <para_name> <value>
+./sdrctl dev sdr0 get <para_name>
+./sdrctl dev sdr0 set <para_name> <value>
 ```
 
 **Registers** (direct access to a driver or FPGA module):
 
 ```bash
-sdrctl dev sdr0 get reg <module_name> <reg_idx>
-sdrctl dev sdr0 set reg <module_name> <reg_idx> <value>
+./sdrctl dev sdr0 get reg <module_name> <reg_idx>
+./sdrctl dev sdr0 set reg <module_name> <reg_idx> <value>
 ```
 
 !!! warning "Linux may overwrite registers you set by hand"
@@ -37,7 +37,7 @@ The convention throughout: FPGA register *N* for module `foo` is `slv_regN` in `
 
 ---
 
-## Common runtime tasks (the "frequent tricks")
+## Common runtime tasks (the ["frequent tricks"](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/frequent_trick.md))
 
 These are the day-to-day knobs, most with a convenience script in `user_space/` and the underlying `sdrctl` command shown where useful.
 
@@ -127,6 +127,8 @@ The hex nibbles encode log2 values: `b5` for q3 means CWmax=2¹¹−1=2047, CWmi
 
 Other bits of this register have other jobs, so the value you write must combine every bit you want set. After a fresh `wgd.sh` load the register is 0 and the driver does not touch it, so the absolute values below are complete settings (25 = 16 + 8 + 1 keeps the retransmission cap and disables ACK TX). If you have changed the register since boot, read it first and merge your bits into the current value.
 
+A successful `get` prints the register's current value. If a command fails, the usual causes are that the driver is not loaded (run `wgd.sh`) or that the interface name is wrong.
+
 ```bash
 ./sdrctl dev sdr0 get reg xpu 11        # read first
 ./sdrctl dev sdr0 set reg xpu 11 9      # bit3=1 + bits2-0=001 ⇒ max 1 retransmission
@@ -136,11 +138,11 @@ Other bits of this register have other jobs, so the value you write must combine
 ./sdrctl dev sdr0 set reg xpu 11 25     # 11001: keep the retx setting AND disable ACK TX
 ```
 
-The cleanest place to cap retransmissions is the driver, via `retry_limit_raw` (from which `retry_limit_hw_value` is derived) in `openwifi_tx()`.
+The cleanest place to cap retransmissions is the driver, via `retry_limit_raw` (from which `retry_limit_hw_value` is derived) in `openwifi_tx()` in [`driver/sdr.c`](https://github.com/open-sdr/openwifi/blob/master/driver/sdr.c).
 
 ### TX LO / RF-port control
 
-The FPGA switches the TX LO/port on only during transmit. To force the LO always on (needed for some self-TX capture experiments):
+The FPGA switches the TX LO/port on only during transmit. To force the LO always on (needed for some [self-TX capture experiments](Research-Features.md#self-loopback-testing)):
 
 ```bash
 ./sdrctl dev sdr0 set reg xpu 13 1
@@ -181,7 +183,9 @@ openwifi can gate each of its four TX queues to a fraction of a repeating time c
 | `slice_total` | Cycle length in µs (for example `49999` for 50 ms) |
 | `slice_start` | Slice start time in µs (for example `10000` for 10 ms) |
 | `slice_end` | Slice end time in µs (for example `39999` for 40 ms) |
-| `tsf` | Set the TSF timer (needs two decimal values: high then low) |
+| `tsf` | Set the TSF timer (needs two decimal values, high then low: `./sdrctl dev sdr0 set tsf 0 1000000`) |
+
+Writing 4 to `slice_idx` is a synchronization command, not a slice index: it commits all four slices at once so their start and end times line up.
 
 The imec [w-iLab.t tutorial](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/openwifi.html#sdr-tx-time-slicing) has a fuller walkthrough.
 
@@ -189,7 +193,7 @@ The imec [w-iLab.t tutorial](https://doc.ilabt.imec.be/ilabt/wilab/tutorials/ope
 
 ## Register reference
 
-The tables below list the commonly used registers. For the full set, read the module's `.c` and `.v` files. Values are decimal unless noted. Where a comment lists `decimal(0xhex):explanation`, use the decimal in the command.
+The tables below list the commonly used registers. For the full set, read the module's `.c` and `.v` files. Values are decimal unless noted.
 
 ### `drv_rx` (driver RX)
 
@@ -216,6 +220,8 @@ The tables below list the commonly used registers. For the full set, read the mo
 |---|---|
 | 0 | LBT/CCA threshold: 0=auto (via `ad9361_rf_set_channel()`), else `N` means −N dBm fixed |
 | 7 | Git revision of the driver build (hex) |
+
+Prefer this dBm knob (`drv_xpu` register 0, or `set_lbt_th.sh` above) to tune CCA. `xpu` register 8 below is the raw hardware register behind it.
 
 ### `rf` (AD9361 front end)
 
@@ -271,7 +277,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 | 17 | Selects which watchdog event reg 30 counts (0=phase offset too big, 1=too many small EQ out, 2=DC detected, 3=pkt too short, 4=pkt too long) |
 | 18 | sync_short phase-offset (freq-offset) watchdog threshold |
 | 19 | phase-offset override (bit31 enable, bits15-0 signed value) |
-| 20 | PHY RX state history (read-only). **If the last digit is always 3, the Viterbi decoder has halted** |
+| 20 | PHY RX state history (read-only). **If the last digit is always 3, the Viterbi decoder has halted** (see [Reception dies after ~2 hours](Troubleshooting.md#reception-dies-after-2-hours)) |
 | 21 | Read back Fc (MHz, bits31-16) and phase_offset (bits15-0) |
 | 30 | Read the selected watchdog counter. Writing clears it |
 | 31 | Git revision of the receiver build (hex) |
@@ -309,7 +315,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 | 27 | FPGA packet-filter config (passing bits13-0, dropping bits24-16, see `openwifi_configure_filter()`) |
 | 28 / 29 | BSSID filter low 32 / high 16 bits (auto-set) |
 | 30 / 31 | Self MAC address low 32 / high 16 bits (auto-set) |
-| 57 | rssi_half_db read-back with channel idle/CSMA state (pair with `rssi_openwifi_show.sh` / `rssi_ad9361_show.sh`) |
+| 57 | `rssi_half_db` (signal strength in units of 0.5 dB) read-back with channel idle/CSMA state (pair with `rssi_openwifi_show.sh` / `rssi_ad9361_show.sh`) |
 | 58 / 59 | TSF runtime value low / high (read-only) |
 | 62 | addr2 of the last RX packet, read back (bits31-0 from addr2 bits47-16) |
 | 63 | Git revision of the FPGA build (hex) |
@@ -318,7 +324,7 @@ The tables below list the commonly used registers. For the full set, read the mo
 
 ## Statistics via sysfs
 
-Beyond registers, the driver exposes rich per-packet counters through sysfs, wrapped by scripts. Enable, read, clear:
+Beyond registers, the driver exposes per-packet counters through sysfs, wrapped by scripts. Enable, read, clear:
 
 ```bash
 ./stat_enable.sh                 # turn on driver statistics

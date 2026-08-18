@@ -5,7 +5,7 @@ This page is a **datasheet-style reference** for openwifi: the numbers you need 
 Every figure carries a **footnote** pointing to its source so you can check it. Two conventions to note:
 
 - **The repository is authoritative.** Where a number comes from openwifi's own code, docs, or release notes, the footnote links to it. If a build script or a repo README states something different from this page, trust the repo and please fix this page.
-- **Standard-derived values are marked** with the `[802.11]`[^std] footnote. These follow from the IEEE 802.11 standard and the PHY parameters openwifi implements (for example 20 MHz OFDM), not from an openwifi-specific measurement.
+- **Standard-derived values are marked** with the `[^std]` footnote, which stands for the IEEE 802.11 standard. These follow from the standard and the PHY parameters openwifi implements (for example 20 MHz OFDM), not from an openwifi-specific measurement.
 
 !!! warning "Configuration matters"
     openwifi is a *modifiable* design. Bandwidth, baseband clock, MAC timing, and even the FPGA resource footprint depend on how you build and configure it. The figures below describe the **default, open-source `master` configuration** on the reference boards unless stated otherwise.
@@ -59,7 +59,7 @@ The RF characteristics come from the **Analog Devices AD9361/AD9364** agile tran
 | Parameter | Value |
 |---|---|
 | Tuning range | 70 MHz–6 GHz[^faq] |
-| Duplex mode | FDD, same TX and RX frequency, with the TX LO / RF switch gated per packet for self-interference-free RX[^docreadme] |
+| Duplex mode | FDD, same TX and RX frequency. The TX LO and RF switch turn on only for the duration of a packet, so the receiver never hears its own transmitter[^docreadme] |
 | Antenna configurations | 1×1 typical, some boards (AD9361) 2×2-capable[^boards] |
 | RF/baseband clock coupling | Baseband clock derived from the AD9361 sample clock, so RF and baseband never drift apart[^docreadme] |
 
@@ -78,7 +78,7 @@ openwifi's real-time "low MAC" (the `xpu` core) runs the DCF (CSMA/CA) state mac
 | Hardware ACK generation | Yes (in FPGA)[^readme] |
 | ACK frame duration (@ 6 Mbps) | 44 µs[^sdrc] |
 | Measured ACK gap (RX / TX) | ≈16 µs (320 samples @ 20 Msps) in the app-note IQ capture[^acktiming] |
-| Configurable / defeatable | SIFS, DIFS, EIFS, slot time, CW, NAV, ACK, retransmission[^frequent] |
+| Can be changed or disabled at run time | SIFS, DIFS, EIFS, slot time, CW, NAV, ACK, retransmission[^frequent] |
 
 !!! note "SIFS is band-dependent"
     Following the 802.11 standard, openwifi's FPGA low-MAC applies **10 µs SIFS in the 2.4 GHz band and 16 µs in 5 GHz**, selected automatically per channel by the driver (`ad9361_rf_set_channel()`).[^docreadme] The feature-list claim of a "10 µs SIFS"[^readme] refers to the tighter 2.4 GHz case, which a software MAC cannot meet.
@@ -109,7 +109,7 @@ openwifi is built to fit the **lowest-end supported FPGA (Xilinx Zynq-7020)**, s
 !!! note "These are openwifi-core numbers"
     The utilization above is for the openwifi design. A complete bitstream also includes peripheral logic (DMA, AXI interconnect, the ADI reference design, clocking), so the *total* device utilization is higher. The figures were published in the openwifi release notes. The later releases ship full `report_utilization` archives as release assets (`20220330084857-pre-release-report.zip` for `v1.3.0`, `openwifi-1.5.0-shahecheng-utilization.zip` for `v1.5.0`) if you need the exact breakdown for a specific version.[^release]
 
-Clock / speed grade. The `openofdm_tx` core was optimized so the whole design closes timing at **100 MHz on the low-speed-grade 7020 (−1)**, while higher-grade parts run at 200 MHz (the release notes cite the 7035 −2/−2L, and the ZC706's Zynq-7045 offers the same 200 MHz option).[^release] The baseband clock is set by `NUM_CLK_PER_US` in `openwifi-hw/boards/openwifi.tcl` (default 100).[^tcl] Per-board options are in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).
+Clock / speed grade. The `openofdm_tx` core was optimized so the whole design closes timing at **100 MHz on the low-speed-grade 7020 (−1)**, while higher-grade parts run at 200 MHz (the release notes cite the Zynq-7035 in speed grades −2 and −2L, faster-binned silicon, and the ZC706's Zynq-7045 offers the same 200 MHz option).[^release] The baseband clock is set by `NUM_CLK_PER_US` in `openwifi-hw/boards/openwifi.tcl` (default 100).[^tcl] Per-board options are in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).
 
 ### To generate exact numbers for your build
 
