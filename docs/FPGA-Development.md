@@ -155,7 +155,7 @@ Background: the [FCCM 2023 poster](https://arxiv.org/abs/2305.13351).
 Two approaches:
 
 - **Vivado auto-upgrade.** Create the design in the current Vivado version, open it in the target version and let Vivado upgrade it, then export the upgraded project as a `.tcl` and diff it against the original `openwifi.tcl` to see what changed (openwifi's own commits on `openwifi.tcl` show how past migrations were handled).
-- **Start fresh from the new ADI reference design, then add openwifi IP.** Export the openwifi IP hierarchy from the current design with `write_bd_tcl`, then `source` it into a new/target ADI reference design and instantiate it. The pattern looks like this (illustrative only: the generated script defines the exact procedure name and its arguments, so read it instead of copying this verbatim):
+- **Start fresh from the new ADI reference design, then add openwifi IP.** Export the openwifi IP hierarchy from the current design with `write_bd_tcl`, then `source` it into a new/target ADI reference design and instantiate it:
 
   ```tcl
   write_bd_tcl -hier_blks [get_bd_cells /hier_mig] ./mig_hierarchy.tcl

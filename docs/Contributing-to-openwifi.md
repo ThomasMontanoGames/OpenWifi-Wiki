@@ -37,7 +37,7 @@ openwifi is [split across several repos](Repositories.md) by toolchain, so the f
 
 - **Discuss large changes first** in the tracker of the repo your change belongs to, for example [openwifi Discussions](https://github.com/open-sdr/openwifi/discussions) or [openwifi-hw Issues](https://github.com/open-sdr/openwifi-hw/issues), so effort isn't wasted.
 - **Match the surrounding code style** and keep changes focused.
-- **Open a pull request** against the relevant repository, referencing any related issue. Make sure the CLA (step 1) is on file first. After you open it, the maintainer reviews the PR, and CI runs the strict site build on documentation pull requests.
+- **Open a pull request** against the relevant repository, referencing any related issue. Make sure the CLA (step 1) is on file first.
 
 ## 5. Community and support
 

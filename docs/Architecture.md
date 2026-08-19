@@ -118,7 +118,7 @@ The FPGA design decomposes into modules whose names match their source files (in
 
 There's also a **`side_ch`** (side channel) module used for research features (CSI and IQ capture), described on the [Research Features](Research-Features.md) page.
 
-The processor reaches these modules over the ARM **AXI bus**. Each module exposes a bank of registers (`slv_regN` in the Verilog), whose addresses are defined in `driver/hw_def.h`. This AXI coupling is what gives openwifi very low processor↔PHY latency, and also what makes the design fairly platform-specific: porting openwifi to a non-Zynq platform means redesigning this interface.
+The processor reaches these modules over the ARM **AXI bus**. Each module exposes a bank of registers (`slv_regN` in the Verilog), whose addresses are defined in `driver/hw_def.h`. This AXI coupling is what gives openwifi very low processor↔PHY latency, and also what makes the design fairly platform-specific.
 
 For a core-by-core walkthrough, see the dedicated [FPGA IP Cores](FPGA-IP-Cores.md) page: the submodules inside `xpu` (the CSMA/CA state machine, TSF timer, hardware SPI to the AD9361), the OFDM transmit and receive chains, and how a register write travels from `sdrctl` all the way to a `slv_regN`.
 
@@ -233,7 +233,7 @@ The 64-bit TSF (Timing Synchronization Function) timer is defined by the 802.11 
 
 ## RF and baseband: the frequency/clock design
 
-openwifi drives the AD9361 in **FDD mode with identical TX and RX frequencies** (unusual for FDD, where TX and RX normally use different frequencies), and controls the AD9361 TX chain in real time over an FPGA SPI link (`openwifi-hw/ip/xpu/src/spi.v`). The TX local oscillator (or an RF switch) is turned **on just before** a transmit packet and **off just after** it, with two consequences:
+openwifi drives the AD9361 in **FDD mode with identical TX and RX frequencies**, and controls the AD9361 TX chain in real time over an FPGA SPI link (`openwifi-hw/ip/xpu/src/spi.v`). The TX local oscillator (or an RF switch) is turned **on just before** a transmit packet and **off just after** it, with two consequences:
 
 - **No LO leakage during receive**, so the receiver does not interfere with itself, which enables full-duplex self-reception (the basis of the CSI radar and loopback features).
 - **Fast TX/RX turnaround** (~0.6 µs), which is what makes the tight SIFS and hardware ACK timing achievable (SIFS is 10 µs in 2.4 GHz and 16 µs in 5 GHz).

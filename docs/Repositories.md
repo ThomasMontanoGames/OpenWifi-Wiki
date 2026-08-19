@@ -77,7 +77,7 @@ There is not one "openwifi repo." There are four, each with its own job and tool
   <text x="346" y="381" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">build scripts pull the prebuilt bitstreams</text>
   <text x="590" y="427" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">vendored as a git submodule → ip/openofdm_rx</text>
 </svg>
-<figcaption><em>The four openwifi repositories and how they connect. If you develop on openwifi, the two you clone day-to-day are <strong>openwifi</strong> and <strong>openwifi-hw</strong>. The other two are consumed automatically. Users of prebuilt SD images need no clone at all.</em></figcaption>
+<figcaption><em>The four openwifi repositories and how they connect. If you develop on openwifi, the two you clone day-to-day are <strong>openwifi</strong> and <strong>openwifi-hw</strong>. The other two are consumed automatically.</em></figcaption>
 </figure>
 
 | Repository | What it holds | When you touch it |
@@ -109,7 +109,7 @@ openwifi pins several toolchains and upstream projects, and they intentionally d
 | ADI Linux kernel (`adi-linux` / `adi-linux-64`) | branch **`2026_R1`**, Linux **6.12** | `prepare_kernel.sh` | Patched by `ad9361_v6_12.patch`. See [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#the-kernel). |
 | `openofdm` receiver (submodule) | branch **`dot11zynq`** (HLS variant **`dot11zynq_hls`**) | `get_ip_openofdm_rx.sh` | Backs the `openofdm_rx` core. |
 | ADI Kuiper base image | **2023-12-13 release** (`image_2023-12-13-ADI-Kuiper-full.zip`, tagged `2022_r2`) | flashed manually | Only the starting rootfs. You build a current kernel on top. See [Building SD Images](Building-SD-Images.md#adi-kuiper-build-from-scratch). |
-| OpenWrt (alternative to Kuiper) | branch **`openwrt-openwifi_v25.12.5`** = OpenWrt **25.12.5**, Linux **6.12**, mac80211 **6.18** (backports package, which is why the number runs ahead of the kernel) | `openwrt-openwifi` repo | Docker-only build, no Vivado. See [Building SD Images](Building-SD-Images.md#openwrt). |
+| OpenWrt (alternative to Kuiper) | branch **`openwrt-openwifi_v25.12.5`** = OpenWrt **25.12.5**, Linux **6.12**, mac80211 **6.18** | `openwrt-openwifi` repo | Docker-only build, no Vivado. See [Building SD Images](Building-SD-Images.md#openwrt). |
 | Xilinx Viterbi decoder | **evaluation license** | Vivado IP catalog | The eval license halts a running receiver after ~2 hours. A paid license removes the limit. |
 | Build-host OS | **Ubuntu 18 / 20 / 22 LTS** | not pinned | Ubuntu 24 needs `libtinfo5` installed manually (see [Environment Setup](Development-Environment-Setup.md#host-os-and-packages)). |
 

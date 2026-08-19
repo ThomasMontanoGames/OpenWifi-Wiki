@@ -233,7 +233,7 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
 **Prerequisite:** Docker on a Linux host (Windows untested). Vivado is **not** required.
 
-1. **Clone** the OpenWrt source with openwifi support (branch `openwrt-openwifi_v25.12.5` = OpenWrt v25.12.5, Linux 6.12, mac80211 v6.18 (backports package, which is why the number runs ahead of the kernel)):
+1. **Clone** the OpenWrt source with openwifi support (branch `openwrt-openwifi_v25.12.5` = OpenWrt v25.12.5, Linux 6.12, mac80211 v6.18):
 
     ```bash
     git clone --branch openwrt-openwifi_v25.12.5 https://github.com/open-sdr/openwrt-openwifi.git
