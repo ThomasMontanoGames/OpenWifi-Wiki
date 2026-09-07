@@ -1,9 +1,10 @@
 # Building SD Images
 
-openwifi boots from an SD card running one of two base operating systems, and you can build either from scratch:
+openwifi boots from an SD card running one of three base operating systems, and you can build any of them from scratch:
 
 - **ADI Kuiper**: a Debian/Ubuntu-like image (the classic openwifi environment, and what the `fosdem.sh` demo and most app notes assume).
 - **OpenWrt**: a router-style image with the LuCI web UI, with openwifi packaged as a kernel module.
+- **Buildroot**: a small, fast-booting, reproducible image aimed at deployment, currently for the ANTSDR boards (`antsdr_e200`, `antsdr`, `e310v2`).
 
 !!! tip "You may not need to build anything"
     Prebuilt images exist for both. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
@@ -12,12 +13,13 @@ The builds below assume you understand the [boot chain and device tree](Boot-Ker
 
 ## Which one should you build?
 
-| | ADI Kuiper | OpenWrt |
-|---|---|---|
-| Feels like | A small Debian/Ubuntu box | A Wi-Fi router (LuCI web UI) |
-| Best for | Research, the app-note workflows, full apt tooling | Router use cases |
-| Build needs | Vivado 2022.2 + Vitis | Docker only (no Vivado) |
-| openwifi tools | Built on the board | Packaged into the image (in `$PATH`) |
+| | ADI Kuiper | OpenWrt | Buildroot |
+|---|---|---|---|
+| Feels like | A small Debian/Ubuntu box | A Wi-Fi router (LuCI web UI) | A minimal embedded appliance (serial console, BusyBox) |
+| Best for | Research, the app-note workflows, full apt tooling | Router use cases | Small, reproducible deployment images |
+| Build needs | Vivado 2022.2 + Vitis | Docker only (no Vivado) | Buildroot host packages + a prebuilt XSA (no Vivado) |
+| openwifi tools | Built on the board | Packaged into the image (in `$PATH`) | Built into the image under `/root/openwifi` |
+| Boards | All supported boards | Most supported boards | `antsdr_e200`, `antsdr`, `e310v2` |
 
 ---
 
@@ -164,7 +166,13 @@ cd /root/openwifi/inject_80211/ && make clean && make && cd ..
 ### 7. Run openwifi
 
 ```bash
-/root/openwifi/setup_once.sh    # once per new board (reboots)
+/root/openwifi/setup_once.sh    # once per new board (builds the on-board tools)
+reboot                          # setup_once.sh does not reboot, so do it yourself
+```
+
+After the board comes back up, ssh in again and start openwifi:
+
+```bash
 cd /root/openwifi
 ./wgd.sh                         # "./wgd.sh 1" enables experimental 11n A-MPDU aggregation
 ifconfig sdr0 up
@@ -174,7 +182,7 @@ iwlist sdr0 scan
 
 Connect a phone or laptop to the **"openwifi"** SSID. You should get a `192.168.13.x` address, and browsing to `192.168.13.1` shows the on-board webserver page. A few things to know (same as the prebuilt-image flow):
 
-- The demo defaults to **channel 44 (5 GHz)**. For a 2.4 GHz-only client, edit `hostapd-openwifi.conf` on the board and re-run `fosdem.sh`.
+- The demo defaults to **channel 36 (5 GHz)**. For a 2.4 GHz-only client, edit `hostapd-openwifi.conf` on the board and re-run `fosdem.sh`.
 - The Xilinx **Viterbi decoder halts after ~2 hours** (evaluation license). Reload the FPGA or power-cycle to recover.
 - The **ADRV9361-Z7035 has very low 5 GHz TX power**: keep nodes close on that board.
 
@@ -303,6 +311,97 @@ src-link openwifi /openwrt-openwifi-packages-feed
 ```
 
 You can also bind-mount the OpenWrt tree under `/workdir` so paths printed in the container are copy-pasteable on the host. OpenWrt-specific issues (including the ZCU102 UART/SODIMM problem) are collected in [Troubleshooting → OpenWrt-specific](Troubleshooting.md#openwrt-specific).
+
+---
+
+## Buildroot
+
+Buildroot produces a small (about 169 MB), fast-booting, reproducible SD image aimed at deployment rather than development. It replaces the multi-gigabyte Kuiper image where you only need openwifi to run. The build needs Buildroot's host packages but no Vivado. It does reuse a prebuilt `system_top.xsa` from `openwifi-hw-img` for the FPGA bitstream and PS initialization.
+
+### Board support
+
+Buildroot currently targets three ANTSDR boards, all booted and tested on real hardware:
+
+| Build name | Hardware | Serial console | RAM |
+|---|---|---|---|
+| `antsdr_e200` | ANTSDR-E200 | `ttyPS0` | 512 MiB |
+| `antsdr` | ANTSDR-E310/ANT | `ttyPS0` | 1 GiB |
+| `e310v2` | ANTSDR-E310V2 | `ttyPS0` | 1 GiB |
+
+All three share one kernel, module set, and ext4 root filesystem. Only the BOOT artifacts (SPL/U-Boot, device tree, bitstream, PS init, and UART selection) are per board.
+
+!!! info "Different boot chain from Kuiper"
+    On Buildroot, `BOOT.BIN` is the U-Boot SPL, not the Xilinx FSBL composite Kuiper uses, so it needs the separate `u-boot.img`, and **U-Boot configures the FPGA before Linux starts**. Do not mix BOOT files between the two schemes by name alone. Buildroot does not use `update_sdcard.sh`, `prepare_kernel.sh`, or `boot_bin_gen.sh`.
+
+### Prerequisites
+
+- Buildroot host packages on Ubuntu or Debian:
+
+    ```bash
+    sudo apt install build-essential git rsync cpio unzip bc file wget curl python3 libncurses-dev
+    ```
+
+- The Buildroot submodule, initialized after cloning openwifi:
+
+    ```bash
+    git submodule update --init buildroot
+    ```
+
+- A matching `system_top.xsa` for your board. By default the build reads it from `../openwifi-hw-img/boards/<board>/sdk/system_top.xsa`. Point elsewhere with `OPENWIFI_HW_IMG_DIR`, or supply a single file with `OPENWIFI_XSA`. The XSA must match the board and FPGA design.
+
+### Build
+
+Run from the openwifi repository root. The first build compiles the shared system (toolchain, Linux 6.12, openwifi modules, rootfs). Later board builds reuse it and rebuild only that board's U-Boot and final image:
+
+```bash
+./buildroot-build.sh antsdr_e200 build
+./buildroot-build.sh antsdr build
+./buildroot-build.sh e310v2 build
+```
+
+Each board build produces an SD image and a complete-system update package:
+
+```text
+output/antsdr_e200/images/openwifi-antsdr_e200-sdcard.img
+output/antsdr_e200/images/openwifi-antsdr_e200-system.frm
+```
+
+Other subcommands are `configure`, `menuconfig`, `rebuild-system` (keep the toolchain, rebuild Linux, openwifi, and the rootfs), and `clean` (remove one board's output, keep the common system and download cache).
+
+### Write the SD card and boot
+
+The first install needs the complete image, not a manual copy of BOOT files:
+
+```bash
+lsblk -o NAME,SIZE,MODEL,TRAN,MOUNTPOINTS
+sudo umount /dev/sdX1 /dev/sdX2 2>/dev/null || true
+sudo dd if=output/antsdr_e200/images/openwifi-antsdr_e200-sdcard.img of=/dev/sdX bs=4M conv=fsync status=progress
+sync
+```
+
+Use the whole-disk device (`/dev/sdX`), not a partition. Then connect the serial console at 115200 8N1 and log in as `root` with password `openwifi` (the board comes up at `192.168.10.122/24` on `eth0`):
+
+```bash
+cat /etc/openwifi-board       # board name, detected at boot from the device tree
+openwifi-start 0              # same as "./wgd.sh 0" in /root/openwifi
+ip link show sdr0
+```
+
+The verified stable default is `test_mode=0`. Use other test modes only with a matching, explicitly tested FPGA/driver pair.
+
+!!! note "U-Boot owns the FPGA here"
+    Buildroot keeps the bitstream U-Boot loaded, so `wgd.sh` reuses it instead of reprogramming, the opposite of the Kuiper/OpenWrt default. For normal operation prefer `OPENWIFI_RELOAD_FPGA=0`. For development against a topology-compatible bitstream, force a reload with `OPENWIFI_RELOAD_FPGA=1 ./wgd.sh 0`. See [Reloading driver and FPGA without rebooting](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting).
+
+### Update over Ethernet
+
+Each board build also creates a `.frm` package (about 20 MB) with all BOOT files and the compressed ext4 rootfs. Install it from the host over plain SSH and SCP, with no daemon or token:
+
+```bash
+./host-tools/openwifi_fw_update.py --host 192.168.10.122 update --reboot \
+    output/antsdr_e200/images/openwifi-antsdr_e200-system.frm
+```
+
+The package validates board identity, sizes, and SHA-256 digests, and it rejects a package built for a different board. It replaces the single active rootfs in place, so the update always reboots and has no automatic power-loss rollback. Keep power stable during the write.
 
 ## Related pages
 

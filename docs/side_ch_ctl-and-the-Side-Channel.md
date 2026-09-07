@@ -289,7 +289,7 @@ Reloading `side_ch.ko` does not return the core to a clean state. `dev_probe()` 
 - A leftover `wh5h4` from a loopback test still taps `tx_intf` after the reload, so the IQ quick start silently captures your own transmit instead of the air. Register 5 needs no enabling bit, so nothing else hides the mistake.
 - Going from IQ mode back to CSI mode by reloading with no `iq_len_init` leaves register 3 bit 0 **still set**, because the driver only writes that register when `iq_len_init > 0`. The FPGA stays in IQ mode while the driver frames for CSI. (Also flagged under [Unverified](#unverified-a-suspected-upstream-bug).)
 
-Write the stale registers back by hand (`wh5d0`, `wh3d0`), or reload the bitstream with `./wgd.sh` for a guaranteed clean state.
+Write the stale registers back by hand (`wh5d0`, `wh3d0`), or reload the bitstream with `./wgd.sh` for a guaranteed clean state. On a Buildroot image plain `./wgd.sh` keeps the FPGA that U-Boot loaded, so force the reprogram with `OPENWIFI_RELOAD_FPGA=1 ./wgd.sh`.
 
 ### Nothing reaches the PC
 

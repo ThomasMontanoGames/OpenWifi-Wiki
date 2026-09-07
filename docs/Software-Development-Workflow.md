@@ -93,6 +93,14 @@ Passing extra arguments to `make_all.sh` turns them into `#define` macros in `pr
 
 **Driver only.** Ensure `system_top.bit.bin` is *not* in the directory. `wgd.sh` then loads just the `.ko` files.
 
+!!! note "Forcing or skipping the FPGA reload"
+    When `system_top.bit.bin` *is* present, whether `wgd.sh` reprograms the FPGA depends on the system. On Kuiper and OpenWrt it reloads the FPGA image, the historical default. On a Buildroot image it keeps the bitstream U-Boot already loaded when the RF chain is up, to avoid a redundant reprogram. Override either default explicitly with an environment variable:
+
+    ```bash
+    OPENWIFI_RELOAD_FPGA=0 ./wgd.sh   # never reprogram the FPGA, load only the driver
+    OPENWIFI_RELOAD_FPGA=1 ./wgd.sh   # force an FPGA reprogram from system_top.bit.bin
+    ```
+
 **Driver + FPGA.** Generate the reloadable bitstream and put it beside the driver files (the `.xsa` input comes from the FPGA build, see [FPGA Development](FPGA-Development.md#updating-the-fpga-image-on-a-running-board)):
 
 ```bash
@@ -117,13 +125,14 @@ This makes it easy to keep, share, and switch between variants. To build a varia
 ./wgd.sh $TARGET_DIR
 ```
 
-**Full `wgd.sh` usage** (also shown by `./wgd.sh -h`):
+**Full `wgd.sh` usage** (`wgd.sh` prints this at the start of every run; there is no dedicated help flag, so `./wgd.sh -h` prints the usage and then fails because it treats `-h` as a missing directory):
 
 - no argument: load the driver `.ko` files and the FPGA image (if `system_top.bit.bin` exists) from the current directory, with `test_mode=0`
 - a numeric first argument is assigned to `test_mode` (loads everything from the current directory)
 - `remote` downloads the files and then loads them. An optional second argument names the target directory, an optional third sets `test_mode`
 - any other first argument that is not a `.tar.gz` file is treated as a directory to load from. An optional second argument sets `test_mode`
 - a `.tar.gz` file is unpacked and loaded from the unpacked directory. An optional second argument sets `test_mode`
+- `OPENWIFI_RELOAD_FPGA=0/1` (environment variable) explicitly skips or forces the FPGA reprogram, overriding the per-system default described above
 
 ### test_mode
 
@@ -156,4 +165,4 @@ For larger updates (kernel, modules, device tree, rootfs) there are paired host/
 
 ## Building a full SD image from scratch
 
-Two base operating systems are supported, **ADI Kuiper** (Debian/Ubuntu-like) and **OpenWrt** (router-style with LuCI). The full step-by-step for both (flashing the base image, the rootfs edits, `update_sdcard.sh`, and the OpenWrt Docker build) is on the dedicated [Building SD Images](Building-SD-Images.md) page. Kuiper builds need Vivado 2022.2 (with Vitis) and the `flex bison libssl-dev device-tree-compiler u-boot-tools` packages. The OpenWrt build only needs Docker.
+Three base operating systems are supported, **ADI Kuiper** (Debian/Ubuntu-like), **OpenWrt** (router-style with LuCI), and **Buildroot** (a small, fast-booting deployment image for the ANTSDR boards). The full step-by-step for all three (flashing or writing the image, the rootfs edits, `update_sdcard.sh`, the OpenWrt Docker build, and the Buildroot build) is on the dedicated [Building SD Images](Building-SD-Images.md) page. Kuiper builds need Vivado 2022.2 (with Vitis) and the `flex bison libssl-dev device-tree-compiler u-boot-tools` packages. The OpenWrt build only needs Docker, and the Buildroot build needs only its host packages plus a prebuilt `system_top.xsa`.
