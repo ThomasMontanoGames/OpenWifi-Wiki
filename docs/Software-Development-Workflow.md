@@ -125,7 +125,7 @@ This makes it easy to keep, share, and switch between variants. To build a varia
 ./wgd.sh $TARGET_DIR
 ```
 
-**Full `wgd.sh` usage** (`wgd.sh` prints this at the start of every run; there is no dedicated help flag, so `./wgd.sh -h` prints the usage and then fails because it treats `-h` as a missing directory):
+**Full `wgd.sh` usage** (`wgd.sh` prints this at the start of every run, and there is no dedicated help flag, so `./wgd.sh -h` prints the usage and then fails because it treats `-h` as a missing directory):
 
 - no argument: load the driver `.ko` files and the FPGA image (if `system_top.bit.bin` exists) from the current directory, with `test_mode=0`
 - a numeric first argument is assigned to `test_mode` (loads everything from the current directory)

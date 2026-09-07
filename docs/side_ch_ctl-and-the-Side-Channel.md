@@ -97,7 +97,7 @@ The fields run left to right, butted up against each other:
 |---|---|---|---|
 | 1 | **Action** | `w` write, `r` read, `g` get | |
 | 2 | **Register type** | `h` hardware, `s` software | Required for `w` and `r`. Which one you pick makes no difference (see below). |
-| 3 | **Register index** | `0`–`31`, decimal | The parser reads digits until it hits the radix letter. |
+| 3 | **Register index** | `0` to `31`, decimal | The parser reads digits until it hits the radix letter. |
 | 4 | **Radix** | `d` decimal, `h` hex | Write only: how to read the value that follows. |
 | 5 | **Value** | | Write only. |
 
