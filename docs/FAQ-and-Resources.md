@@ -2,6 +2,10 @@
 
 ## Frequently asked questions
 
+### What hardware do you need, and how do you get it running?
+
+Pick a board from [Supported Boards](Supported-Boards.md): the ZedBoard plus an FMCOMMS2/3 card is the classic reference, and several cheaper community boards work too. Then follow [Getting Started](Getting-Started.md) to flash the SD image, boot the board, and bring up the `sdr0` interface.
+
 ### Is openwifi a real Wi-Fi chip?
 
 It's a full-stack Wi-Fi design that runs on FPGA-based SDR hardware, not (yet) a fabricated ASIC. Functionally the FPGA behaves like a Wi-Fi chip: it presents a standard Linux Wi-Fi interface and interoperates with commercial devices. The difference is that every layer is open and modifiable.
@@ -20,7 +24,7 @@ openwifi is OFDM-only and not backward-compatible with 802.11b, which makes 2.4 
 
 ### Can it work outside normal Wi-Fi frequencies?
 
-Yes. The AD9361 tunes 70 MHz–6 GHz. Bring the system up on the nearest legal channel, lock it, then override the RF frequency. See [sdrctl → arbitrary tuning](sdrctl-and-Runtime-Control.md#frequency-restrict-and-arbitrary-tuning). You can also run narrower bandwidths (2 MHz for sub-GHz 802.11ah-style, 10 MHz for 802.11p vehicular). Mind your local spectrum regulations.
+Yes. The AD9361 tunes 70 MHz–6 GHz. Bring the system up on the nearest legal channel, lock the frequency so the driver stops re-tuning it, then override the RF frequency. See [sdrctl → arbitrary tuning](sdrctl-and-Runtime-Control.md#frequency-restrict-and-arbitrary-tuning). You can also run narrower bandwidths (2 MHz for sub-GHz 802.11ah-style, 10 MHz for 802.11p vehicular). Mind your local spectrum regulations.
 
 ### The receiver stops working after about two hours. Broken?
 
@@ -28,7 +32,7 @@ No. That's the Xilinx Viterbi decoder evaluation license halting. Reload the FPG
 
 ### Do you need a paid Vivado license?
 
-Only for some boards. Boards with the Zynq-7020 FPGA (ZedBoard, ADRV9364-Z7020, ZC702, `antsdr`, `sdrpi`, and the community 7020 boards) build under the free Vivado tier. ZC706, ZCU102, ADRV9361-Z7035, and RFSoC4x2 need a license to rebuild the FPGA. Either way, the prebuilt images need no license to *run*.
+Only for some boards. Boards with the Zynq-7020 FPGA (ZedBoard, ADRV9364-Z7020, ZC702, `antsdr`, `sdrpi`, and the [community 7020 boards](Supported-Boards.md#the-community-microphase-hexsdr-boards-in-detail)) build under the free Vivado tier. ZC706, ZCU102, ADRV9361-Z7035, and RFSoC4x2 need a license to rebuild the FPGA. Either way, the prebuilt images need no license to *run*.
 
 ### Can you try it without any hardware?
 
@@ -96,7 +100,7 @@ A curated playlist lives in [`doc/videos.md`](https://github.com/open-sdr/openwi
 - **Issues:** <https://github.com/open-sdr/openwifi/issues> and <https://github.com/open-sdr/openwifi-hw/issues>
 - **Mailing list:** <https://lists.ugent.be/wws/subscribe/openwifi>
 - **Commercial support & advanced features:** <https://openwifi.tech>
-- **Contributing:** see `CONTRIBUTING.md` in each repo.
+- **Contributing:** see [Contributing to openwifi](Contributing-to-openwifi.md), with the `CONTRIBUTING.md` in each repo as the authoritative follow-up.
 
 ## License
 

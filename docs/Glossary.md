@@ -215,6 +215,9 @@ RU (Resource Unit)
 SDR
 :   Software-Defined Radio: a radio whose signal processing is done in software/logic rather than fixed hardware. openwifi is a full-stack Wi-Fi design on SDR hardware.
 
+sdr0
+:   The network-interface name the openwifi driver creates for the board's Wi-Fi. Standard Linux tools (`iw`, `tcpdump`, `hostapd`, `wpa_supplicant`) all operate on `sdr0`. See [Operating Modes](Operating-Modes.md).
+
 Side channel (`side_ch`)
 :   openwifi's FPGA capture engine: it taps the receiver's IQ and the demodulator's internal results (CSI, equalizer) and DMAs them to the host, independent of the normal packet path. See [FPGA IP Cores](FPGA-IP-Cores.md#side_ch-the-csi-iq-capture-side-channel).
 
@@ -274,6 +277,9 @@ Vivado / Vitis
 
 wpa_supplicant
 :   The standard Linux user-space client for joining Wi-Fi networks. openwifi runs stock `wpa_supplicant` over `sdr0` in client mode. See [hostapd and wpa_supplicant](hostapd-and-wpa_supplicant.md).
+
+`wgd.sh`
+:   The on-board bring-up script that loads the FPGA image and the openwifi driver and brings up the `sdr0` interface. See [Software Development Workflow](Software-Development-Workflow.md).
 
 `xpu`
 :   openwifi's real-time MAC core (its largest FPGA IP block): CSMA/CA, TSF timer, hardware ACK generation/reception, packet filtering, RSSI/CCA, and TX-queue gating. See [FPGA IP Cores](FPGA-IP-Cores.md#xpu-the-real-time-mac).

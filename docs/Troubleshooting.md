@@ -1,12 +1,12 @@
 # Troubleshooting and Known Issues
 
-Grouped by symptom. When networking won't come up at all, use a **USB-UART serial console**. It shows you the boot messages that ssh can't. The authoritative, continuously updated list is the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md). This page reorganizes it and adds the debugging tools.
+Grouped by symptom. When networking won't come up at all, use a **USB-UART serial console**. It shows you the boot messages that ssh can't. Connect a USB-UART adapter to the board's UART header and open the port at 115200 baud in a terminal program (for example PuTTY, screen, or minicom). The authoritative, continuously updated list is the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md). This page reorganizes it and adds the debugging tools.
 
 ## Boot and networking
 
-### Can't ssh to the board on first boot
+### Can't `ssh` to the board on first boot
 
-Delete `/etc/network/interfaces.new` from the SD card's `rootfs` partition (on your PC). If it still fails, use the UART console (`/dev/ttyUSBx`, `/dev/ttyCH341USBx`, …) to watch the boot.
+Delete `/etc/network/interfaces.new`, a leftover from image creation that can break the network configuration, from the SD card's `rootfs` partition (on your PC). If it still fails, use the UART console (`/dev/ttyUSBx`, `/dev/ttyCH341USBx`, …) to watch the boot.
 
 ### No UART console device appears
 
@@ -18,7 +18,7 @@ Seen on neptunesdr. The flashing tool is suspect, so re-flash with a different o
 
 ### ZCU102 kernel panic: "Unable to mount root fs on unknown-block(179,2)"
 
-The same SD card boots on some ZCU102 units but not others. The SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed:
+The same SD card boots on some ZCU102 units but not others. The SD interface likely needs to run slower. Add these to the mmc/sdhci node of the ZCU102 device tree to cap the speed (see [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#the-device-tree) for how openwifi builds and edits a board's device tree):
 
 ```text
 xlnx,has-cd = <0x1>;
@@ -42,9 +42,21 @@ Zynq> env default -a
 Zynq> saveenv
 ```
 
+!!! warning "This resets all U-Boot variables"
+    `env default -a` + `saveenv` permanently restores factory defaults and erases any custom U-Boot variables you set. Reboot the board afterwards. It should then boot normally.
+
 ### Wrong memory size on ADRV9361-Z7035 SoM
 
-Linux detects only half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild U-Boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) (`make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf`) and regenerate `BOOT.BIN`.
+Linux detects only half the RAM. An old `u-boot.elf` hard-coded 512 MB. Rebuild U-Boot from [analogdevicesinc/u-boot-xlnx](https://github.com/analogdevicesinc/u-boot-xlnx) and regenerate `BOOT.BIN` (build flow: [Boot, Kernel & Device Tree](Boot-Kernel-Device-Tree.md#32-bit-vs-64-bit-boot)):
+
+```bash
+source environment_setting.sh          # from the u-boot-xlnx checkout
+export ARCH=arm
+export CROSS_COMPILE=arm-linux-gnueabihf-
+make zynq_adrv9361_defconfig && make -j8 && make u-boot.elf
+```
+
+The 1 GB fix is already in u-boot-xlnx master (`zynq-adrv9361.dts`), so a current checkout needs no source edits.
 
 ## Client / link problems
 
@@ -71,7 +83,7 @@ Set `nameserver 8.8.8.8` in `/etc/resolv.conf` on the board.
 
 ### Reception dies after ~2 hours
 
-`sdrctl dev sdr0 get reg rx 20` is frozen. This is the **Xilinx Viterbi decoder evaluation license** halting, which is expected behavior, not a bug. Reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle. A proper license removes the limit.
+`./sdrctl dev sdr0 get reg rx 20` is frozen. This is the **Xilinx Viterbi decoder evaluation license** halting, which is expected behavior, not a bug. Reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle. A proper license removes the limit.
 
 ## Hardware quirks
 
@@ -85,11 +97,11 @@ Some FMCOMMS2/3/4 boards ship with a wrong or empty FRU EEPROM, which crashes so
 4. Confirm the mismatch with `fru-dump -i <eeprom> -b`.
 5. Write the correct master file, e.g.:
 
-```bash
-fru-dump -i ./masterfiles/AD-FMCOMMS4-EBZ-FRU.bin -o /sys/.../0-0050/eeprom
-```
+    ```bash
+    fru-dump -i ./masterfiles/AD-FMCOMMS4-EBZ-FRU.bin -o /sys/.../0-0050/eeprom
+    ```
 
-Reboot and re-read to confirm.
+    Reboot and re-read to confirm.
 
 ### `Unsupported PRODUCT_ID 0xFF` at AD9361 probe
 
@@ -101,7 +113,7 @@ A different failure from the `0xFF` case above. `0x00` means the AD9361 / FMCOMM
 
 ### ZCU102 kernel panic (RTC / capacitor & current load)
 
-Tracked in issues [#366](https://github.com/open-sdr/openwifi/issues/366) and [#457](https://github.com/open-sdr/openwifi/issues/457).
+Some ZCU102 boards kernel-panic during boot, a failure traced to the RTC capacitor and current load. Tracked in issues [#366](https://github.com/open-sdr/openwifi/issues/366) and [#457](https://github.com/open-sdr/openwifi/issues/457).
 
 ## Storage and long-run stability
 
@@ -109,11 +121,14 @@ Tracked in issues [#366](https://github.com/open-sdr/openwifi/issues/366) and [#
 
 journald can't write because logs filled the disk. Clean up and cap journald:
 
+!!! warning "These commands are destructive"
+    They delete every log on the board and permanently remove the rsyslog package. Fine on a throwaway demo image, not fine if you still need those logs.
+
 ```bash
-systemd-tmpfiles --clean
+sudo systemd-tmpfiles --clean
 sudo systemd-tmpfiles --remove
-rm /var/log/* -rf
-apt --autoremove purge rsyslog
+sudo rm /var/log/* -rf
+sudo apt --autoremove purge rsyslog
 ```
 
 Then add to `/etc/systemd/journald.conf`:
@@ -128,7 +143,7 @@ ForwardToWall=no
 
 ### Instability after a long uptime
 
-`lightdm` has a memory leak. Disable it via `systemctl` if you don't need the desktop.
+`lightdm` has a memory leak. If you don't need the desktop, disable it: `sudo systemctl disable --now lightdm`.
 
 ## Build-host problems
 
@@ -156,7 +171,7 @@ The default is `libtinfo6`. Install `libtinfo5` manually (see [Environment Setup
 
 ### No UART output on ZCU102 under OpenWrt
 
-Support was validated only on **ZCU102 HW Rev 1.1**, and even then some 4 GB SODIMM modules fail with the U-Boot SPL bootflow. Known-good module: `MTA8ATF51264HZ-2G6B1`. Known-failing: `MTA4ATF51264HZ-2G6E1`. The fix is to use the **Zynq FSBL instead of U-Boot SPL** (FSBL reads the module's SPD EEPROM and configures DDR correctly), via the repo's `build_zynqmp_boot_bin.sh` or by generating `boot.bin` yourself with OpenWrt-built components. Full analysis is in the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md#no-uart-output-on-zcu102).
+Support was validated only on **ZCU102 HW Rev 1.1**, and even then some 4 GB SODIMM modules fail with the U-Boot SPL bootflow. Known-good module: `MTA8ATF51264HZ-2G6B1`. Known-failing: `MTA4ATF51264HZ-2G6E1`. The fix is to use the **Zynq FSBL instead of U-Boot SPL** (FSBL reads the module's SPD EEPROM and configures DDR correctly), via `build_zynqmp_boot_bin.sh` in the openwifi repo's [`kernel_boot/`](https://github.com/open-sdr/openwifi/tree/master/kernel_boot) directory or by generating `boot.bin` yourself with OpenWrt-built components. Full analysis is in the [known-issue note](https://github.com/open-sdr/openwifi/blob/master/doc/known_issue/notter.md#no-uart-output-on-zcu102).
 
 ## Debugging tools
 
@@ -187,7 +202,7 @@ openwifi_tx: 70B RC0 10M FC0040 DI0000 ADDRffff.../6655443322aa/ffff... flag4001
 ```
 
 - `70B` = length
-- `10M` = requested rate (1 Mbps 11b, which openwifi converts to 6 Mbps OFDM)
+- `10M` = requested rate, printed in units of 100 kbps, so 1.0 Mbps 802.11b, which openwifi converts to 6 Mbps OFDM
 - `FC0040` = Frame Control
 - `ADDR` = addr1/2/3
 - `SC20_1` = sequence number 20, set by the driver

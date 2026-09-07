@@ -4,10 +4,10 @@ openwifi boots from an SD card running one of three base operating systems, and 
 
 - **ADI Kuiper**: a Debian/Ubuntu-like image (the classic openwifi environment, and what the `fosdem.sh` demo and most app notes assume).
 - **OpenWrt**: a router-style image with the LuCI web UI, with openwifi packaged as a kernel module.
-- **Buildroot**: a small, fast-booting, reproducible image aimed at deployment, currently for the ANTSDR boards (`antsdr_e200`, `antsdr`, `e310v2`).
+- **Buildroot**: a small, fast-booting, reproducible image aimed at deployment, currently for the MicroPhase ANTSDR boards (`antsdr_e200`, `antsdr`, `e310v2`). See [Buildroot](#buildroot) below.
 
 !!! tip "You may not need to build anything"
-    Prebuilt images exist for both. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
+    Prebuilt images exist for Kuiper and OpenWrt. If you just want a working board, flash a prebuilt image as in [Getting Started](Getting-Started.md) (Kuiper) or the [OpenWrt quick start](#openwrt-quick-start-prebuilt-image) below. Build from scratch when you need a custom kernel, a new board, or an image you control end to end.
 
 The builds below assume you understand the [boot chain and device tree](Boot-Kernel-Device-Tree.md). For the driver/dev loop see [Software Development Workflow](Software-Development-Workflow.md).
 
@@ -36,6 +36,7 @@ The builds below assume you understand the [boot chain and device tree](Boot-Ker
     ```
 
 - The usual environment variables (`XILINX_DIR`, `OPENWIFI_HW_IMG_DIR`, `BOARD_NAME`) set as in [Environment Setup](Development-Environment-Setup.md#environment-variables).
+- `SDCARD_DIR`: the mount point that contains the card's `BOOT` and `rootfs` partitions (the last argument of `update_sdcard.sh` below).
 
 ### 1. Flash the ADI Kuiper base image
 
@@ -143,7 +144,7 @@ Resolve any connectivity problem before continuing. (To make forwarding persiste
 
 ### 6. Install tools and build the on-board utilities
 
-In the board's ssh session (set the clock first with `date -s` if needed):
+In the board's ssh session (set the clock first with `date -s` if needed, for example `date -s "2026-08-16 12:00"`):
 
 ```bash
 sudo apt update
@@ -214,18 +215,21 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
 
     ```bash
     cd ~/Downloads && gunzip openwrt-zynq-generic-analog_devices_zynq-adrv9364-squashfs-sdcard.img.gz
-    sudo dd if=~/Downloads/openwrt-zynq-generic-analog_devices_zynq-adrv9364-squashfs-sdcard.img of=/dev/mmcblk0 status=progress
+    sudo dd if=~/Downloads/openwrt-zynq-generic-analog_devices_zynq-adrv9364-squashfs-sdcard.img of=/dev/your_sdcard_dev status=progress
     ```
+
+    !!! warning "Check the target device"
+        On a PC, `/dev/mmcblk0` is often the PC's own internal eMMC, not the SD card. Run `lsblk` before and after inserting the card and use the device that appeared. Picking the wrong `of=` target overwrites that disk.
 
 2. Boot the board. After about a minute an **`openwrt-openwifi`** SSID appears on 2.4 GHz channel 1. Connecting gives you an IP but no internet yet.
 
-3. Give the board (and its clients) internet through your PC. Connect Ethernet, and the board assigns your PC `192.168.10.1`. Find your interface names with `ip addr`, then run the script below. Its first argument is the PC's internet-facing interface, the second is the board-facing one:
+3. Give the board (and its clients) internet through your PC. Connect Ethernet, and the board assigns your PC `192.168.10.1`. The script ships in the openwifi repo next to the [OpenWrt build instructions](https://github.com/open-sdr/openwifi/tree/master/doc/img_build_instruction/openwrt), under `doc/img_build_instruction/openwrt/`. Find your interface names with `ip addr`, then run the script below. Its first argument is the PC's internet-facing interface, the second is the board-facing one:
 
     ```bash
     ./give_board_internet_access.sh wlan0 eth0
     ```
 
-4. Reach **LuCI** at `http://192.168.10.122` (`http://openwrt.lan` should work too) from the PC, or `http://192.168.13.1` from a device on the `openwrt-openwifi` SSID. There is no password by default. Set one for any real use. Network → Wireless is where you tweak the radio:
+4. Reach **LuCI** at `http://192.168.10.122` (`http://openwrt.lan` should work too) from the PC, or `http://192.168.13.1` from a device on the `openwrt-openwifi` SSID. There is no password by default. Set one for any real use. Network → Wireless is where you configure the radio:
 
     ![OpenWrt LuCI wireless configuration page](assets/img/openwrt-luci-wireless.png)
 
@@ -284,10 +288,10 @@ This is the OpenWrt equivalent of the `fosdem.sh` demo.
     make -j3 V=sc
     ```
 
-7. **Flash** the resulting image with the same `dd` procedure as the quick start (mind the different output path). Exit the container with `Ctrl+D` first.
+7. **Flash** the resulting image with the same `dd` procedure as the quick start. The build places the image under `bin/targets/` in the build tree (for the zynq target, `bin/targets/zynq/generic/`). Exit the container with `Ctrl+D` first.
 
 !!! tip "Building for every board at once"
-    `doc/img_build_instruction/openwrt/build_all_images.sh` in the openwifi repo repeats steps 5 to 7 for every `*_defconfig` in `openwrt-openwifi/configs/`, producing the whole set of prebuilt images in one run under `./output_images`.
+    [`doc/img_build_instruction/openwrt/build_images.sh`](https://github.com/open-sdr/openwifi/blob/master/doc/img_build_instruction/openwrt/build_images.sh) in the openwifi repo repeats steps 5 and 6 for every `*_defconfig` in `openwrt-openwifi/configs/`, or only the boards passed as arguments, producing images under `./output_images`. Each board is built by `doc/img_build_instruction/openwrt/build_image_for_board.sh`, which you can also run directly to build a single board.
 
 ### OpenWrt tips
 

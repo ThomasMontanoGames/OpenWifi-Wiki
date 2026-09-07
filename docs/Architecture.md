@@ -102,7 +102,7 @@ The Linux `mac80211` subsystem defines a set of callbacks (`ieee80211_ops`) that
 
 When Linux invokes one of these, `sdr.c` does the work by driving the FPGA. It uses per-block helper "sub-drivers" (`tx_intf_api`, `rx_intf_api`, `openofdm_tx_api`, `openofdm_rx_api`, and `xpu_api`), each of which wraps register access to one FPGA module. These are compiled as separate kernel modules (`tx_intf.ko`, `rx_intf.ko`, …) that `sdr.ko` binds to at load time, which is why `wgd.sh` inserts all of them.
 
-openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`, and the device tree is what tells Linux the AXI addresses and interrupts of every FPGA block, which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise. Separately, the AD9361 RF chip is driven by the standard Analog Devices IIO driver rather than by openwifi: the driver finds it on the SPI bus at probe time and calls into it (`ad9361_set_tx_atten`, `ad9361_do_calib_run`), which is why some patches to the ADI kernel are needed (see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver)).
+openwifi is a Linux **platform driver** (not PCI or USB): it binds to a device-tree node with `compatible = "sdr,sdr"`, and the device tree is what tells Linux the AXI addresses and interrupts of every FPGA block, which is why [porting a board](FPGA-Development.md#porting-to-a-new-board) is largely a device-tree exercise. Separately, the AD9361 RF chip is driven by the standard Analog Devices IIO driver rather than by openwifi: the driver finds it on the SPI bus at probe time and calls into it (`ad9361_set_tx_atten`, `ad9361_do_calib_run`), which is why some [patches to the ADI kernel](Boot-Kernel-Device-Tree.md#the-kernel-patches) are needed (see [Software Development Workflow](Software-Development-Workflow.md#rebuilding-the-driver)).
 
 For the probe sequence, board auto-detection, the TX rings and RX cyclic buffer, the received-packet metadata format, and the register category encoding, see [The Linux Driver](Driver-Architecture.md).
 
@@ -210,7 +210,7 @@ The transmit lane runs left to right from Linux out to the antenna, and the rece
 ## The receive path, step by step
 
 1. A signal arrives at the AD9361 and is delivered to the FPGA as ADC samples. `rx_intf` unpacks them into per-antenna IQ streams and feeds them to the demodulator.
-2. `openofdm_rx` detects, synchronizes, and decodes it, and hands the bytes back to `rx_intf`. Whether the FCS/CRC passes or fails, the packet is offered up if the current frame-filtering rules allow it (in monitor mode, everything is allowed, even bad-CRC frames and control frames like ACKs).
+2. `openofdm_rx` detects, synchronizes, and decodes it, and hands the bytes back to `rx_intf`. Whether the FCS/CRC passes or fails, the packet is offered up if the current [frame-filtering rules](sdrctl-and-Runtime-Control.md#xpu-low-mac) allow it (in monitor mode, everything is allowed, even bad-CRC frames and control frames like ACKs).
 3. `rx_intf` writes the packet plus metadata into a DMA buffer and raises an interrupt.
 4. The driver's `openwifi_rx_interrupt()` runs: it pulls the raw buffer, parses out the inserted metadata (TSF timestamp, raw RSSI that it corrects to dBm per band/channel, length, MCS, FCS-valid flag), and hands the packet and its metadata to Linux via `ieee80211_rx_irqsafe()`.
 
@@ -242,7 +242,7 @@ The AD9361↔FPGA IQ rate is 40 Msps, decimated/interpolated inside the FPGA to 
 
 ![Baseband clock derived from the AD9361 clock](assets/img/bb-clk.jpg)
 
-*The FPGA baseband clock is generated from the AD9361 sample clock, so the two never drift. The exact clock frequency per board is the `NUM_CLK_PER_US` knob discussed in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).*
+*The FPGA baseband clock is generated from the AD9361 sample clock, so the two never drift. The exact clock frequency per board is the `NUM_CLK_PER_US` parameter discussed in [Supported Boards](Supported-Boards.md#the-baseband-clock-per-board).*
 
 The configuration points of this RF/digital chain are spread across the AD9361 registers, the driver's `.c` files, and the FPGA `.v` modules:
 

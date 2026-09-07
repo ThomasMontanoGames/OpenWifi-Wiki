@@ -6,7 +6,7 @@ The design is built **on top of the [Analog Devices HDL reference designs](https
 
 ## Prerequisites
 
-First set up the shared host toolchain: see [Environment Setup](Development-Environment-Setup.md) (Vivado 2022.2 with Vitis, Ubuntu packages such as `libtinfo5`, and the `XILINX_DIR` and `BOARD_NAME` environment variables). FPGA builds additionally need the **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado (this eval license is why a running board's decoder halts after ~2 hours, see [Troubleshooting](Troubleshooting.md)).
+First set up the shared host toolchain: see [Environment Setup](Development-Environment-Setup.md) (Vivado 2022.2 with Vitis, Ubuntu packages such as `libtinfo5`, and the `XILINX_DIR` and `BOARD_NAME` environment variables). FPGA builds additionally need the **evaluation license of the Xilinx Viterbi Decoder** installed into Vivado (this eval license is why a running board's decoder halts after ~2 hours, see [Troubleshooting](Troubleshooting.md#reception-dies-after-2-hours)).
 
 Set `export XILINX_DIR=/opt/Xilinx` and `export BOARD_NAME=<your board>` before building. If the software and FPGA repos disagree on the Vivado version, match the one the repo README states at the time you build (see [Environment Setup](Development-Environment-Setup.md#xilinx-toolchain-vivado-vitis)).
 
@@ -24,7 +24,7 @@ Run these from the `openwifi-hw` repo root unless noted.
 
    ```bash
    ./prepare_adi_board_ip.sh $XILINX_DIR $BOARD_NAME
-   # You can stop it once it prints "Building ABCD project [..."
+   # You can stop it once it prints "Building <project> project [..." (<project> depends on the board)
    ```
 
 3. **Pull in openofdm_rx** (once, and again whenever openofdm is updated):
@@ -40,17 +40,11 @@ Run these from the `openwifi-hw` repo root unless noted.
    ../create_ip_repo.sh $XILINX_DIR
    ```
 
-   If Vitis HLS errors with `'2xxxxxxxxx' is an invalid argument. Please specify an integer value`, apply the fix in [Xilinx article 76960](https://support.xilinx.com/s/article/76960).
+   Expect this to take tens of minutes. When it finishes, the bitstream and the `.xsa` hardware handoff file sit under the board project directory, ready for the `sdk_update.sh` step below to collect.
 
-5. **In Vivado** (optional, for GUI iteration): the previous `create_ip_repo.sh` step already invoked this automatically. To do it by hand, open the project and generate the bitstream:
+   If Vitis HLS errors with `'2xxxxxxxxx' is an invalid argument. Please specify an integer value`, see [Troubleshooting](Troubleshooting.md#vitis-hls-2xxxxxxxxx-is-an-invalid-argument), which applies the fix from [Xilinx article 76960](https://support.xilinx.com/s/article/76960).
 
-   ```tcl
-   source ../openwifi.tcl
-   # then in the GUI: Generate Bitstream
-   # then: File → Export → Export Hardware → Include bitstream → Finish
-   ```
-
-6. **Stash the outputs** where the software build can find them:
+5. **Stash the outputs** where the software build can find them:
 
    ```bash
    cd boards
@@ -58,6 +52,15 @@ Run these from the `openwifi-hw` repo root unless noted.
    ```
 
    This copies the FPGA image (`.xsa`, `.ltx`) and git info into `$OPENWIFI_HW_IMG_DIR` so the openwifi (software) build can pick it up (see [below](#updating-the-fpga-image-on-a-running-board)).
+
+!!! note "GUI iteration"
+    The `create_ip_repo.sh` step above already runs Vivado for you. To iterate by hand, open the project in the Vivado GUI and generate the bitstream:
+
+    ```tcl
+    source ../openwifi.tcl
+    # then in the GUI: Generate Bitstream
+    # then: File → Export → Export Hardware → Include bitstream → Finish
+    ```
 
 Prebuilt outputs for each board live in the **openwifi-hw-img** repo under `boards/$BOARD_NAME/sdk/` (bitstream, ILA `.ltx`, init files) if you'd rather not synthesize.
 
@@ -86,22 +89,26 @@ Make your changes there, then re-integrate into the board design by re-running `
 
 ## Simulating an IP core
 
-Most cores ship a top-level testbench (`*_tb.v`), which is the fastest way to develop without hardware. Using `openofdm_rx` as the example:
+Most cores ship a top-level testbench (`*_tb.v`), which is the fastest way to develop without hardware. As a quick start, using `openofdm_rx` as the example:
 
 1. Create the IP's Vivado project (as above): `./create_vivado_proj.sh $XILINX_DIR openofdm_rx.tcl`.
 2. In Vivado: *Sources → Simulation Sources → sim_1 → dot11_tb*.
-3. *SIMULATION → Run Simulation → Run Behavioral Simulation.* The first run is slow because sub-IP cores compile once. Later runs are fast.
-4. Press **Run All (F3)** to run to completion.
-5. The testbench uses `$fopen`/`$fscanf`/`$fwrite` to read test vectors and dump variables for later checking. Read `*_tb.v` to see the flow. Simulation-specific settings live in `openofdm_rx_pre_def.v`.
-6. After editing design files, use **Relaunch Simulation**. Drag any signal from *SIMULATION → Scope* (for example `dot11_tb → dot11_inst → ofdm_decoder_inst → viterbi_inst`) into the waveform view and relaunch to inspect it.
+3. *SIMULATION → Run Simulation → Run Behavioral Simulation*, then **Run All (F3)**. The first run is slow because sub-IP cores compile once. Later runs are fast.
+4. After editing design files, use **Relaunch Simulation**.
+
+The [FPGA Simulation and Testbenches](FPGA-Simulation.md) page covers this in full: the IQ input format, the test vectors, which signals and dumped files to inspect, batch simulation, and the transmitter and block-level unit tests.
 
 ## Conditional compilation with Verilog macros
 
 `create_vivado_proj.sh` accepts extra arguments that become `` `define `` macros in `<ip_name>_pre_def.v`, letting you enable/disable code blocks (ILA/debug, feature variants). The argument order:
 
-- First: `BOARD_NAME`
-- Second: `NUM_CLK_PER_US` (for example `100` for 100 MHz)
-- Third through seventh: your own macro names → become `` `define IP_NAME_<NAME> `` (for `openofdm_rx`, the third argument instead selects the simulation `SAMPLE_FILE`, changeable later in the pre_def file)
+| Position | Meaning | Example |
+|---|---|---|
+| First | `BOARD_NAME` | `zc706_fmcs2` |
+| Second | `NUM_CLK_PER_US` | `100` for 100 MHz |
+| Third through seventh | Your own macro names, which become `` `define IP_NAME_<NAME> `` | `ENABLE_DBG` |
+
+For `openofdm_rx`, the third argument instead selects the simulation `SAMPLE_FILE`, changeable later in the pre_def file.
 
 When building the **top-level** project, pass the *same* macros to `create_ip_repo.sh` so the IP is compiled identically:
 
@@ -117,7 +124,7 @@ Pair these FPGA macros with the driver's conditional-compile arguments (see [Sof
 
 ## Changing the baseband clock
 
-The default baseband clock is 100 MHz, set by `NUM_CLK_PER_US` at the top of `openwifi.tcl`. Available options depend on the board: 240/100 MHz on ZCU102, 100/200 MHz on ZC706 and ADRV9361-Z7035, and 100 MHz elsewhere. Change the value and re-run `openwifi.tcl` to regenerate the project.
+The default baseband clock is 100 MHz, set by `NUM_CLK_PER_US` at the top of `boards/openwifi.tcl` in the openwifi-hw repo. Available options depend on the board: 240/100 MHz on ZCU102, 100/200 MHz on ZC706 and ADRV9361-Z7035, and 100 MHz elsewhere. Change the value and re-run `openwifi.tcl` to regenerate the project.
 
 ## High-Level Synthesis (HLS) modules
 

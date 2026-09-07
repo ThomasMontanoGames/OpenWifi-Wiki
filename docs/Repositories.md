@@ -77,7 +77,7 @@ There is not one "openwifi repo." There are four, each with its own job and tool
   <text x="346" y="381" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">build scripts pull the prebuilt bitstreams</text>
   <text x="590" y="427" text-anchor="middle" font-size="12" fill="currentColor" fill-opacity="0.85">vendored as a git submodule → ip/openofdm_rx</text>
 </svg>
-<figcaption><em>The four openwifi repositories and how they connect. The two you clone day-to-day are <strong>openwifi</strong> and <strong>openwifi-hw</strong>. The other two are consumed automatically.</em></figcaption>
+<figcaption><em>The four openwifi repositories and how they connect. If you develop on openwifi, the two you clone day-to-day are <strong>openwifi</strong> and <strong>openwifi-hw</strong>. The other two are consumed automatically.</em></figcaption>
 </figure>
 
 | Repository | What it holds | When you touch it |

@@ -53,6 +53,9 @@ This page takes you from an empty SD card to a working openwifi access point tha
     - Delete `rootfs/root/kernel_modules` if it exists.
     - Delete `rootfs/etc/network/interfaces.new` if it exists (a common cause of "can't ssh to the board").
 
+    !!! info "These deletions are conditional cleanup"
+        The `rootfs` partition is ext4, which Windows and macOS cannot mount without extra tooling (WSL or an ext4 driver). Neither deletion is required for the board to boot. `rootfs/root/kernel_modules` is a staging directory that `setup_once.sh` rebuilds on first boot, so a stale copy can shadow the fresh one.
+
 ## 3. First boot and login
 
 1. Insert the SD card, set the board's boot-mode jumpers/switches to SD boot, connect the antennas, and power on.
@@ -72,6 +75,8 @@ This page takes you from an empty SD card to a working openwifi access point tha
    ./openwifi/setup_once.sh       # then reboot
    ```
 
+   `setup_once.sh` stages the kernel modules matching the board's architecture into `/root/kernel_modules` and `/root/openwifi`. It detects the board name from the device-tree model string, moves the board-support `.ko` files next to the driver, symlinks `/lib/modules/$(uname -r)` to `/root/kernel_modules` and runs `depmod`, copies the board's `system_top.bit.bin` into `openwifi/`, and builds `sdrctl`, `side_ch_ctl`, and `inject_80211`. Success looks like: the script prints the detected board name (for example `zed_fmcs2`) and finishes without an error, then you reboot.
+
 ## 4. Start the access point
 
 On the board:
@@ -82,13 +87,15 @@ cd openwifi
 ./fosdem.sh     # starts hostapd (SSID "openwifi") plus a DHCP server and a demo webserver
 ```
 
+Check that the interface came up with `ip link show sdr0`. If it does not exist, see [Troubleshooting](Troubleshooting.md).
+
 Useful variants: `./wgd.sh 1` enables experimental A-MPDU aggregation (higher 11n throughput), and `./fosdem-11ag.sh` forces legacy 11a/g mode.
 
 Now look for the **"openwifi"** SSID on your phone or laptop and connect. You should receive an IP in the `192.168.13.0/24` range. Browse to `192.168.13.1` to see the on-board demo page.
 
 Two things to know:
 
-- The default configuration uses **channel 36 (5 GHz)**. If your client device is 2.4 GHz-only, edit `hostapd-openwifi.conf` on the board (channel/band) and re-run `fosdem.sh`.
+- The shipped `hostapd-openwifi.conf` defaults to **channel 36 (5 GHz)**. If your client device is 2.4 GHz-only, edit `~/openwifi/hostapd-openwifi.conf` on the board (the `channel=` and `hw_mode=` lines) and re-run `fosdem.sh`.
 - The FPGA uses an **evaluation license** of the Xilinx Viterbi decoder, which halts after roughly two hours of operation. Symptoms: reception dies, and `./sdrctl dev sdr0 get reg rx 20` returns the same value forever. The fix is to reload the FPGA (see [dynamic reloading](Software-Development-Workflow.md#reloading-driver-and-fpga-without-rebooting)) or power-cycle the board.
 
 The ADRV9361-Z7035 has very low TX power in the 5 GHz band, so keep devices close when using that board on 5 GHz.
@@ -104,6 +111,8 @@ sudo ip route add 192.168.13.0/24 via 192.168.10.122 dev <board_nic>
 ```
 
 where `<board_nic>` is the PC interface wired to the board and `<internet_nic>` is the PC's uplink. Uncomment `net.ipv4.ip_forward=1` in `/etc/sysctl.conf` to make forwarding persistent.
+
+Verify from a connected client: `ping 192.168.13.1`, then ping a public address. If the first works and the second fails, the PC-side NAT or route is wrong.
 
 ## 6. What just happened?
 

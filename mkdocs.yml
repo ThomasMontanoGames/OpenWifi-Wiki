@@ -156,6 +156,7 @@ nav:
           - FPGA/index.md
           - Development: FPGA-Development.md
           - IP Cores: FPGA-IP-Cores.md
+          - Simulation & Testbenches: FPGA-Simulation.md
       - Building SD Images: Building-SD-Images.md
       - Boot, Kernel & Device Tree: Boot-Kernel-Device-Tree.md
   # The short tab label ("Research") comes from the section name, while the

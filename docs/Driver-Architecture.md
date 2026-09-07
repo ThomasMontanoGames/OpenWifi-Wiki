@@ -36,14 +36,23 @@ openwifi is a Linux **platform driver** rather than a PCI or USB device. There i
 
 `openwifi_dev_probe()` in `sdr.c` runs at load time and does roughly this:
 
-1. **Match the device-tree node.** The driver binds to `compatible = "sdr,sdr"`. No matching node means no probe, which is the usual cause of "the module loaded but `sdr0` never appeared."
+1. **Match the device-tree node.** The driver binds to `compatible = "sdr,sdr"`. No matching node means no probe, which is the usual cause of "the module loaded but `sdr0` never appeared." Check `dmesg` for probe errors (see [Driver dmesg logging](Troubleshooting.md#driver-dmesg-logging)).
 2. **Allocate the mac80211 device** with `ieee80211_alloc_hw()` against `openwifi_ops`.
-3. **Detect the board.** The driver reads the **`model` string of the device-tree root** and matches on substrings. `ZCU102` means `ZYNQMP_AD9361`, anything else with a model string means `ZYNQ_AD9361`. Separately, `ZCU102`, `Z7035`, and `ZC706` are classified `LARGE_FPGA` and everything else falls back to `SMALL_FPGA`. If there is no model string at all, the driver looks for an `lmk` node (the TI LMK04828 clock chip) and, if it finds one, treats the board as an `RFSOC4X2`. This detection is what makes capture-buffer length and similar limits adapt per board without configuration. See [Supported Boards](Supported-Boards.md).
+3. **Detect the board.** The driver reads the **`model` string of the device-tree root** and matches on substrings:
+
+   | Condition | `hardware_type` | `fpga_type` |
+   |---|---|---|
+   | Model string contains `ZCU102` | `ZYNQMP_AD9361` | `LARGE_FPGA` |
+   | Model string contains `Z7035` or `ZC706` | `ZYNQ_AD9361` | `LARGE_FPGA` |
+   | Any other model string | `ZYNQ_AD9361` | `SMALL_FPGA` |
+   | No model string, but an `lmk` node (the TI LMK04828 clock chip) is present | `RFSOC4X2` | `SMALL_FPGA` |
+
+   `LARGE_FPGA` covers `ZCU102`, `Z7035`, and `ZC706`, and everything else is `SMALL_FPGA`. This detection is what makes capture-buffer length and similar limits adapt per board without configuration. See [Supported Boards](Supported-Boards.md).
 4. **Find the AD9361.** On everything except the RFSoC4x2, the driver locates the `ad9361-phy` device on the SPI bus and the `cf-ad9361-dds-core-lpc` platform device, then keeps handles to the ADI PHY and DDS state so it can call into the standard Analog Devices IIO driver later (`ad9361_set_tx_atten`, `ad9361_do_calib_run`, and so on). A missing or unprobed AD9361 driver fails the openwifi probe outright, which is why ADI kernel patches are a prerequisite.
 5. **Request the DMA channels** by name: `rx_dma_s2mm` and `tx_dma_mm2s`.
 6. **Request the interrupts.** The RX packet interrupt is device-tree interrupt index **1** (`sdr,rx_pkt_intr`) and the TX interrupt is index **3** (`sdr,tx_itrpt`), both registered `IRQF_SHARED`.
 
-The driver also takes two module parameters worth knowing: `test_mode` (bit 0 enables A-MPDU aggregation, which is what `./wgd.sh 1` sets, and bit 1 advertises short guard interval, see [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md#short-guard-interval)) and `init_tx_att` (TX attenuation in millidB, so 3000 means 3 dB).
+The driver also takes two module parameters worth knowing. `test_mode` uses bit 0 to enable A-MPDU aggregation, which is what `./wgd.sh 1` sets, and bit 1 to advertise short guard interval (see [Wi-Fi 4 & Wi-Fi 6 Features](Wi-Fi-4-and-Wi-Fi-6.md#short-guard-interval)). `init_tx_att` is the initial TX attenuation in thousandths of a dB, so 3000 means 3 dB.
 
 ## The mac80211 callback surface
 
@@ -70,7 +79,7 @@ Up to `MAX_NUM_VIF` (4) virtual interfaces are supported.
 
 ## The transmit path inside the driver
 
-Linux hands `openwifi_tx()` one frame at a time. The driver keeps **four TX rings** (`MAX_NUM_SW_QUEUE`), one per Linux priority, mapping one-to-one onto the four hardware queues in `tx_intf`. Each ring holds `NUM_TX_BD` = **64** buffer descriptors, a size that the comment in `sdr.h` warns must stay aligned with the FIFO size in `tx_bit_intf.v`. Each descriptor buffer is `TX_BD_BUF_SIZE` = 8192 bytes.
+Linux hands `openwifi_tx()` one frame at a time. The driver keeps **four TX rings** (`MAX_NUM_SW_QUEUE`), one per Linux priority, mapping one-to-one onto the four hardware queues in `tx_intf`. Each ring holds `NUM_TX_BD` = **64** buffer descriptors, a size that the comment in `sdr.h` warns must stay aligned with the FIFO size in `tx_bit_intf.v` (part of the `tx_intf` core). Each descriptor buffer is `TX_BD_BUF_SIZE` = 8192 bytes.
 
 The sequence:
 
@@ -107,7 +116,7 @@ Receive does not use a descriptor ring in the same way. The driver allocates a *
 | 14 | 2 | Rate index and PHY flags |
 | 16 | *len* | The 802.11 frame itself |
 
-The rate field at offset 14 is packed. The low 5 bits are the rate index (valid range 8 to 23), where bit 4 doubles as the HT flag, so an index of 16 or above means 802.11n. Bit 5 is short guard interval, bit 6 is A-MPDU aggregation, bit 7 marks the last subframe of an aggregate, and the high byte carries the measured phase offset.
+The rate field at offset 14 is packed. The low 5 bits are the rate index (valid range 8 to 23), where bit 4 doubles as the HT flag, so an index of 16 or above means 802.11n. Indices 16 to 23 map to MCS0 to MCS7 (see [the HT rate table](Wi-Fi-4-and-Wi-Fi-6.md#the-ht-rate-table)). Bit 5 is short guard interval, bit 6 is A-MPDU aggregation, bit 7 marks the last subframe of an aggregate, and the high byte carries the measured phase offset.
 
 The FCS-OK bit is **not in the header**. It is the top bit (`0x80`) of the *last byte of the frame payload*, at offset `16 + len - 1`. This is easy to miss when writing a custom parser.
 

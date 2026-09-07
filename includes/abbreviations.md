@@ -3,6 +3,7 @@
      reword a term, check both places. -->
 
 *[A-MPDU]: Aggregated MAC Protocol Data Unit: an 802.11n frame-aggregation method (experimental in openwifi).
+*[AMPDU]: Aggregated MAC Protocol Data Unit: an 802.11n frame-aggregation method (experimental in openwifi).
 *[A-MSDU]: Aggregated MAC Service Data Unit: the other 802.11n aggregation method (not supported by openwifi).
 *[AD9361]: Analog Devices RF transceiver chip openwifi uses as its radio front end (70 MHz to 6 GHz).
 *[AD9364]: Single-channel variant of the AD9361 RF transceiver.
@@ -22,7 +23,9 @@
 *[CCA]: Clear Channel Assessment: the "is the channel busy?" check in CSMA/CA (configurable via sdrctl).
 *[Co-OFDMA]: Coordinated OFDMA: an openwifi research feature where multiple APs coordinate their OFDMA transmissions.
 *[CCDF]: Complementary Cumulative Distribution Function: the curve of how often a measured value exceeds each level, used by 802.11 conformance limits.
-*[CRUA]: an openwifi 802.11ax scheduler feature performing real-time RU puncturing with per-RU clear-channel assessment.
+*[CCMP]: Counter Mode CBC-MAC Protocol: the AES-based encryption protocol of WPA2.
+*[CP]: Cyclic prefix: the copy of an OFDM symbol's tail prepended to it to absorb multipath (the guard interval).
+*[CRUA]: An openwifi 802.11ax scheduler feature that performs real-time RU puncturing with per-RU clear-channel assessment.
 *[CDD]: Cyclic Delay Diversity: sending a delayed copy on a second antenna to add artificial multipath.
 *[cfg80211]: The Linux kernel wireless configuration API.
 *[mac80211]: The Linux kernel SoftMAC layer that openwifi's driver plugs into.
@@ -37,12 +40,15 @@
 *[DCM]: Dual Carrier Modulation: an optional 802.11ax mode that duplicates data across subcarrier pairs for robustness.
 *[DCXO]: Digitally controlled crystal oscillator: the AD9361's tunable reference crystal.
 *[DHCP]: Dynamic Host Configuration Protocol: assigns IP addresses on a network.
+*[DNS]: Domain Name System: resolves host names to IP addresses.
 *[DDR]: Double Data Rate SDRAM: the board's main memory, initialized by the FSBL at boot.
 *[DTB]: Device Tree Blob: the compiled description of the board's hardware for Linux.
 *[DTS]: Device Tree Source: the human-readable device-tree description.
+*[DUT]: Device Under Test: the module a testbench drives and observes.
 *[DTSO]: Device Tree Source Overlay: an overlay layered onto a stock board device tree.
 *[DIFS]: DCF Interframe Space: the idle time a station waits before starting contention.
 *[DMA]: Direct Memory Access: moves packets/samples between FPGA and memory without CPU copying.
+*[EDCA]: Enhanced Distributed Channel Access: the QoS variant of CSMA/CA, with per-access-category queues.
 *[EEPROM]: Electrically Erasable Programmable Read-Only Memory: the small non-volatile chip holding board identification (FRU) data.
 *[EIFS]: Extended Interframe Space: a longer wait used after a reception error.
 *[ERP]: Extended Rate PHY: the 802.11g amendment that brought OFDM to 2.4 GHz.
@@ -84,7 +90,10 @@
 *[Kuiper]: Analog Devices' Debian/Ubuntu-based Linux distribution for its SDR platforms.
 *[LBT]: Listen Before Talk: the regulatory term for carrier sensing before transmitting.
 *[LDPC]: Low-Density Parity-Check: the high-performance FEC 802.11ax uses in place of convolutional coding in many cases.
+*[LFSR]: Linear-feedback shift register: a shift register with XOR feedback, used for scrambling and pseudo-random sequences.
+*[PLCP]: Physical Layer Convergence Procedure: the 802.11 PHY layer that prepends the preamble and header to a frame.
 *[PPDU]: PLCP Protocol Data Unit: a complete PHY-layer frame (preamble plus payload) as sent on the air.
+*[PSDU]: PLCP Service Data Unit: the MAC-frame payload carried inside a PPDU.
 *[LO]: Local Oscillator: the mixing frequency in the RF chain.
 *[LTF]: Long Training Field: preamble symbols used for channel estimation.
 *[LuCI]: The web configuration UI of OpenWrt.
@@ -92,6 +101,8 @@
 *[MCS]: Modulation and Coding Scheme: an index selecting modulation + code rate (openwifi supports 0-7).
 *[MIMO]: Multiple-Input Multiple-Output: multiple spatial streams (not supported in the open-source release).
 *[MPDU]: MAC Protocol Data Unit: a single 802.11 MAC frame. Several MPDUs are packed together in an A-MPDU.
+*[MSPS]: Mega-samples per second.
+*[Msps]: Mega-samples per second.
 *[minstrel_ht]: The default Linux mac80211 rate-control algorithm.
 *[NAV]: Network Allocation Vector: the virtual carrier-sense timer set by RTS/CTS.
 *[nl80211]: The netlink interface between user space and cfg80211 (openwifi's sdrctl uses its testmode path).
@@ -107,6 +118,7 @@
 *[PMUFW]: Platform Management Unit Firmware: a ZynqMP-specific boot component (ZCU102).
 *[PPS]: Pulse Per Second: a once-a-second timing signal (typically from GPS).
 *[QSPI]: Quad SPI: the flash interface some boards can boot from.
+*[RF]: Radio frequency: the analog wireless signal, as opposed to digital baseband.
 *[RSSI]: Received Signal Strength Indicator: an estimate of received power (per-packet in openwifi).
 *[RTC]: Real-Time Clock: keeps wall-clock time across reboots.
 *[RTS/CTS]: Request To Send / Clear To Send: the 802.11 handshake that reserves the channel via the NAV.
@@ -119,6 +131,7 @@
 *[SoC]: System on Chip: openwifi runs on Xilinx Zynq / Zynq UltraScale+ SoCs.
 *[SODIMM]: Small Outline DIMM: the pluggable DRAM module used on some boards.
 *[SoM]: System on Module: a small board carrying the SoC, RAM, and support circuitry.
+*[SPD]: Serial Presence Detect: the EEPROM on a DRAM module that reports its timing to the boot loader.
 *[SPI]: Serial Peripheral Interface: openwifi drives the AD9361's TX chain over an FPGA-generated SPI link.
 *[SPL]: Secondary Program Loader: U-Boot's first-stage loader.
 *[SSID]: Service Set Identifier: the Wi-Fi network name.
@@ -126,6 +139,7 @@
 *[STF]: Short Training Field: preamble symbols used for packet detection and synchronization.
 *[STBC]: Space-Time Block Coding: an optional transmit-diversity scheme spreading data across space and time.
 *[sysfs]: The Linux virtual filesystem exposing kernel/driver variables as files.
+*[TCP]: Transmission Control Protocol: the connection-oriented IP transport (iperf throughput tests).
 *[TSF]: Timing Synchronization Function: the 802.11 64-bit hardware timer.
 *[TSN]: Time-Sensitive Networking: deterministic, scheduled networking.
 *[TWT]: Target Wake Time: the 802.11ax scheduled power-saving mechanism.

@@ -19,7 +19,10 @@ radiotap
 Xilinx('s)?
 Vivado
 Vitis
+Buildroot
 Verilog
+Tcl
+XSim
 Kuiper
 ADI('s)?
 imec
@@ -67,6 +70,9 @@ defeatable
 beaconing
 backhaul
 demodulator('s)?
+demod
+descrambl(e|es|er|ing)
+unpacker
 STAs?
 SNRs?
 APs?
@@ -127,7 +133,7 @@ schedulable
 subframes?
 substrings?
 sysfs
-testbench
+testbench(es)?
 testmode
 toolchains?
 udev
@@ -159,3 +165,8 @@ tx_intf
 Gb
 Fc
 ns
+backports
+minicom
+kbps
+prepended
+rsyslog

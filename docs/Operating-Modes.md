@@ -6,7 +6,7 @@ The two daemons used below are covered in their own right on [hostapd and wpa_su
 
 A few reminders that apply to every mode:
 
-- Mount the TX and RX antennas as close to perpendicular as you can, since good TX/RX isolation matters.
+- Mount the TX and RX antennas as close to perpendicular as you can, since good TX/RX isolation matters. Perpendicular antennas couple less, so the receiver is not deafened by your own transmitter.
 - The **ADRV9361-Z7035 has very low 5 GHz TX power**, so keep nodes close on that board.
 - Any ssh session below can instead be a USB-UART serial console.
 
@@ -21,7 +21,7 @@ cd openwifi
 cat /proc/interrupts        # run a few times: "sdr,tx_itrpt1" count should keep growing
 ```
 
-The script runs stock `hostapd`. Edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run.
+The script runs stock `hostapd`. Edit `hostapd-openwifi.conf` to change SSID, channel, band, or security, then re-run. If `hostapd` fails to start, see [Debugging a link that won't come up](hostapd-and-wpa_supplicant.md#debugging-a-link-that-wont-come-up).
 
 ## Client (station)
 
@@ -33,10 +33,10 @@ cd openwifi
 ./wgd.sh
 ifconfig sdr0 up
 iwlist sdr0 scan                    # the target SSID should appear
-wpa_supplicant -i sdr0 -c wpa-openwifi.conf
+wpa_supplicant -i sdr0 -c wpa-openwifi.conf   # pass -c wpa-connect.conf instead when joining your own AP
 ```
 
-Adjust the SSID/passphrase in the config file for your target network (`wpa-openwifi.conf` for an openwifi AP, or edit `wpa-connect.conf` for a different network). A successful association prints something like:
+Adjust the SSID/passphrase in the config file for your target network (`wpa-openwifi.conf` for an openwifi AP, or edit `wpa-connect.conf` for a different network and pass it with `-c`). A successful association prints something like:
 
 ```text
 sdr0: SME: Trying to authenticate with 66:55:44:33:22:8c (SSID='openwifi' freq=5220 MHz)
@@ -52,7 +52,7 @@ ifconfig sdr0                       # you should now have a 192.168.13.x address
 ping 192.168.13.1
 ```
 
-If association never completes, adjust antenna orientation and distance and retry on the client side. When connecting to a commercial AP you'll also want `route del default gw 192.168.10.1` first so the board doesn't keep the Ethernet default route.
+If association never completes, adjust antenna orientation and distance and retry on the client side. When connecting to a commercial AP you'll also want `route del default gw 192.168.10.1` first (`192.168.10.1` is the board's factory default Ethernet gateway) so the board doesn't keep the Ethernet default route.
 
 ## Ad-hoc (IBSS)
 
@@ -93,7 +93,7 @@ cd openwifi
 ./monitor_ch.sh sdr0 11             # monitor on channel 11 (pick a channel you care about)
 ```
 
-You can now run `tcpdump -i sdr0` or add a dedicated virtual monitor interface:
+You can now run `tcpdump -i sdr0` or add a dedicated virtual monitor interface, useful when you want to keep `sdr0` free for injection at the same time:
 
 ```bash
 iw dev sdr0 interface add mon0 type monitor && ifconfig mon0 up
@@ -129,14 +129,20 @@ Watch them arrive on any other device sniffing channel 11.
 | `-m` | PHY mode: `a`, `g`, or `n` |
 | `-r` | Rate / MCS index (0–7) |
 | `-t` | Packet type: `m`/`c`/`d`/`r` = management/control/data/reserved |
-| `-e` | Subtype (hex). For example, with `-t m`: 8=Beacon, A=Disassoc, B=Auth, C=Deauth. With `-t c`: A/B/C/D = PS-Poll/RTS/CTS/ACK. With `-t d`: 0/1/2/8 = Data/Data+CF-Ack/Data+CF-Poll/QoS-Data |
+| `-e` | Subtype (hex). See the three subtype maps below the table |
 | `-a` / `-b` | Last byte of addr1 / addr2 (hex) |
 | `-i` | Short-GI flag (0/1) |
 | `-n` | Number of packets |
 | `-s` | Payload size (bytes) |
 | `-d` | Inter-packet delay (µs) |
 
-To customize full frame contents, edit the `ieee_hdr_*` byte arrays in `inject_80211.c`. The byte/bit ordering is not always intuitive versus the standard.
+The `-e` subtype maps, one per packet type:
+
+- Management (`-t m`): 8=Beacon, A=Disassoc, B=Auth, C=Deauth
+- Control (`-t c`): A/B/C/D = PS-Poll/RTS/CTS/ACK
+- Data (`-t d`): 0/1/2/8 = Data/Data+CF-Ack/Data+CF-Poll/QoS-Data
+
+To customize full frame contents, edit the `ieee_hdr_*` byte arrays in `inject_80211.c`. The packet-format notes in the openwifi [`doc/app_notes/`](https://github.com/open-sdr/openwifi/tree/master/doc/app_notes) directory describe the byte and bit ordering.
 
 **Controlling ACK behavior for injection.** Even in monitor mode, the FPGA still auto-transmits an ACK when it receives a matching data frame. To stop that (usually what you want when injecting/fuzzing), disable hardware ACK TX:
 
@@ -163,12 +169,12 @@ analyze_80211 trace.pcap
 openwifi is **OFDM-only** and therefore not backward-compatible with 802.11b. This matters at connection setup, since 2.4 GHz devices often fall back to 11b rates for beacons and management frames. The fix is to suppress 11b rates on both ends:
 
 - **On the openwifi AP:** the provided `hostapd-openwifi.conf` already suppresses 11b rates (`supported_rates` / `basic_rates`).
-- **On a commercial client:** unmodified `wpa_supplicant` can't suppress 11b rates in 2.4 GHz. Build the patched version openwifi provides:
+- **On a commercial client:** unmodified `wpa_supplicant` can't suppress 11b rates in 2.4 GHz. Build the patched version openwifi provides, on the client machine:
 
   ```bash
-  sudo apt-get install libssl1.0-dev
+  sudo apt-get install libssl-dev    # Ubuntu 20.04 and later. On 18.04 the package is libssl1.0-dev
   cd openwifi/user_space
   ./build_wpa_supplicant_wo11b.sh
   ```
 
-Using 5 GHz channels avoids the issue entirely, which is why the default demo uses channel 44.
+Using 5 GHz channels avoids the issue entirely, which is why the default demo uses a 5 GHz channel.

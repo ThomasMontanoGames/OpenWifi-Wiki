@@ -2,12 +2,14 @@
 
 openwifi ships a set of **application notes** in [`openwifi/doc/app_notes/`](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/README.md): short, task-focused write-ups for specific scenarios and modes. Their material is spread across the thematic wiki pages ([Operating Modes](Operating-Modes.md), [Research Features](Research-Features.md), [sdrctl](sdrctl-and-Runtime-Control.md), and so on), and this page indexes every note in one place.
 
+These notes assume a board that already boots and runs `wgd.sh`. If you are not there yet, start with [Getting Started](Getting-Started.md).
+
 Each entry below expands to a short summary and the note's key figures. Use **Read more** to jump to the full section on that topic, or **Original note** to open the app note on GitHub.
 
 ## Getting on the air: two-SDR links
 
 ??? note "Communication between two SDR boards: AP and client mode"
-    Step-by-step for an access-point + client link between two openwifi boards using stock `hostapd` and `wpa_supplicant`. Covers confirming beacon transmission via `/proc/interrupts`, associating the client, and getting an IP over the link.
+    Step-by-step for an access-point + client link between two openwifi boards using the standard, unmodified `hostapd` and `wpa_supplicant`. Covers confirming beacon transmission via `/proc/interrupts`, associating the client, and getting an IP over the link.
 
     [Read more →](Operating-Modes.md#access-point) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ap-client-two-sdr.md)
 
@@ -28,7 +30,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![Live CSI display](assets/img/csi-screen-shot.jpg)
 
 ??? note "WiFi CSI radar via self CSI capturing"
-    Full-duplex "Wi-Fi radar": with a TX and an RX antenna, the CSI of openwifi's own transmitted signal reflects changes in the environment. Unmute self-reception (`xpu 1 1`), inject a stream of packets to sound the channel, and watch the CSI waterfall change as people or objects move.
+    Full-duplex "Wi-Fi radar": with a TX and an RX antenna, the CSI of openwifi's own transmitted signal reflects changes in the environment. Enable reception of the board's own signal (via `sdrctl`, register `xpu 1`), inject a stream of packets to sound the channel, and watch the CSI waterfall change as people or objects move.
 
     [Read more →](Research-Features.md#csi-radar-full-duplex-self-sensing) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/radar-self-csi.md)
 
@@ -56,7 +58,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
     ![Live IQ display](assets/img/iq-screen-shot.jpg)
 
 ??? note "ACK timing verification by IQ capture"
-    Trigger IQ capture on the ACK-send event to directly measure the Rx-ACK-GAP and Tx-ACK-GAP against the ~16 µs SIFS across MCS and packet lengths.
+    Trigger IQ capture on the ACK-send event to directly measure the Rx-ACK-GAP and Tx-ACK-GAP (the gap between the end of reception, or transmission, of a packet and the ACK leaving the board) against the ~16 µs SIFS across MCS and packet lengths.
 
     [Read more →](Research-Features.md#ack-timing-measurement) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/iq_ack_timing.md)
 
@@ -95,7 +97,7 @@ Each entry below expands to a short summary and the note's key figures. Use **Re
 ## Standards background
 
 ??? note "IEEE 802.11n (Wi-Fi 4)"
-    Background on the five 802.11n PHY improvements (more subcarriers, higher FEC, short guard interval, MIMO, 40 MHz) and frame aggregation, with a throughput derivation, and which parts openwifi implements: 52 subcarriers, 5/6 FEC, short GI, and experimental A-MPDU.
+    Background on the five 802.11n PHY improvements (more subcarriers, a higher FEC code rate (5/6), short guard interval, MIMO, 40 MHz) and frame aggregation, with a throughput derivation, and which parts openwifi implements: 52 subcarriers, 5/6 FEC, short GI, and experimental A-MPDU.
 
     [Read more →](Architecture.md#what-openwifi-implements-of-80211agn) · [Original note ↗](https://github.com/open-sdr/openwifi/blob/master/doc/app_notes/ieee80211n.md)
 

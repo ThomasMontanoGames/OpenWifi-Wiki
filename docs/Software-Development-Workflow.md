@@ -1,6 +1,6 @@
 # Software Development Workflow
 
-This page covers the software side of openwifi development: rebuilding and deploying the driver, `sdrctl`, and the other `user_space/` tools. Building the FPGA bitstream and turning it into a loadable image are on the [FPGA Development](FPGA-Development.md) page. This page picks up at getting things onto the board.
+This page covers the software side of openwifi development: rebuilding and deploying the driver, `sdrctl`, and the other `user_space/` tools. Building the FPGA bitstream and turning it into a loadable image are on the [FPGA Development](FPGA-Development.md) page. This page starts where the FPGA pages stop: getting built software onto the board.
 
 The prebuilt SD image may be older than the current repo, so **copy the repo's `user_space/` files onto the board** before doing serious work, and rebuild the driver against the matching kernel.
 
@@ -21,7 +21,7 @@ For the exact toolchain, kernel, and image versions these builds expect, see [Ve
 
 ## Quick reference: from code change to running board
 
-Find the row that matches what you changed and follow its link to the full instructions. The commands assume the usual setup: sources on your PC, the board reachable at `192.168.10.122`, and the [environment variables](#environment-setup) set.
+Find the row that matches what you changed and follow its link to the full instructions. The commands assume the usual setup: sources on your PC, the board reachable at `192.168.10.122` (the default address from [Getting Started](Getting-Started.md)), and the [environment variables](#environment-setup) set.
 
 | You changed | Rebuild & deploy | Take effect |
 | --- | --- | --- |
@@ -81,7 +81,7 @@ For print-style debugging, add `printk` calls in the driver and watch them live 
 4. On the board, `./wgd.sh` loads the new driver (and reloads the FPGA image if `system_top.bit.bin` is present in the same directory).
 
 !!! warning "Symbol/version errors on load mean a kernel mismatch"
-    The kernel in the SD image is usually older than the one your driver was built against. Fix it by putting the freshly built kernel image into the `BOOT` partition: `adi-linux/arch/arm/boot/uImage` (32-bit) or `adi-linux-64/arch/arm64/boot/Image` (64-bit).
+    The kernel in the SD image is usually older than the one your driver was built against. Fix it by putting the freshly built kernel image into the `BOOT` partition: `adi-linux/arch/arm/boot/uImage` (32-bit) or `adi-linux-64/arch/arm64/boot/Image` (64-bit). The full procedure is in [Updating a board to a newly built kernel](Boot-Kernel-Device-Tree.md#updating-a-board-to-a-newly-built-kernel).
 
 ### Conditional compilation
 
@@ -153,15 +153,17 @@ scp `find ./ -name \*` root@192.168.10.122:openwifi/sdrctl_src/
 cd ~/openwifi/sdrctl_src/ && make clean && make && cp sdrctl ../ && cd ..
 ```
 
+A successful build finishes without errors, and the new binary lands at `~/openwifi/sdrctl`.
+
 ## Bulk update helpers
 
 For larger updates (kernel, modules, device tree, rootfs) there are paired host/board scripts:
 
 - **Kernel + modules + device tree:** on the host, `prepare_kernel.sh`, `boot_bin_gen.sh`, and `transfer_kernel_image_module_to_board.sh`. On the board, `populate_kernel_image_module_reboot.sh` (run it again after the first reboot if the kernel *version* changed, so symlinks point at the new version). The whole flow, with the verification steps that get you back to a working `sdr0`, is written out in [Updating a board to a newly built kernel](Boot-Kernel-Device-Tree.md#updating-a-board-to-a-newly-built-kernel).
 - **Driver + user space:** on the host, `make_all.sh` and `transfer_driver_userspace_to_board.sh`. On the board, `populate_driver_userspace.sh`.
-- **Over FTP:** set up an anonymous FTP server on the PC rooted at your `openwifi` directory, then on the board `./sdcard_boot_update.sh $BOARD_NAME` (pulls `uImage`, `BOOT.BIN`, `devicetree.dtb` into the boot partition, then power-cycle) and `./wgd.sh remote` (pulls driver files and brings up `sdr0`).
+- **Over FTP (optional):** set up an anonymous FTP server on the PC rooted at your `openwifi` directory, then on the board `./sdcard_boot_update.sh $BOARD_NAME` (pulls `uImage`, `BOOT.BIN`, `devicetree.dtb` into the boot partition, then power-cycle) and `./wgd.sh remote` (pulls driver files and brings up `sdr0`). Anonymous FTP has no authentication, so use it on trusted lab networks only.
 - **rootfs as a disk:** on the PC, *File manager → Connect to Server → `sftp://root@192.168.10.122/root`* (password `openwifi`).
-- Refreshing the ADI rootfs tools is also worthwhile: on the board, clone `linux_image_ADI-scripts`, `apt update`, then run `adi_update_tools.sh` (see the [ADI Kuiper update guide](https://wiki.analog.com/resources/tools-software/linux-software/kuiper-linux/update)).
+- Refreshing the ADI rootfs tools is also worthwhile: on the board, clone [`linux_image_ADI-scripts`](https://github.com/analogdevicesinc/linux_image_ADI-scripts), `apt update`, then run `adi_update_tools.sh` (see the [ADI Kuiper update guide](https://wiki.analog.com/resources/tools-software/linux-software/kuiper-linux/update)).
 
 ## Building a full SD image from scratch
 

@@ -132,7 +132,7 @@ Three GitHub Actions workflows in `.github/workflows/`:
 - `sync-docs.yml`: daily scheduled job (also manually dispatchable with dry-run
   options) that polls the two source repositories via
   `.github/scripts/collect_changes.py` and, when commits look
-  documentation-relevant, runs a headless Claude Code session that opens a pull
+  documentation-relevant, runs a headless Kimi Code session that opens a pull
   request against this repo. It never pushes content to `master` and never
   merges. It only commits the updated `.github/sync-state.json`.
 

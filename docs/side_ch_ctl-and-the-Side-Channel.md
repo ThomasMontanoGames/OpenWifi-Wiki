@@ -169,7 +169,7 @@ These are the `side_ch` core's `slv_regN` in `side_ch.v`. Several registers **me
 
 | reg | Mode | Meaning |
 |---|---|---|
-| 0 | both | Reset, per bit, write 1 to hold: bit0 the DMA-to-PS stream, bit2 the capture FSM. (bit1 is an unused S-AXIS reset.) |
+| 0 | both | Reset, per bit, write 1 to hold: bit0 the DMA-to-PS stream, bit2 the capture FSM. (bit1 is an unused reset of the AXI-Stream slave interface (S-AXIS).) |
 | 1 | both | Config. bits1-0 start mode: **1 = normal** (transfer starts when reg 2 is written), 0 = S-AXIS loopback, 2 = external trigger, 3 = off. bit4 endless mode. bit12 FC match, bit13 addr1 match, bit14 addr2 match. |
 | 2 | both | Symbol count for the next DMA transfer. **Writing it starts the transfer**: that's what "start mode 1" means. `side_ch.ko` writes it on every `g` poll, so you never touch it. |
 | 3 | IQ | bit0 enables IQ capture. bits5-4 pick what each sample carries: `0` = antenna 0 IQ + AGC gain + status, `1` = antenna 0 **and** antenna 1 IQ (dual-antenna capture), `2` = antenna 0 IQ + AGC gain + a status word with `tx_control_state` and Frame Control instead. |
@@ -268,7 +268,7 @@ The counters are 16 bits wide and wrap silently, so clear the ones you use at th
 ./side_ch_ctl wh31d0         # write any value to clear it
 ```
 
-Registers 30 and 31 read together give you a per-peer PER: 31 counts the good ones, 30 counts every decode attempt. For a proper `rssi_above_th` threshold, take the value from `auto_lbt_th` in `openwifi_rf_rx_update_after_tuning()` in `sdr.c`. The `openofdm_rx` watchdog has a separate set of counters reached through `sdrctl` instead. Both are covered on the [Research Features page](Research-Features.md#fpga-event-counters).
+Registers 30 and 31 read together give you a per-peer PER: 31 counts the good ones, 30 counts every decode attempt. For a proper `rssi_above_th` threshold, take the value from `auto_lbt_th` in `openwifi_rf_rx_update_after_tuning()` in [`sdr.c`](https://github.com/open-sdr/openwifi/blob/master/driver/sdr.c). The `openofdm_rx` watchdog has a separate set of counters reached through `sdrctl` instead. Both are covered on the [Research Features page](Research-Features.md#fpga-event-counters).
 
 ---
 

@@ -6,7 +6,7 @@ FPGA rebuilds and the driver, kernel, and software builds all run on the same ho
 - [FPGA Development](FPGA-Development.md) for building and modifying the FPGA design.
 - [Building SD Images](Building-SD-Images.md) for assembling a card from scratch.
 
-Each workflow has a few extras of its own, such as the FPGA's Viterbi license or the driver's `ARCH_BIT`.
+Each workflow has a few extras of its own, such as the FPGA's Viterbi license.
 
 For the exact toolchain, kernel, and image versions these builds expect, see [Versions this wiki targets](Repositories.md#versions-this-wiki-targets).
 
@@ -14,19 +14,22 @@ For the exact toolchain, kernel, and image versions these builds expect, see [Ve
 
 - **Vivado 2022.2 with Vitis** installed (you need `.../Vitis`, *not* `Vitis_HLS`). If Vitis is missing, add it via *Xilinx Design Tools → Add Design Tools for Devices 2022.2*.
 - The driver is cross-compiled with the kernel toolchain, so a Vivado/Vitis install is required for **both** driver and FPGA builds.
+- The installer download is tens of GB and requires a free AMD/Xilinx account from the Xilinx website.
 
 !!! note "Which Vivado version?"
     The *software* side of openwifi historically referenced Vivado 2021.1, while the current openwifi-hw build targets 2022.2. Match the version the repo README states at the time you build.
 
 ## Host OS and packages
 
-- Ubuntu 18/20/22 LTS (others may work).
-- **`libtinfo5`** for Vivado. On Ubuntu 24 LTS the default `libtinfo6` won't do, so install `libtinfo5` manually:
+- Ubuntu 18.04/20.04/22.04 LTS are the tested versions. Ubuntu 24.04 is untested but works with the `libtinfo5` workaround below.
+- **`libtinfo5`** for Vivado. On Ubuntu 24.04 the default `libtinfo6` won't do, so install `libtinfo5` manually:
 
   ```bash
-  wget http://be.archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.1-1ubuntu1.18.04.1_amd64.deb
+  wget http://archive.ubuntu.com/ubuntu/pool/main/n/ncurses/libtinfo5_6.1-1ubuntu1.18.04.1_amd64.deb
   sudo dpkg -i ./libtinfo5_6.1-1ubuntu1.18.04.1_amd64.deb
   ```
+
+- Windows is not supported as a build host: see [Windows for development?](FAQ-and-Resources.md#windows-for-development) in the FAQ.
 
 - Driver / kernel build packages:
 

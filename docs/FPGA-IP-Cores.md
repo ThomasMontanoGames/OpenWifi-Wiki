@@ -110,14 +110,14 @@ The six cores form a transmit chain and a receive chain that meet at the AD9361 
 
 Every core is an AXI4-Lite slave for control (register bank named `*_s_axi.v`) and, where it moves sample data, an AXI-Stream master/slave for DMA. A driver file and its FPGA core usually share a name (`xpu.c` ↔ `xpu.v`), and every register the driver writes (`hw_def.h`) has a matching `slv_regN` in the core's `_s_axi.v`.
 
-| Core | Role | Register bank size | Unit-test benches? |
+| Core | Role | Register bank size | Testbenches |
 |---|---|---|---|
-| `xpu` | Real-time MAC (CSMA/CA, ACK, TSF, filtering, queue gating) | **64** AXI-Lite regs | yes (`fifo_sample_delay`, `mv_avg`) |
-| `openofdm_tx` | 802.11 OFDM transmitter | 32 regs | yes (`test_vec/`) |
-| `openofdm_rx` | 802.11 OFDM receiver | (submodule) | yes (`dot11_tb`) |
-| `tx_intf` | DAC-side interface + TX BRAM + CSI fuzzer | 32 regs | no |
-| `rx_intf` | ADC-side interface + RX DMA | 32 regs | yes (`adc_intf`) |
-| `side_ch` | CSI / raw-IQ capture side channel | 32 regs | no |
+| `xpu` | Real-time MAC (CSMA/CA, ACK, TSF, filtering, queue gating) | **64** AXI-Lite regs | unit: `mv_avg`, `fifo_sample_delay` |
+| `openofdm_tx` | 802.11 OFDM transmitter | 32 regs | full transmitter: `dot11_tx_tb` + `test_vec/` |
+| `openofdm_rx` | 802.11 OFDM receiver | 32 regs (in the `openofdm` submodule) | full receiver: `dot11_tb` |
+| `tx_intf` | DAC-side interface + TX BRAM + CSI fuzzer | 32 regs | none |
+| `rx_intf` | ADC-side interface + RX DMA | 32 regs | unit: `adc_intf` |
+| `side_ch` | CSI / raw-IQ capture side channel | 32 regs | none |
 
 ---
 
@@ -240,7 +240,7 @@ Notable source (`ip/openofdm_tx/src/`, 28 files):
   <text x="700" y="325" text-anchor="middle" font-size="10" fill="currentColor" fill-opacity="0.72">training-field ROMs</text>
   <text x="520" y="474" text-anchor="middle" font-size="10.5" fill="currentColor" fill-opacity="0.72">result_iq_ready advances every output source. Deasserting it holds the current sample and stalls forwarding.</text>
 </svg>
-<figcaption><em>The implemented <a href="https://github.com/open-sdr/openwifi-hw/blob/d047d794195beb72e12d2a9a6c205c16399cf288/ip/openofdm_tx/src/dot11_tx.v"><code>dot11_tx</code></a> path. Three state machines collect and encode frame bits, generate OFDM symbols, and forward packet samples. IQ first exists after constellation mapping. It is frequency-domain IQ before the IFFT and time-domain IQ after the IFFT.</em></figcaption>
+<figcaption><em>The implemented <a href="https://github.com/open-sdr/openwifi-hw/blob/d047d794195beb72e12d2a9a6c205c16399cf288/ip/openofdm_tx/src/dot11_tx.v"><code>dot11_tx</code></a> path. Three state machines collect and encode frame bits, generate OFDM symbols, and forward packet samples. IQ first exists after constellation mapping. It is frequency-domain IQ before the IFFT and time-domain IQ after the IFFT. CP is the cyclic prefix.</em></figcaption>
 </figure>
 
 Addressed as register space `tx` (category 5). Scrambler seeds are at regs 1/2 (default 127).

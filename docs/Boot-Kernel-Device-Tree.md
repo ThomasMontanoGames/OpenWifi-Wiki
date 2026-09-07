@@ -160,7 +160,7 @@ The kernel build produces the image and a tree of `.ko` modules, but openwifi do
 
 `<ARCH>` is `32` or `64`, giving `openwifi32`/`openwifi64` and `kernel_modules32`/`kernel_modules64` directories side by side on the `rootfs` partition. At this point the modules are only *staged*. Nothing is under `/lib/modules` yet.
 
-The board-side script `populate_kernel_image_module_reboot.sh` is what finishes the job. It picks the set matching the board's architecture and:
+The board-side script `populate_kernel_image_module_reboot.sh` is what finishes the job. The architecture selection already happened host-side (`transfer_kernel_image_module_to_board.sh` packs only the matching set), and the script uses `uname -m` only to pick the kernel image and device tree filenames (`uImage` + `devicetree.dtb` on 32-bit, `Image` + `system.dtb` on 64-bit). It:
 
 - moves the board-support modules (`ad9361_drv.ko`, `adi_axi_hdmi.ko`, `axidmatest.ko`, `lcd.ko`, `xilinx_dma.ko`) out of `kernel_modules` and into `openwifi/`, next to the driver,
 - symlinks the staged directory into the module path (`ln -s /root/kernel_modules /lib/modules/$(uname -r)`) and runs `depmod`, so `modprobe` can resolve dependencies for the running kernel,
@@ -638,7 +638,7 @@ A practical sequence:
 
 4. **Provide the stock board `.dts`.** Add a `board_name → stock .dts` entry to the map in `construct_device_tree.sh` and place the matching stock ADI/Xilinx `.dts` (plus its `.dtsi` includes) in the defaults folder. openwifi obtains stock trees by decompiling the ADI Linux image's `.dtb` with `dtc`, then editing.
 
-5. **Generate and sanity-check the tree:**
+5. **Generate and sanity-check the tree.** You need `dtc` and `fdtoverlay` (from the `device-tree-compiler` package, see [Building SD Images → Prerequisites](Building-SD-Images.md#prerequisites)):
 
     ```bash
     cd kernel_boot/boards
@@ -649,7 +649,7 @@ A practical sequence:
 
     Confirm the `fpga-axi@0` block shows your `sdr,*` nodes at the right addresses and that `ad9361-phy@0` has your clock.
 
-6. **Boot and verify.** After building `BOOT.BIN` + kernel + this `devicetree.dtb` into an SD image (see [Software Development Workflow](Software-Development-Workflow.md#building-a-full-sd-image-from-scratch)), boot with a UART console attached. On a good boot you'll see the AD9361 probe and the `sdr,sdr` driver bind. If it doesn't, the device-tree addresses/interrupts almost certainly disagree with the FPGA. Recheck step 1. Common failures (SPI-flash env, wrong DDR size, ZCU102 SD/SODIMM, no UART) are in [Troubleshooting](Troubleshooting.md#boot-and-networking).
+6. **Boot and verify.** After building `BOOT.BIN` + kernel + this `devicetree.dtb` into an SD image (see [Software Development Workflow](Software-Development-Workflow.md#building-a-full-sd-image-from-scratch)), boot with a UART console attached. On a good boot you'll see the AD9361 probe and the `sdr,sdr` driver bind. If it doesn't, the device-tree addresses/interrupts almost certainly disagree with the FPGA. Check `dmesg` against the [`sdr0` troubleshooting table](#if-sdr0-does-not-appear) before rechecking the addresses in step 1. Common failures (SPI-flash env, wrong DDR size, ZCU102 SD/SODIMM, no UART) are in [Troubleshooting](Troubleshooting.md#boot-and-networking).
 
 !!! tip "The device tree is where the FPGA meets Linux"
     A board port is really two halves that must agree: the **FPGA side** (the openwifi-hw Vivado project, which fixes addresses/interrupts, see [FPGA Development](FPGA-Development.md#porting-to-a-new-board)) and the **device-tree side** (this page, which declares those same addresses/interrupts to Linux). Get the two to match and the rest of openwifi (driver, `sdrctl`, everything above) works unchanged, because it's all keyed off the `sdr,*` `compatible` strings, not the board.
